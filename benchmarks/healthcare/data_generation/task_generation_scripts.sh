@@ -1,0 +1,2 @@
+#!/bin/bash
+mcp-eval generate-tasks --server mcp_servers/healthcare/server.py --model gpt-4.1-2025-04-14 --num-tasks 200 --prompt-file benchmarks/healthcare/data_generation/task_generation_prompt.json --output data/healthcare/evaluation_tasks.jsonl 

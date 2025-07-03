@@ -1,0 +1,2 @@
+#!/bin/bash
+mcp-eval verify-tasks --server mcp_servers/healthcare/server.py --tasks-file data/healthcare/evaluation_tasks.jsonl --model gpt-4.1-2025-04-14 --output data/healthcare/evaluation_tasks_verified.jsonl --prompt-file benchmarks/healthcare/data_generation/task_verification_prompt.json 

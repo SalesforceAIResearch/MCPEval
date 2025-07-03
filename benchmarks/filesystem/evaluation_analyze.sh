@@ -1,0 +1,2 @@
+mcp-eval analyze --predictions data/filesystem/evaluation_results.json --ground-truth data/filesystem/tasks_verified.jsonl --generate-report --report-model gpt-4o-2024-08-06 --report-output benchmarks/filesystem/results/filesystem_report.md
+mcp-eval analyze --predictions data/filesystem/tasks_verified.jsonl --ground-truth data/filesystem/tasks_verified.jsonl --generate-report --report-model gpt-4o-2024-08-06 --report-output benchmarks/filesystem/results/filesystem_report.md

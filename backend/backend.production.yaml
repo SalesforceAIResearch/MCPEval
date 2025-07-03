@@ -1,0 +1,67 @@
+# Production Configuration for MCP Eval LLM Backend
+# Copy this to backend.yaml and customize for your production environment
+
+# Application settings
+app:
+  debug: false
+  host: "127.0.0.1"  # More restrictive binding for production
+  port: 8080
+
+# Workspace Configuration for Production
+# All paths are organized within a common workspace structure
+workspace:
+  # Production workspace root directory
+  root: "workspace"
+  
+# Directory paths within the workspace
+paths:
+  # Root directory for running CLI commands
+  root_directory: "${workspace.root}"
+  # MCP servers directory
+  mcp_servers_directory: "${workspace.root}/mcp_servers"
+  # Backend application directory
+  backend_directory: "${workspace.root}/backend"
+  # Frontend application directory  
+  frontend_directory: "${workspace.root}/frontend"
+  # Data directory for generated files
+  data_directory: "${workspace.root}/data"
+  # Results directory for evaluation outputs
+  results_directory: "${workspace.root}/results"
+  # Directory for file uploads
+  uploads_directory: "${workspace.root}/uploads"
+  # Directory for configuration files
+  config_directory: "${workspace.root}/config"
+  # Directory for logs
+  logs_directory: "${workspace.root}/logs"
+  # Directory for temporary files
+  temp_directory: "/tmp/mcp-eval-llm-prod"
+  # Auto-generated workspaces directory
+  auto_workspaces_directory: "${workspace.root}/auto_workspaces"
+
+# Production defaults
+defaults:
+  generation_model: "gpt-4"
+  judge_model: "gpt-4"
+  num_tasks: 50      # Higher default for production
+  max_concurrent: 10  # Higher concurrency for production
+  train_ratio: 0.8
+  random_seed: 42
+
+# Job management settings for production
+jobs:
+  max_concurrent_jobs: 5     # More concurrent jobs
+  cleanup_interval: 1800     # Cleanup every 30 minutes
+  max_retention: 172800      # Keep jobs for 48 hours
+
+# File management
+files:
+  max_upload_size: 500       # Larger uploads allowed
+  allowed_extensions: [".jsonl", ".json", ".txt", ".csv", ".yaml", ".yml", ".parquet"]
+
+# Environment variables for production
+environment:
+  PYTHONPATH: "${root_directory}/src"
+  OPENAI_API_KEY: "${OPENAI_API_KEY}"  # Use environment variable
+  ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"  # Use environment variable
+  LOG_LEVEL: "INFO"
+  FLASK_ENV: "production" 

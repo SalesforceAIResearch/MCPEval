@@ -1,0 +1,1 @@
+mcp-eval verify-tasks --server @modelcontextprotocol/server-filesystem --server-args "benchmarks/filesystem/working" --model gpt-4.1-2025-04-14 --prompt-file benchmarks/filesystem/task_verification_prompt.json --tasks-file data/filesystem/tasks_test.jsonl --output data/filesystem/tasks_test_verified.jsonl

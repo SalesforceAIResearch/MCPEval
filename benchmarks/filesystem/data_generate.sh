@@ -1,0 +1,2 @@
+# nohup mcp-eval generate-tasks --server @modelcontextprotocol/server-filesystem --server-args "benchmarks/filesystem/working" --model gpt-4.1-2025-04-14 --num-tasks 500 --prompt-file benchmarks/filesystem/task_generation_prompt.json --output data/filesystem/tasks.jsonl > data/filesystem/tasks.log 2>&1 &
+mcp-eval generate-tasks --server @modelcontextprotocol/server-filesystem --server-args "benchmarks/filesystem/working" --model gpt-4.1-2025-04-14 --num-tasks 2 --prompt-file benchmarks/filesystem/task_generation_prompt.json --output data/filesystem/tasks_test.jsonl

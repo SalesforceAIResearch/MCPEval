@@ -1,0 +1,1 @@
+mcp-eval verify-tasks --server @modelcontextprotocol/server-sequential-thinking --tasks-file data/sequential-thinking/tasks.jsonl --model gpt-4.1-2025-04-14 --output data/sequential-thinking/verified_tasks.jsonl --prompt-file benchmarks/sequential_thinking/data_generation/task_verification_prompt.json

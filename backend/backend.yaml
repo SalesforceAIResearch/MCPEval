@@ -1,0 +1,78 @@
+# Backend Configuration for MCP Eval LLM
+# This file contains configuration settings for the Flask backend application
+
+# Application settings
+app:
+  debug: true
+  host: "0.0.0.0"
+  port: 22358
+
+# Workspace Configuration
+# All paths are organized within a common workspace structure
+workspace:
+  # Root workspace directory (relative to this config file)
+  root: "workspace"
+  
+# Directory paths within the workspace
+paths:
+  # Root directory for running CLI commands
+  root_directory: "${workspace.root}"
+  # MCP servers directory
+  mcp_servers_directory: "${workspace.root}/mcp_servers"
+  # Backend application directory
+  backend_directory: "${workspace.root}/backend"
+  # Frontend application directory  
+  frontend_directory: "${workspace.root}/frontend"
+  # Data directory for generated files
+  data_directory: "${workspace.root}/data"
+  # Results directory for evaluation outputs
+  results_directory: "${workspace.root}/results"
+  # Directory for file uploads
+  uploads_directory: "${workspace.root}/uploads"
+  # Directory for configuration files
+  config_directory: "${workspace.root}/config"
+  # Directory for logs
+  logs_directory: "${workspace.root}/logs"
+  # Directory for temporary files
+  temp_directory: "/tmp/mcp-eval-llm"
+  # Auto-generated workspaces directory
+  auto_workspaces_directory: "${workspace.root}/auto_workspaces"
+
+# Default settings for task generation and evaluation
+defaults:
+  # Default model for task generation
+  generation_model: "gpt-4"
+  # Default model for llm judger
+  judge_model: "gpt-4"
+  # Default number of tasks to generate
+  num_tasks: 10
+  # Default maximum concurrent evaluations
+  max_concurrent: 5
+  # Default train/test split ratio
+  train_ratio: 0.8
+  # Default random seed for reproducibility
+  random_seed: 42
+
+# Job management settings
+jobs:
+  # Maximum number of concurrent jobs
+  max_concurrent_jobs: 3
+  # Job cleanup interval in seconds
+  cleanup_interval: 3600
+  # Maximum job retention time in seconds
+  max_retention: 86400
+
+# File management
+files:
+  # Maximum file upload size in MB
+  max_upload_size: 100
+  # Allowed file extensions for uploads
+  allowed_extensions: [".jsonl", ".json", ".txt", ".csv", ".yaml", ".yml"]
+
+# Environment variables to set
+environment:
+  # Add any environment variables needed by the CLI commands
+  PYTHONPATH: "${root_directory}/src"
+  # Uncomment and set these if needed
+  # OPENAI_API_KEY: "your-openai-api-key"
+  # ANTHROPIC_API_KEY: "your-anthropic-api-key" 

@@ -1,0 +1,1 @@
+mcp-eval generate-tasks --server mcp_servers/yfinance/server.py --model gpt-4.1-2025-04-14 --num-tasks 180 --prompt-file benchmarks/yfinance/data_generation/task_generation_prompt.json --output data/yfinance/evaluation_tasks.jsonl

@@ -1,0 +1,2 @@
+#!/bin/bash
+mcp-eval generate-tasks --server mcp_servers/travel_assistant/server.py --model gpt-4.1-2025-04-14 --num-tasks 200 --prompt-file benchmarks/travel_assistant/data_generation/task_generation_prompt.json --output data/travel_assistant/evaluation_tasks.jsonl 

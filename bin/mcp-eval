@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+
+"""
+Command-line entry point for MCP Eval LLM tools.
+
+This script provides access to all CLI functionality in the mcp-eval-llm package.
+"""
+
+from mcp_eval_llm.cli.main import main
+
+if __name__ == "__main__":
+    main() 

@@ -1,0 +1,2 @@
+#!/bin/bash
+mcp-eval verify-tasks --server mcp_servers/travel_assistant/server.py --tasks-file data/travel_assistant/evaluation_tasks.jsonl --model gpt-4.1-2025-04-14 --output data/travel_assistant/evaluation_tasks_verified.jsonl --prompt-file benchmarks/travel_assistant/data_generation/task_verification_prompt.json 

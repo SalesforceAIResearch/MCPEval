@@ -1,0 +1,1 @@
+mcp-eval verify-tasks --server mcp_servers/yfinance/server.py --tasks-file data/yfinance/evaluation_tasks.jsonl --model gpt-4.1-2025-04-14 --output data/yfinance/evaluation_tasks_verified.jsonl --prompt-file benchmarks/yfinance/data_generation/task_verification_prompt.json
