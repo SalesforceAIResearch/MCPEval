@@ -12,11 +12,6 @@ import ssl
 from mcp.server.fastmcp import FastMCP
 
 # Set API keys if not already set
-if not os.getenv("FDA_API_KEY"):
-    os.environ["FDA_API_KEY"] = "Al226R5566G9SImX7HVFtEJVJptyxMgoecX5gazH"
-if not os.getenv("PUBMED_API_KEY"):
-    os.environ["PUBMED_API_KEY"] = "f423fd1648281220c972b0d1331f7930be07"
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
