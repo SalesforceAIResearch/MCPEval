@@ -277,7 +277,7 @@ For custom endpoints:
   "api_key": "default",
   "temperature": 0.01,
   "max_tokens": 3000,
-  "base_url": "http://10.3.91.185:8002/v1"
+  "base_url": "http://<ip_address:port>/v1"
 }
 ```
 
