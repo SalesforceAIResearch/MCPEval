@@ -84,7 +84,7 @@ After running the setup script:
    cd frontend
    npm start
    ```
-   Frontend will run on http://localhost:3000
+   Frontend will run on http://localhost:22359
 
 3. **Access the web application:**
    - Open http://localhost:22359 in your browser
