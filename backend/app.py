@@ -21,6 +21,9 @@ from routes.files import create_files_routes
 from routes.workspace import create_workspace_routes
 from routes.tasks import create_tasks_routes
 from routes.auto import create_auto_routes
+from routes.report_generation import create_report_generation_routes
+from routes.analysis import create_analysis_routes
+from routes.llm_judge import create_llm_judge_routes
 
 
 def create_app(config_path=None):
@@ -33,7 +36,7 @@ def create_app(config_path=None):
     app = Flask(__name__)
     
     # Enable CORS
-    CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"])
+    CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:22359", "http://127.0.0.1:22359"])
     
     # Initialize core managers
     job_manager = JobManager(config)
@@ -46,6 +49,9 @@ def create_app(config_path=None):
     app.register_blueprint(create_workspace_routes(config, job_manager))
     app.register_blueprint(create_tasks_routes(config, job_manager))
     app.register_blueprint(create_auto_routes(config, job_manager))
+    app.register_blueprint(create_report_generation_routes(config, job_manager))
+    app.register_blueprint(create_analysis_routes(config, job_manager))
+    app.register_blueprint(create_llm_judge_routes(config, job_manager))
     
     # Root endpoint
     @app.route('/')
@@ -84,12 +90,20 @@ def create_app(config_path=None):
                     'analyze': '/api/analyze-results',
                     'job_status': '/api/job/<job_id>'
                 },
+                'llm_judge': {
+                    'judge': '/api/llm-judge',
+                    'rubric': '/api/llm-judge-rubric'
+                },
                 'auto': {
                     'run': '/api/auto/run',
                     'validate': '/api/auto/config/validate',
                     'save': '/api/auto/config/save',
                     'load': '/api/auto/config/load/<name>',
                     'list': '/api/auto/config/list'
+                },
+                'reports': {
+                    'generate': '/api/generate-report',
+                    'detect_files': '/api/detect-analysis-files'
                 }
             }
         })
@@ -142,9 +156,12 @@ def main():
     print("  Files:      GET  /api/files")
     print("  Upload:     POST /api/upload")
     print("  Tasks:      POST /api/generate-tasks")
+    print("  LLM Judge:  POST /api/llm-judge")
+    print("  LLM Rubric: POST /api/llm-judge-rubric")
     print("  Auto:       POST /api/auto/run")
+    print("  Reports:    POST /api/generate-report")
     print("="*60)
-    print("Frontend URL: http://localhost:3000")
+    print("Frontend URL: http://localhost:22359")
     print("Backend URL:  http://localhost:22358")
     print("="*60)
     

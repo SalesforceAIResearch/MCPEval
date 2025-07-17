@@ -13,36 +13,72 @@ def create_auto_routes(config, job_manager):
         try:
             data = request.get_json()
             
-            # Extract parameters
-            workspace = data.get('workspace', 'default')
+            # Extract parameters matching the auto CLI structure
+            working_dir = data.get('working_dir', '')
             servers = data.get('servers', [])
-            model_configs = data.get('model_configs', [])
-            num_tasks = data.get('num_tasks', 10)
-            max_concurrent = data.get('max_concurrent', 3)
+            task_model = data.get('task_model', 'gpt-4.1-2025-04-14')
+            eval_model_configs = data.get('eval_model_configs', [])
+            num_tasks = data.get('num_tasks', 200)
+            max_turns = data.get('max_turns', 30)
+            
+            # Optional prompt files
+            task_generation_prompt = data.get('task_generation_prompt')
+            task_verification_prompt = data.get('task_verification_prompt')
+            evaluation_prompt = data.get('evaluation_prompt')
+            
+            # LLM Judge options
+            enable_llm_judge = data.get('enable_llm_judge', False)
+            llm_judge_model = data.get('llm_judge_model', 'gpt-4o')
             
             # Validate required fields
-            if not servers or not model_configs:
-                return jsonify({'error': 'Servers and model configs are required'}), 400
+            if not working_dir:
+                return jsonify({'error': 'Working directory is required'}), 400
+            if not servers:
+                return jsonify({'error': 'At least one server is required'}), 400
+            if not eval_model_configs:
+                return jsonify({'error': 'At least one model config is required'}), 400
             
             # Create job
-            job_id = job_manager.create_job("Auto Workflow", f"Auto eval: {workspace}", "auto")
+            job_id = job_manager.create_job("Auto Workflow", f"Auto eval: {working_dir}", "auto")
             
             # Store additional metadata for this job
             job_manager.job_metadata[job_id].update({
-                'workspace': workspace,
-                'servers': servers
+                'working_dir': working_dir,
+                'servers': servers,
+                'eval_model_configs': eval_model_configs
             })
             
-            # Build command - using the auto CLI module
-            command = f'uv run python -m mcp_eval_llm.cli.auto.auto'
-            command += f' --workspace "{workspace}"'
-            command += f' --servers {" ".join([f"{s}" for s in servers])}'
-            command += f' --model-configs {" ".join([f"{mc}" for mc in model_configs])}'
-            command += f' --num-tasks {num_tasks}'
-            command += f' --max-concurrent {max_concurrent}'
+            # Build command using the correct CLI structure
+            command = ['mcp-eval', 'auto']
+            
+            # Required arguments
+            command.extend(['--servers'] + servers)
+            command.extend(['--working-dir', working_dir])
+            command.extend(['--task-model', task_model])
+            command.extend(['--eval-model-configs'] + eval_model_configs)
+            
+            # Optional arguments
+            command.extend(['--num-tasks', str(num_tasks)])
+            command.extend(['--max-turns', str(max_turns)])
+            
+            # Optional prompt files
+            if task_generation_prompt:
+                command.extend(['--task-generation-prompt', task_generation_prompt])
+            if task_verification_prompt:
+                command.extend(['--task-verification-prompt', task_verification_prompt])
+            if evaluation_prompt:
+                command.extend(['--evaluation-prompt', evaluation_prompt])
+            
+            # LLM Judge options
+            if enable_llm_judge:
+                command.append('--enable-llm-judge')
+                command.extend(['--llm-judge-model', llm_judge_model])
+            
+            # Convert command list to string for job manager
+            command_str = ' '.join([f'"{arg}"' if ' ' in arg else arg for arg in command])
             
             # Run command asynchronously
-            result = job_manager.run_job_async(job_id, command)
+            result = job_manager.run_job_async(job_id, command_str)
             result['job_id'] = job_id
             
             return jsonify(result)
@@ -56,18 +92,21 @@ def create_auto_routes(config, job_manager):
         try:
             data = request.get_json()
             
-            workspace = data.get('workspace', '')
+            working_dir = data.get('working_dir', '')
             servers = data.get('servers', [])
-            model_configs = data.get('model_configs', [])
+            eval_model_configs = data.get('eval_model_configs', [])
+            task_generation_prompt = data.get('task_generation_prompt')
+            task_verification_prompt = data.get('task_verification_prompt')
+            evaluation_prompt = data.get('evaluation_prompt')
             
             errors = []
             warnings = []
             
-            # Validate workspace
-            if not workspace:
-                errors.append('Workspace name is required')
-            elif workspace in ['', '.', '..', '/']:
-                errors.append('Invalid workspace name')
+            # Validate working directory
+            if not working_dir:
+                errors.append('Working directory is required')
+            elif working_dir in ['', '.', '..', '/']:
+                errors.append('Invalid working directory name')
             
             # Validate servers
             if not servers:
@@ -75,16 +114,19 @@ def create_auto_routes(config, job_manager):
             else:
                 root_dir = config.get('paths', {}).get('root_directory', '..')
                 for server in servers:
-                    server_path = Path(root_dir) / server
-                    if not server_path.exists():
-                        errors.append(f'Server file not found: {server}')
+                    # Handle server specifications with arguments/env vars
+                    server_path = server.split(':')[0].split('^')[0]
+                    if not server_path.startswith('@'):  # Local server file
+                        full_server_path = Path(root_dir) / server_path
+                        if not full_server_path.exists():
+                            errors.append(f'Server file not found: {server_path}')
             
             # Validate model configs
-            if not model_configs:
-                errors.append('At least one model config must be provided')
+            if not eval_model_configs:
+                errors.append('At least one evaluation model config must be provided')
             else:
                 root_dir = config.get('paths', {}).get('root_directory', '..')
-                for model_config in model_configs:
+                for model_config in eval_model_configs:
                     config_path = Path(root_dir) / model_config
                     if not config_path.exists():
                         errors.append(f'Model config file not found: {model_config}')
@@ -98,6 +140,24 @@ def create_auto_routes(config, job_manager):
                             errors.append(f'Invalid JSON in model config: {model_config}')
                         except Exception as e:
                             warnings.append(f'Could not validate model config {model_config}: {str(e)}')
+            
+            # Validate optional prompt files
+            root_dir = config.get('paths', {}).get('root_directory', '..')
+            for prompt_file, prompt_name in [
+                (task_generation_prompt, 'Task generation prompt'),
+                (task_verification_prompt, 'Task verification prompt'),
+                (evaluation_prompt, 'Evaluation prompt')
+            ]:
+                if prompt_file:
+                    prompt_path = Path(root_dir) / prompt_file
+                    if not prompt_path.exists():
+                        warnings.append(f'{prompt_name} file not found: {prompt_file}')
+                    else:
+                        try:
+                            with open(prompt_path, 'r') as f:
+                                json.load(f)
+                        except json.JSONDecodeError:
+                            warnings.append(f'Invalid JSON in {prompt_name.lower()}: {prompt_file}')
             
             return jsonify({
                 'valid': len(errors) == 0,
@@ -126,13 +186,19 @@ def create_auto_routes(config, job_manager):
             
             config_file = configs_dir / f'{config_name}.json'
             
-            # Save configuration
+            # Save configuration with correct structure
             config_data = {
-                'workspace': data.get('workspace', ''),
+                'working_dir': data.get('working_dir', ''),
                 'servers': data.get('servers', []),
-                'model_configs': data.get('model_configs', []),
-                'num_tasks': data.get('num_tasks', 10),
-                'max_concurrent': data.get('max_concurrent', 3)
+                'task_model': data.get('task_model', 'gpt-4.1-2025-04-14'),
+                'eval_model_configs': data.get('eval_model_configs', []),
+                'num_tasks': data.get('num_tasks', 200),
+                'max_turns': data.get('max_turns', 30),
+                'task_generation_prompt': data.get('task_generation_prompt'),
+                'task_verification_prompt': data.get('task_verification_prompt'),
+                'evaluation_prompt': data.get('evaluation_prompt'),
+                'enable_llm_judge': data.get('enable_llm_judge', False),
+                'llm_judge_model': data.get('llm_judge_model', 'gpt-4o')
             }
             
             with open(config_file, 'w') as f:

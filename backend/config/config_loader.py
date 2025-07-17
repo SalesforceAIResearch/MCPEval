@@ -49,18 +49,12 @@ def load_config(config_path=None):
             print("Using default configuration.")
             config = default_config
     
-    # Resolve relative paths
-    config_dir = config_path.parent
-    for key, value in config.get('paths', {}).items():
-        if isinstance(value, str) and not os.path.isabs(value):
-            config['paths'][key] = str(config_dir / value)
-    
-    # Handle workspace variable substitution in paths
+    # Handle workspace variable substitution in paths first
     if 'workspace' in config and 'paths' in config:
         workspace_root = config['workspace'].get('root', '.')
         # Resolve workspace root relative to config directory
         if not os.path.isabs(workspace_root):
-            workspace_root = str(config_dir / workspace_root)
+            workspace_root = str(config_path.parent / workspace_root)
         
         # Create workspace root directory if it doesn't exist
         workspace_root_path = Path(workspace_root)
@@ -77,6 +71,12 @@ def load_config(config_path=None):
         for key, value in config['paths'].items():
             if isinstance(value, str) and '${workspace.root}' in value:
                 config['paths'][key] = value.replace('${workspace.root}', workspace_root)
+    
+    # Resolve remaining relative paths
+    config_dir = config_path.parent
+    for key, value in config.get('paths', {}).items():
+        if isinstance(value, str) and not os.path.isabs(value):
+            config['paths'][key] = str(config_dir / value)
     
     # Set environment variables
     for key, value in config.get('environment', {}).items():

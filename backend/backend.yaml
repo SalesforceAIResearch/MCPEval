@@ -11,7 +11,7 @@ app:
 # All paths are organized within a common workspace structure
 workspace:
   # Root workspace directory (relative to this config file)
-  root: "workspace"
+  root: "../workspace"
   
 # Directory paths within the workspace
 paths:
@@ -72,7 +72,7 @@ files:
 # Environment variables to set
 environment:
   # Add any environment variables needed by the CLI commands
-  PYTHONPATH: "${root_directory}/src"
+  PYTHONPATH: "../src"
   # Uncomment and set these if needed
   # OPENAI_API_KEY: "your-openai-api-key"
   # ANTHROPIC_API_KEY: "your-anthropic-api-key" 
