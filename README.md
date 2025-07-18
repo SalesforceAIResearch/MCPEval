@@ -1,5 +1,28 @@
 # MCPEval: Automatic MCP-based Deep Evaluation for AI Agent Models
 
+<br/>
+
+<div align="center">
+
+  [![arXiv](https://img.shields.io/badge/arXiv-2507.12806-b31b1b.svg)](https://arxiv.org/abs/2507.12806)
+  [![Release Notes](https://img.shields.io/github/release/SalesforceAIResearch/MCPEval)](https://github.com/SalesforceAIResearch/MCPEval/releases)
+  ![Python 3.12+](https://img.shields.io/badge/Python-3.9%2B-brightgreen.svg)
+  [![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://github.com/SalesforceAIResearch/MCPEval/blob/main/LICENSE.txt)
+  [![GitHub star chart](https://img.shields.io/github/stars/SalesforceAIResearch/MCPEval?style=social)](https://star-history.com/#SalesforceAIResearch/MCPEval)
+
+</div>
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2507.12806">Paper</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#features">Features</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#installation">Installation</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#usage">Usage</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#mcpeval-cli-usage">CLI</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#development">Development</a>
+</p>
+
+---
+
 A Model Context Protocol (MCP) based LLM evaluation pipeline for assessing and benchmarking Large Language Models.
 
 ## Overview
