@@ -18,11 +18,11 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from mcp_eval_llm.eval.task_executor import LLMTaskExecutor
-from mcp_eval_llm.models.llms import OpenAIWrapper
-from mcp_eval_llm.client.openai_client import OpenAIMCPClient
-from mcp_eval_llm.synthesis.utils import load_tasks_from_jsonl
-from mcp_eval_llm.utils.cli import load_prompt_from_file
+from mcpeval.eval.task_executor import LLMTaskExecutor
+from mcpeval.models.llms import OpenAIWrapper
+from mcpeval.client.openai_client import OpenAIMCPClient
+from mcpeval.synthesis.utils import load_tasks_from_jsonl
+from mcpeval.utils.cli import load_prompt_from_file
 from dotenv import load_dotenv
 
 # Import shared utilities
@@ -58,8 +58,12 @@ class FilesystemEvaluator:
         )
         
         try:
-            # Connect to MCP server
-            await client.connect_to_server(self.server_path, self.server_args)
+            # Connect to MCP server using connect_to_multiple_servers
+            # Convert single server to list format for connect_to_multiple_servers
+            server_paths = [self.server_path]
+            server_args_list = [self.server_args] if self.server_args else [None]
+            server_envs = None
+            await client.connect_to_multiple_servers(server_paths, server_args_list, server_envs)
             print(f"🔗 Connected to filesystem server")
             
             # Create executor
@@ -69,12 +73,12 @@ class FilesystemEvaluator:
             # Create tool mapping
             tool_name_to_session = {}
             try:
-                available_tools_response = await client.session.list_tools()
-                for tool in available_tools_response.tools:
-                    tool_name_to_session[tool.name] = client.session
+                available_tools = await client.get_all_tools()
+                for tool in available_tools:
+                    tool_name_to_session[tool.name] = client.tool_name_to_session[tool.name]
             except Exception as e:
                 print(f"⚠️  Warning: Could not get available tools: {e}")
-                tool_name_to_session = {tool.name: client.session for tool in task.tools} if task.tools else {}
+                tool_name_to_session = client.tool_name_to_session if client.tool_name_to_session else {}
             
             # Execute task
             start_time = time.time()

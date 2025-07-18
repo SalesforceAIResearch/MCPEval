@@ -2,14 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   TextField,
   Button,
   List,
   ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   IconButton,
   Chip,
   Dialog,
@@ -21,19 +18,15 @@ import {
   Tabs,
   Tab,
   Paper,
-  Divider,
   CircularProgress,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Grid,
-  Switch,
-  FormControlLabel,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Tooltip,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -52,23 +45,8 @@ import {
 } from '@mui/icons-material';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
-interface MCPServer {
-  id: string;
-  name: string;
-  path: string;
-  args: string[];
-  type: 'local' | 'npm';
-  status: 'disconnected' | 'connecting' | 'connected' | 'error';
-  tools?: Tool[];
-  error?: string;
-}
-
-interface Tool {
-  name: string;
-  description: string;
-  inputSchema?: any;
-}
+import { MCPServer, Tool, parseEnvString } from '../components/types';
+import MCPChatServerConfiguration from '../components/MCPChatServerConfiguration';
 
 interface LLMConfig {
   model: string;
@@ -118,16 +96,24 @@ const MCPChatClient: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showAddServerDialog, setShowAddServerDialog] = useState(false);
-  const [showServerSelectionDialog, setShowServerSelectionDialog] = useState(false);
-  const [showLLMConfigDialog, setShowLLMConfigDialog] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' as 'success' | 'error' | 'info' | 'warning' });
-  
+  const [showServerSelectionDialog, setShowServerSelectionDialog] =
+    useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'info' as 'success' | 'error' | 'info' | 'warning',
+  });
+  const [expandedResults, setExpandedResults] = useState<Set<string>>(
+    new Set()
+  );
+
   // Server configuration state
   const [newServer, setNewServer] = useState({
     name: '',
     path: '',
     args: '',
-    type: 'local' as 'local' | 'npm'
+    env: '',
+    type: 'local' as 'local' | 'npm',
   });
 
   // LLM configuration state
@@ -137,7 +123,8 @@ const MCPChatClient: React.FC = () => {
     baseUrl: '',
     temperature: 0.7,
     maxTokens: 2000,
-    systemPrompt: 'You are a helpful AI assistant with access to various tools through MCP servers.'
+    systemPrompt:
+      'You are a helpful AI assistant with access to various tools through MCP servers.',
   });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -145,10 +132,10 @@ const MCPChatClient: React.FC = () => {
   useEffect(() => {
     // Load saved configuration on component mount
     loadSavedConfig();
-    
+
     // Fetch available servers from the workspace
     fetchAvailableServers();
-    
+
     // Check MCP status on mount
     checkMCPStatus();
   }, []);
@@ -157,14 +144,14 @@ const MCPChatClient: React.FC = () => {
     try {
       const response = await fetch('/api/mcp/status');
       const result = await response.json();
-      
+
       if (result.connected) {
         setIsConnected(true);
         const systemMessage: ChatMessage = {
           id: Date.now().toString(),
           role: 'system',
           content: `Found existing connection with ${result.tool_count} tools available`,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
         setChatMessages([systemMessage]);
       }
@@ -177,7 +164,7 @@ const MCPChatClient: React.FC = () => {
     try {
       const response = await fetch('/api/servers');
       const result = await response.json();
-      
+
       if (result.servers) {
         setAvailableServers(result.servers);
       }
@@ -195,11 +182,17 @@ const MCPChatClient: React.FC = () => {
     try {
       const savedServers = localStorage.getItem('mcp-chat-servers');
       const savedLLMConfig = localStorage.getItem('mcp-chat-llm-config');
-      
+
       if (savedServers) {
-        setServers(JSON.parse(savedServers));
+        const parsedServers = JSON.parse(savedServers);
+        // Ensure all servers have the env property
+        const serversWithEnv = parsedServers.map((server: any) => ({
+          ...server,
+          env: server.env || {},
+        }));
+        setServers(serversWithEnv);
       }
-      
+
       if (savedLLMConfig) {
         setLLMConfig(JSON.parse(savedLLMConfig));
       }
@@ -214,7 +207,10 @@ const MCPChatClient: React.FC = () => {
         localStorage.setItem('mcp-chat-servers', JSON.stringify(newServers));
       }
       if (newLLMConfig) {
-        localStorage.setItem('mcp-chat-llm-config', JSON.stringify(newLLMConfig));
+        localStorage.setItem(
+          'mcp-chat-llm-config',
+          JSON.stringify(newLLMConfig)
+        );
       }
     } catch (error) {
       console.error('Error saving configuration:', error);
@@ -223,7 +219,11 @@ const MCPChatClient: React.FC = () => {
 
   const addServer = () => {
     if (!newServer.name || !newServer.path) {
-      setSnackbar({ open: true, message: 'Please fill in all required fields', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: 'Please fill in all required fields',
+        severity: 'error',
+      });
       return;
     }
 
@@ -231,25 +231,36 @@ const MCPChatClient: React.FC = () => {
       id: Date.now().toString(),
       name: newServer.name,
       path: newServer.path,
-      args: newServer.args ? newServer.args.split(',').map(arg => arg.trim()) : [],
+      args: newServer.args
+        ? newServer.args.split(',').map(arg => arg.trim())
+        : [],
+      env: parseEnvString(newServer.env),
       type: newServer.type,
-      status: 'disconnected'
+      status: 'disconnected',
     };
 
     const updatedServers = [...servers, server];
     setServers(updatedServers);
     saveConfig(updatedServers);
-    
-    setNewServer({ name: '', path: '', args: '', type: 'local' });
+
+    setNewServer({ name: '', path: '', args: '', env: '', type: 'local' });
     setShowAddServerDialog(false);
-    setSnackbar({ open: true, message: 'Server added successfully', severity: 'success' });
+    setSnackbar({
+      open: true,
+      message: 'Server added successfully',
+      severity: 'success',
+    });
   };
 
   const addServerFromWorkspace = (workspaceServer: any) => {
     // Check if server is already added
     const existingServer = servers.find(s => s.path === workspaceServer.path);
     if (existingServer) {
-      setSnackbar({ open: true, message: 'Server already added', severity: 'warning' });
+      setSnackbar({
+        open: true,
+        message: 'Server already added',
+        severity: 'warning',
+      });
       return;
     }
 
@@ -258,16 +269,21 @@ const MCPChatClient: React.FC = () => {
       name: workspaceServer.name,
       path: workspaceServer.path,
       args: [],
+      env: {},
       type: 'local',
-      status: 'disconnected'
+      status: 'disconnected',
     };
 
     const updatedServers = [...servers, server];
     setServers(updatedServers);
     saveConfig(updatedServers);
-    
+
     setShowServerSelectionDialog(false);
-    setSnackbar({ open: true, message: `Added ${workspaceServer.name} server`, severity: 'success' });
+    setSnackbar({
+      open: true,
+      message: `Added ${workspaceServer.name} server`,
+      severity: 'success',
+    });
   };
 
   const removeServer = (serverId: string) => {
@@ -279,30 +295,39 @@ const MCPChatClient: React.FC = () => {
 
   const connectToServers = async () => {
     if (servers.length === 0) {
-      setSnackbar({ open: true, message: 'No servers configured', severity: 'warning' });
+      setSnackbar({
+        open: true,
+        message: 'No servers configured',
+        severity: 'warning',
+      });
       return;
     }
 
     // Validate API key - only warn if it's explicitly set to test-key
     if (llmConfig.apiKey === 'test-key') {
-      setSnackbar({ 
-        open: true, 
-        message: 'Please provide a valid OpenAI API key in the LLM configuration or set OPENAI_API_KEY environment variable', 
-        severity: 'warning' 
+      setSnackbar({
+        open: true,
+        message:
+          'Please provide a valid OpenAI API key in the LLM configuration or set OPENAI_API_KEY environment variable',
+        severity: 'warning',
       });
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       // Update all servers to connecting status
-      const connectingServers = servers.map(s => ({ ...s, status: 'connecting' as const }));
+      const connectingServers = servers.map(s => ({
+        ...s,
+        status: 'connecting' as const,
+      }));
       setServers(connectingServers);
 
       const serverPaths = servers.map(s => s.path);
       const serverArgs = servers.map(s => s.args);
       const serverTypes = servers.map(s => s.type);
+      const serverEnvs = servers.map(s => s.env);
 
       const response = await fetch('/api/mcp/connect', {
         method: 'POST',
@@ -311,8 +336,9 @@ const MCPChatClient: React.FC = () => {
           servers: serverPaths,
           server_args: serverArgs,
           server_types: serverTypes,
-          llm_config: llmConfig
-        })
+          server_envs: serverEnvs,
+          llm_config: llmConfig,
+        }),
       });
 
       const result = await response.json();
@@ -323,48 +349,67 @@ const MCPChatClient: React.FC = () => {
           const serverInfo = result.server_mapping?.[server.path];
           return {
             ...server,
-            status: serverInfo?.connected ? 'connected' as const : 'error' as const,
+            status: serverInfo?.connected
+              ? ('connected' as const)
+              : ('error' as const),
             tools: serverInfo?.tools || [],
-            error: serverInfo?.connected ? undefined : 'Failed to connect'
+            error: serverInfo?.connected ? undefined : 'Failed to connect',
           };
         });
 
         setServers(connectedServers);
         setIsConnected(true);
-        setSnackbar({ open: true, message: `Connected to ${result.connected_count} server(s)`, severity: 'success' });
-        
+        setSnackbar({
+          open: true,
+          message: `Connected to ${result.connected_count} server(s)`,
+          severity: 'success',
+        });
+
         // Add system message
         const systemMessage: ChatMessage = {
           id: Date.now().toString(),
           role: 'system',
           content: `Connected to ${result.connected_count} server(s). Available tools: ${result.total_tools}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
         setChatMessages([systemMessage]);
       } else {
         // Update servers with error status
-        const errorServers = servers.map(s => ({ ...s, status: 'error' as const, error: result.error }));
+        const errorServers = servers.map(s => ({
+          ...s,
+          status: 'error' as const,
+          error: result.error,
+        }));
         setServers(errorServers);
-        
+
         // Check for API key related errors
         if (result.error && result.error.includes('API key')) {
-          setSnackbar({ 
-            open: true, 
-            message: 'Invalid API key. Please check your OpenAI API key in the LLM configuration.', 
-            severity: 'error' 
+          setSnackbar({
+            open: true,
+            message:
+              'Invalid API key. Please check your OpenAI API key in the LLM configuration.',
+            severity: 'error',
           });
         } else {
-          setSnackbar({ 
-            open: true, 
-            message: result.error || 'Failed to connect to servers', 
-            severity: 'error' 
+          setSnackbar({
+            open: true,
+            message: result.error || 'Failed to connect to servers',
+            severity: 'error',
           });
         }
       }
     } catch (error) {
-      const errorServers = servers.map(s => ({ ...s, status: 'error' as const, error: 'Network error' }));
+      const errorServers = servers.map(s => ({
+        ...s,
+        status: 'error' as const,
+        error: 'Network error',
+      }));
       setServers(errorServers);
-      setSnackbar({ open: true, message: 'Network error connecting to servers', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: 'Network error connecting to servers',
+        severity: 'error',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -373,16 +418,29 @@ const MCPChatClient: React.FC = () => {
   const disconnectFromServers = async () => {
     try {
       await fetch('/api/mcp/disconnect', { method: 'POST' });
-      
-      const disconnectedServers = servers.map(s => ({ ...s, status: 'disconnected' as const, tools: undefined, error: undefined }));
+
+      const disconnectedServers = servers.map(s => ({
+        ...s,
+        status: 'disconnected' as const,
+        tools: undefined,
+        error: undefined,
+      }));
       setServers(disconnectedServers);
       setIsConnected(false);
-      setSnackbar({ open: true, message: 'Disconnected from servers', severity: 'info' });
-      
+      setSnackbar({
+        open: true,
+        message: 'Disconnected from servers',
+        severity: 'info',
+      });
+
       // Clear chat messages
       setChatMessages([]);
     } catch (error) {
-      setSnackbar({ open: true, message: 'Error disconnecting from servers', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: 'Error disconnecting from servers',
+        severity: 'error',
+      });
     }
   };
 
@@ -393,7 +451,7 @@ const MCPChatClient: React.FC = () => {
       id: Date.now().toString(),
       role: 'user',
       content: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setChatMessages(prev => [...prev, userMessage]);
@@ -405,8 +463,8 @@ const MCPChatClient: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: inputMessage
-        })
+          message: inputMessage,
+        }),
       });
 
       const result = await response.json();
@@ -418,7 +476,7 @@ const MCPChatClient: React.FC = () => {
           content: result.response,
           timestamp: new Date(),
           toolCalls: result.tool_calls,
-          toolResults: result.tool_results
+          toolResults: result.tool_results,
         };
 
         setChatMessages(prev => [...prev, assistantMessage]);
@@ -426,14 +484,15 @@ const MCPChatClient: React.FC = () => {
         // Provide better error messages for common issues
         let errorContent = result.error;
         if (result.error && result.error.includes('API key')) {
-          errorContent = 'Invalid API key. Please check your OpenAI API key in the LLM configuration.';
+          errorContent =
+            'Invalid API key. Please check your OpenAI API key in the LLM configuration.';
         }
-        
+
         const errorMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           role: 'system',
           content: `Error: ${errorContent}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
         setChatMessages(prev => [...prev, errorMessage]);
       }
@@ -442,7 +501,7 @@ const MCPChatClient: React.FC = () => {
         id: (Date.now() + 1).toString(),
         role: 'system',
         content: `Network error: ${error}`,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       setChatMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -452,26 +511,39 @@ const MCPChatClient: React.FC = () => {
 
   const saveLLMConfig = () => {
     saveConfig(undefined, llmConfig);
-    setShowLLMConfigDialog(false);
-    setSnackbar({ open: true, message: 'LLM configuration saved', severity: 'success' });
-  };
-
-  const getServerStatusColor = (status: MCPServer['status']) => {
-    switch (status) {
-      case 'connected': return 'success';
-      case 'connecting': return 'warning';
-      case 'error': return 'error';
-      default: return 'default';
-    }
+    setSnackbar({
+      open: true,
+      message: 'LLM configuration saved',
+      severity: 'success',
+    });
   };
 
   const getAvailableTools = () => {
-    return servers.filter(s => s.status === 'connected').flatMap(s => s.tools || []);
+    return servers
+      .filter(s => s.status === 'connected')
+      .flatMap(s => s.tools || []);
+  };
+
+  const truncateText = (text: string, maxLength: number = 500) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+  const shouldTruncateResult = (result: string) => {
+    return result.length > 500;
   };
 
   const formatMessage = (message: ChatMessage) => {
     if (message.role === 'system') {
-      return <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>{message.content}</Typography>;
+      return (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ fontStyle: 'italic' }}
+        >
+          {message.content}
+        </Typography>
+      );
     }
 
     return (
@@ -479,22 +551,45 @@ const MCPChatClient: React.FC = () => {
         <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>
           {message.content}
         </Typography>
-        
+
         {message.toolCalls && message.toolCalls.length > 0 && (
           <Accordion sx={{ mt: 1 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="body2">Tool Calls ({message.toolCalls.length})</Typography>
+              <Typography variant="body2" color="primary">
+                🔧 Tool Calls ({message.toolCalls.length})
+              </Typography>
             </AccordionSummary>
             <AccordionDetails>
               {message.toolCalls.map((call, index) => (
                 <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2">🔧 {call.function?.name}</Typography>
+                  <Typography
+                    variant="subtitle2"
+                    color="primary"
+                    sx={{ fontWeight: 'bold' }}
+                  >
+                    🔧 {call.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Arguments:
+                  </Typography>
                   <SyntaxHighlighter
                     language="json"
                     style={tomorrow}
-                    customStyle={{ fontSize: '0.8rem', margin: '8px 0' }}
+                    customStyle={{
+                      fontSize: '0.8rem',
+                      margin: '8px 0',
+                      maxHeight: '200px',
+                      overflow: 'auto',
+                      wordWrap: 'break-word',
+                      whiteSpace: 'pre-wrap',
+                    }}
+                    wrapLongLines={true}
                   >
-                    {JSON.stringify(JSON.parse(call.function?.arguments || '{}'), null, 2)}
+                    {JSON.stringify(call.arguments, null, 2)}
                   </SyntaxHighlighter>
                 </Box>
               ))}
@@ -505,20 +600,123 @@ const MCPChatClient: React.FC = () => {
         {message.toolResults && message.toolResults.length > 0 && (
           <Accordion sx={{ mt: 1 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="body2">Tool Results ({message.toolResults.length})</Typography>
+              <Typography variant="body2" color="secondary">
+                📊 Tool Results ({message.toolResults.length})
+              </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              {message.toolResults.map((result, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <SyntaxHighlighter
-                    language="json"
-                    style={tomorrow}
-                    customStyle={{ fontSize: '0.8rem', margin: '8px 0' }}
-                  >
-                    {JSON.stringify(result, null, 2)}
-                  </SyntaxHighlighter>
-                </Box>
-              ))}
+              {message.toolResults.map((result, index) => {
+                const resultText =
+                  typeof result.result === 'string'
+                    ? result.result
+                    : JSON.stringify(result.result, null, 2);
+                const resultKey = `${message.id}-result-${index}`;
+                const isExpanded = expandedResults.has(resultKey);
+                const isTooLong = shouldTruncateResult(resultText);
+                const displayText =
+                  isTooLong && !isExpanded
+                    ? truncateText(resultText)
+                    : resultText;
+
+                const toggleExpanded = () => {
+                  const newExpanded = new Set(expandedResults);
+                  if (isExpanded) {
+                    newExpanded.delete(resultKey);
+                  } else {
+                    newExpanded.add(resultKey);
+                  }
+                  setExpandedResults(newExpanded);
+                };
+
+                return (
+                  <Box key={index} sx={{ mb: 2 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        color="secondary"
+                        sx={{ fontWeight: 'bold' }}
+                      >
+                        📊 {result.name}
+                      </Typography>
+                      {isTooLong && (
+                        <Button
+                          size="small"
+                          variant="text"
+                          onClick={toggleExpanded}
+                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                        >
+                          {isExpanded ? 'Show Less' : 'Show More'}
+                        </Button>
+                      )}
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 1 }}
+                    >
+                      Result: {isTooLong && `(${resultText.length} characters)`}
+                    </Typography>
+                    <Box
+                      sx={{
+                        maxHeight: isExpanded ? '500px' : '300px',
+                        overflow: 'auto',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        position: 'relative',
+                      }}
+                    >
+                      <SyntaxHighlighter
+                        language="json"
+                        style={tomorrow}
+                        customStyle={{
+                          fontSize: '0.8rem',
+                          margin: '0',
+                          wordWrap: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                          maxWidth: '100%',
+                        }}
+                        wrapLongLines={true}
+                      >
+                        {displayText}
+                      </SyntaxHighlighter>
+                      {isTooLong && !isExpanded && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: '40px',
+                            background:
+                              'linear-gradient(transparent, rgba(255,255,255,0.9))',
+                            display: 'flex',
+                            alignItems: 'end',
+                            justifyContent: 'center',
+                            pb: 1,
+                          }}
+                        >
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={toggleExpanded}
+                          >
+                            Show More (
+                            {resultText.length - displayText.length + 3} more
+                            characters)
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                );
+              })}
             </AccordionDetails>
           </Accordion>
         )}
@@ -528,14 +726,21 @@ const MCPChatClient: React.FC = () => {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+      >
         <ChatIcon />
         MCP Chat Client
       </Typography>
 
       <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
+          <Tabs
+            value={currentTab}
+            onChange={(_, newValue) => setCurrentTab(newValue)}
+          >
             <Tab label="Chat" icon={<ChatIcon />} />
             <Tab label="Servers" icon={<ServerIcon />} />
             <Tab label="Settings" icon={<SettingsIcon />} />
@@ -544,9 +749,18 @@ const MCPChatClient: React.FC = () => {
 
         <TabPanel value={currentTab} index={0}>
           {/* Chat Tab */}
-          <Box sx={{ height: '60vh', display: 'flex', flexDirection: 'column' }}>
+          <Box
+            sx={{ height: '60vh', display: 'flex', flexDirection: 'column' }}
+          >
             {/* Chat Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+              }}
+            >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Chip
                   label={isConnected ? 'Connected' : 'Disconnected'}
@@ -554,13 +768,14 @@ const MCPChatClient: React.FC = () => {
                   size="small"
                 />
                 <Typography variant="body2" color="text.secondary">
-                  {servers.filter(s => s.status === 'connected').length} server(s) connected
+                  {servers.filter(s => s.status === 'connected').length}{' '}
+                  server(s) connected
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {getAvailableTools().length} tool(s) available
                 </Typography>
               </Box>
-              
+
               <Box sx={{ display: 'flex', gap: 1 }}>
                 {isConnected ? (
                   <Button
@@ -583,7 +798,7 @@ const MCPChatClient: React.FC = () => {
                     Connect
                   </Button>
                 )}
-                
+
                 <Button
                   variant="outlined"
                   startIcon={<RefreshIcon />}
@@ -600,10 +815,12 @@ const MCPChatClient: React.FC = () => {
               sx={{
                 flexGrow: 1,
                 overflowY: 'auto',
+                overflowX: 'hidden',
                 p: 2,
                 backgroundColor: 'grey.50',
                 border: '1px solid',
-                borderColor: 'grey.200'
+                borderColor: 'grey.200',
+                maxWidth: '100%',
               }}
             >
               {chatMessages.length === 0 ? (
@@ -611,19 +828,19 @@ const MCPChatClient: React.FC = () => {
                   <Typography variant="body2" color="text.secondary">
                     {isConnected
                       ? 'Start a conversation by typing a message below'
-                      : 'Connect to MCP servers to start chatting'
-                    }
+                      : 'Connect to MCP servers to start chatting'}
                   </Typography>
                 </Box>
               ) : (
-                chatMessages.map((message) => (
+                chatMessages.map(message => (
                   <Box
                     key={message.id}
                     sx={{
                       display: 'flex',
-                      flexDirection: message.role === 'user' ? 'row-reverse' : 'row',
+                      flexDirection:
+                        message.role === 'user' ? 'row-reverse' : 'row',
                       mb: 2,
-                      alignItems: 'flex-start'
+                      alignItems: 'flex-start',
                     }}
                   >
                     <Box
@@ -631,29 +848,47 @@ const MCPChatClient: React.FC = () => {
                         minWidth: 40,
                         height: 40,
                         borderRadius: '50%',
-                        backgroundColor: message.role === 'user' ? 'primary.main' : message.role === 'assistant' ? 'secondary.main' : 'grey.400',
+                        backgroundColor:
+                          message.role === 'user'
+                            ? 'primary.main'
+                            : message.role === 'assistant'
+                              ? 'secondary.main'
+                              : 'grey.400',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
-                        mx: 1
+                        mx: 1,
                       }}
                     >
-                      {message.role === 'user' ? <PersonIcon /> : message.role === 'assistant' ? <BotIcon /> : <CodeIcon />}
+                      {message.role === 'user' ? (
+                        <PersonIcon />
+                      ) : message.role === 'assistant' ? (
+                        <BotIcon />
+                      ) : (
+                        <CodeIcon />
+                      )}
                     </Box>
-                    
+
                     <Box
                       sx={{
                         maxWidth: '70%',
-                        backgroundColor: message.role === 'user' ? 'primary.light' : 'white',
-                        color: message.role === 'user' ? 'white' : 'text.primary',
+                        backgroundColor:
+                          message.role === 'user' ? 'primary.light' : 'white',
+                        color:
+                          message.role === 'user' ? 'white' : 'text.primary',
                         borderRadius: 2,
                         p: 2,
-                        boxShadow: 1
+                        boxShadow: 1,
+                        overflow: 'hidden',
+                        wordBreak: 'break-word',
                       }}
                     >
                       {formatMessage(message)}
-                      <Typography variant="caption" sx={{ display: 'block', mt: 1, opacity: 0.7 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{ display: 'block', mt: 1, opacity: 0.7 }}
+                      >
                         {message.timestamp.toLocaleTimeString()}
                       </Typography>
                     </Box>
@@ -669,11 +904,15 @@ const MCPChatClient: React.FC = () => {
                 fullWidth
                 multiline
                 maxRows={4}
-                placeholder={isConnected ? 'Type your message...' : 'Connect to servers first'}
+                placeholder={
+                  isConnected
+                    ? 'Type your message...'
+                    : 'Connect to servers first'
+                }
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+                onChange={e => setInputMessage(e.target.value)}
                 disabled={!isConnected || isLoading}
-                onKeyPress={(e) => {
+                onKeyPress={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
@@ -682,7 +921,9 @@ const MCPChatClient: React.FC = () => {
               />
               <Button
                 variant="contained"
-                endIcon={isLoading ? <CircularProgress size={20} /> : <SendIcon />}
+                endIcon={
+                  isLoading ? <CircularProgress size={20} /> : <SendIcon />
+                }
                 onClick={sendMessage}
                 disabled={!isConnected || !inputMessage.trim() || isLoading}
                 sx={{ minWidth: 100 }}
@@ -696,7 +937,14 @@ const MCPChatClient: React.FC = () => {
         <TabPanel value={currentTab} index={1}>
           {/* Servers Tab */}
           <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+              }}
+            >
               <Typography variant="h6">MCP Servers</Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button
@@ -717,122 +965,72 @@ const MCPChatClient: React.FC = () => {
             </Box>
 
             <Alert severity="info" sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>How to use MCP Chat Client:</Typography>
+              <Typography variant="subtitle2" gutterBottom>
+                How to use MCP Chat Client:
+              </Typography>
               <Typography variant="body2" component="div">
-                1. Configure your LLM settings in the Settings tab<br/>
-                2. Add MCP servers (local .py files or npm packages)<br/>
-                3. Click Connect to establish connections<br/>
+                1. Configure your LLM settings in the Settings tab
+                <br />
+                2. Add MCP servers (local .py files or npm packages)
+                <br />
+                3. Click Connect to establish connections
+                <br />
                 4. Start chatting with AI that has access to your tools!
               </Typography>
             </Alert>
 
-            {servers.length === 0 ? (
-              <Alert severity="warning">
-                No servers configured. Add a server to get started.
-              </Alert>
-            ) : (
-              <List>
-                {servers.map((server) => (
-                  <ListItem key={server.id}>
-                    <Box sx={{ width: '100%' }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Box>
-                          <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {server.name}
-                            <Chip
-                              label={server.type}
-                              size="small"
-                              color={server.type === 'local' ? 'primary' : 'secondary'}
-                            />
-                            <Chip
-                              label={server.status}
-                              size="small"
-                              color={getServerStatusColor(server.status)}
-                            />
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {server.path}
-                          </Typography>
-                          {server.args.length > 0 && (
-                            <Typography variant="caption" color="text.secondary">
-                              Args: {server.args.join(', ')}
-                            </Typography>
-                          )}
-                          {server.error && (
-                            <Typography variant="caption" color="error">
-                              Error: {server.error}
-                            </Typography>
-                          )}
-                        </Box>
-                        
-                        <IconButton onClick={() => removeServer(server.id)} color="error">
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-
-                      {server.tools && server.tools.length > 0 && (
-                        <Box sx={{ mt: 1 }}>
-                          <Typography variant="caption" color="text.secondary">
-                            Available Tools ({server.tools.length}):
-                          </Typography>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                            {server.tools.map((tool, index) => (
-                              <Tooltip key={index} title={tool.description}>
-                                <Chip
-                                  label={tool.name}
-                                  size="small"
-                                  variant="outlined"
-                                />
-                              </Tooltip>
-                            ))}
-                          </Box>
-                        </Box>
-                      )}
-                    </Box>
-                  </ListItem>
-                ))}
-              </List>
-            )}
+            <MCPChatServerConfiguration
+              servers={servers}
+              onRemoveServer={removeServer}
+            />
           </Box>
         </TabPanel>
 
         <TabPanel value={currentTab} index={2}>
           {/* Settings Tab */}
           <Box>
-            <Typography variant="h6" gutterBottom>LLM Configuration</Typography>
-            
+            <Typography variant="h6" gutterBottom>
+              LLM Configuration
+            </Typography>
+
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Model"
                   value={llmConfig.model}
-                  onChange={(e) => setLLMConfig({ ...llmConfig, model: e.target.value })}
+                  onChange={e =>
+                    setLLMConfig({ ...llmConfig, model: e.target.value })
+                  }
                   helperText="e.g., gpt-4o, gpt-3.5-turbo"
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="API Key"
                   type="password"
                   value={llmConfig.apiKey}
-                  onChange={(e) => setLLMConfig({ ...llmConfig, apiKey: e.target.value })}
+                  onChange={e =>
+                    setLLMConfig({ ...llmConfig, apiKey: e.target.value })
+                  }
                   helperText="OpenAI API key"
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Base URL (Optional)"
                   value={llmConfig.baseUrl}
-                  onChange={(e) => setLLMConfig({ ...llmConfig, baseUrl: e.target.value })}
+                  onChange={e =>
+                    setLLMConfig({ ...llmConfig, baseUrl: e.target.value })
+                  }
                   helperText="Custom API endpoint"
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -840,11 +1038,16 @@ const MCPChatClient: React.FC = () => {
                   type="number"
                   inputProps={{ min: 0, max: 2, step: 0.1 }}
                   value={llmConfig.temperature}
-                  onChange={(e) => setLLMConfig({ ...llmConfig, temperature: parseFloat(e.target.value) })}
+                  onChange={e =>
+                    setLLMConfig({
+                      ...llmConfig,
+                      temperature: parseFloat(e.target.value),
+                    })
+                  }
                   helperText="0 = deterministic, 2 = very random"
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -852,11 +1055,16 @@ const MCPChatClient: React.FC = () => {
                   type="number"
                   inputProps={{ min: 1, max: 4000 }}
                   value={llmConfig.maxTokens}
-                  onChange={(e) => setLLMConfig({ ...llmConfig, maxTokens: parseInt(e.target.value) })}
+                  onChange={e =>
+                    setLLMConfig({
+                      ...llmConfig,
+                      maxTokens: parseInt(e.target.value),
+                    })
+                  }
                   helperText="Maximum response length"
                 />
               </Grid>
-              
+
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -864,11 +1072,13 @@ const MCPChatClient: React.FC = () => {
                   rows={4}
                   label="System Prompt"
                   value={llmConfig.systemPrompt}
-                  onChange={(e) => setLLMConfig({ ...llmConfig, systemPrompt: e.target.value })}
+                  onChange={e =>
+                    setLLMConfig({ ...llmConfig, systemPrompt: e.target.value })
+                  }
                   helperText="Instructions for the AI assistant"
                 />
               </Grid>
-              
+
               <Grid item xs={12}>
                 <Button
                   variant="contained"
@@ -884,16 +1094,24 @@ const MCPChatClient: React.FC = () => {
       </Card>
 
       {/* Add Server Dialog */}
-      <Dialog open={showAddServerDialog} onClose={() => setShowAddServerDialog(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={showAddServerDialog}
+        onClose={() => setShowAddServerDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Add MCP Server</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <Alert severity="info" sx={{ mb: 1 }}>
-              <Typography variant="subtitle2" gutterBottom>Examples:</Typography>
+              <Typography variant="subtitle2" gutterBottom>
+                Examples:
+              </Typography>
               <Typography variant="body2" component="div">
-                • Local: <code>mcp_servers/yfinance/server.py</code><br/>
-                • NPM: <code>@openbnb/mcp-server-airbnb</code><br/>
-                • NPM: <code>@modelcontextprotocol/server-sequential-thinking</code>
+                • Local: <code>mcp_servers/yfinance/server.py</code>
+                <br />• NPM: <code>@openbnb/mcp-server-airbnb</code>
+                <br />• NPM:{' '}
+                <code>@modelcontextprotocol/server-sequential-thinking</code>
               </Typography>
             </Alert>
 
@@ -901,65 +1119,122 @@ const MCPChatClient: React.FC = () => {
               fullWidth
               label="Server Name"
               value={newServer.name}
-              onChange={(e) => setNewServer({ ...newServer, name: e.target.value })}
+              onChange={e =>
+                setNewServer({ ...newServer, name: e.target.value })
+              }
               placeholder="e.g., YFinance Server"
             />
-            
+
             <FormControl fullWidth>
               <InputLabel>Server Type</InputLabel>
               <Select
                 value={newServer.type}
-                onChange={(e) => setNewServer({ ...newServer, type: e.target.value as 'local' | 'npm' })}
+                onChange={e =>
+                  setNewServer({
+                    ...newServer,
+                    type: e.target.value as 'local' | 'npm',
+                  })
+                }
               >
                 <MenuItem value="local">Local Server (.py file)</MenuItem>
                 <MenuItem value="npm">NPM Package</MenuItem>
               </Select>
             </FormControl>
-            
+
             <TextField
               fullWidth
               label="Server Path"
               value={newServer.path}
-              onChange={(e) => setNewServer({ ...newServer, path: e.target.value })}
-              placeholder={newServer.type === 'local' ? 'mcp_servers/yfinance/server.py' : '@openbnb/mcp-server-airbnb'}
-              helperText={newServer.type === 'local' ? 'Path to your local server script' : 'NPM package name'}
+              onChange={e =>
+                setNewServer({ ...newServer, path: e.target.value })
+              }
+              placeholder={
+                newServer.type === 'local'
+                  ? 'mcp_servers/yfinance/server.py'
+                  : '@openbnb/mcp-server-airbnb'
+              }
+              helperText={
+                newServer.type === 'local'
+                  ? 'Path to your local server script'
+                  : 'NPM package name'
+              }
             />
-            
+
             <TextField
               fullWidth
               label="Arguments (Optional)"
               value={newServer.args}
-              onChange={(e) => setNewServer({ ...newServer, args: e.target.value })}
+              onChange={e =>
+                setNewServer({ ...newServer, args: e.target.value })
+              }
               placeholder="--ignore-robots-txt, --debug"
               helperText="Comma-separated arguments to pass to the server"
             />
 
-
+            <TextField
+              fullWidth
+              label="Environment Variables (Optional)"
+              value={newServer.env}
+              onChange={e =>
+                setNewServer({ ...newServer, env: e.target.value })
+              }
+              placeholder="API_KEY=secret123, DEBUG=true"
+              helperText="Format: KEY1=value1, KEY2=value2"
+            />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowAddServerDialog(false)}>Cancel</Button>
-          <Button onClick={addServer} variant="contained">Add Server</Button>
+          <Button onClick={addServer} variant="contained">
+            Add Server
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Server Selection Dialog */}
-      <Dialog open={showServerSelectionDialog} onClose={() => setShowServerSelectionDialog(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={showServerSelectionDialog}
+        onClose={() => setShowServerSelectionDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Select Server from Workspace</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
             {availableServers.length === 0 ? (
               <Alert severity="info">
-                No MCP servers found in workspace. Make sure you have servers in the mcp_servers directory.
+                No MCP servers found in workspace. Make sure you have servers in
+                the mcp_servers directory.
               </Alert>
             ) : (
               <List>
                 {availableServers.map((server, index) => (
-                  <ListItem key={index} sx={{ border: '1px solid', borderColor: 'grey.300', borderRadius: 1, mb: 1 }}>
+                  <ListItem
+                    key={index}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      mb: 1,
+                    }}
+                  >
                     <Box sx={{ width: '100%' }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
                         <Box>
-                          <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
                             {server.name}
                             <Chip label="local" size="small" color="primary" />
                           </Typography>
@@ -971,7 +1246,10 @@ const MCPChatClient: React.FC = () => {
                           </Typography>
                           {server.tools && server.tools.length > 0 && (
                             <Box sx={{ mt: 1 }}>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 Tools: {server.tools.join(', ')}
                               </Typography>
                             </Box>
@@ -983,7 +1261,9 @@ const MCPChatClient: React.FC = () => {
                           onClick={() => addServerFromWorkspace(server)}
                           disabled={servers.some(s => s.path === server.path)}
                         >
-                          {servers.some(s => s.path === server.path) ? 'Added' : 'Add'}
+                          {servers.some(s => s.path === server.path)
+                            ? 'Added'
+                            : 'Add'}
                         </Button>
                       </Box>
                     </Box>
@@ -994,8 +1274,14 @@ const MCPChatClient: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowServerSelectionDialog(false)}>Close</Button>
-          <Button onClick={fetchAvailableServers} variant="outlined" startIcon={<RefreshIcon />}>
+          <Button onClick={() => setShowServerSelectionDialog(false)}>
+            Close
+          </Button>
+          <Button
+            onClick={fetchAvailableServers}
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+          >
             Refresh
           </Button>
         </DialogActions>
@@ -1007,7 +1293,10 @@ const MCPChatClient: React.FC = () => {
         autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
@@ -1015,4 +1304,4 @@ const MCPChatClient: React.FC = () => {
   );
 };
 
-export default MCPChatClient; 
+export default MCPChatClient;

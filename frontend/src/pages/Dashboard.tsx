@@ -23,6 +23,10 @@ import {
   PlayArrow,
   Refresh,
   MoreVert,
+  AutoAwesome as AutoIcon,
+  Gavel as JudgeIcon,
+  Description as ReportIcon,
+  History as ActivitiesIcon,
 } from '@mui/icons-material';
 
 interface QuickActionCard {
@@ -32,6 +36,7 @@ interface QuickActionCard {
   action: string;
   path: string;
   color: string;
+  size?: 'small' | 'large';
 }
 
 interface RecentActivity {
@@ -52,36 +57,68 @@ const Dashboard: React.FC = () => {
 
   const quickActions: QuickActionCard[] = [
     {
+      title: 'Auto Workflow',
+      description:
+        'Complete automated evaluation pipeline from task generation to analysis',
+      icon: <AutoIcon sx={{ fontSize: 40 }} />,
+      action: 'Start Auto',
+      path: '/auto-workflow',
+      color: '#673ab7',
+      size: 'large',
+    },
+    {
       title: 'Generate Tasks',
       description: 'Create new evaluation tasks for MCP servers',
-      icon: <GenerateIcon sx={{ fontSize: 32 }} />,
+      icon: <GenerateIcon sx={{ fontSize: 28 }} />,
       action: 'Generate',
       path: '/generate-tasks',
       color: '#4caf50',
+      size: 'small',
     },
     {
       title: 'Verify Tasks',
       description: 'Validate generated tasks against servers',
-      icon: <VerifyIcon sx={{ fontSize: 32 }} />,
+      icon: <VerifyIcon sx={{ fontSize: 28 }} />,
       action: 'Verify',
       path: '/verify-tasks',
       color: '#2196f3',
+      size: 'small',
     },
     {
       title: 'Evaluate Models',
       description: 'Run comprehensive model evaluations',
-      icon: <EvaluateIcon sx={{ fontSize: 32 }} />,
+      icon: <EvaluateIcon sx={{ fontSize: 28 }} />,
       action: 'Evaluate',
       path: '/evaluate',
       color: '#ff9800',
+      size: 'small',
+    },
+    {
+      title: 'LLM Judge',
+      description: 'AI-powered evaluation and scoring',
+      icon: <JudgeIcon sx={{ fontSize: 28 }} />,
+      action: 'Judge',
+      path: '/judge',
+      color: '#e91e63',
+      size: 'small',
+    },
+    {
+      title: 'Generate Reports',
+      description: 'Create AI-powered analysis reports from evaluation results',
+      icon: <ReportIcon sx={{ fontSize: 28 }} />,
+      action: 'Generate',
+      path: '/generate-report',
+      color: '#795548',
+      size: 'small',
     },
     {
       title: 'Analyze Results',
       description: 'Deep dive into evaluation metrics',
-      icon: <AnalyzeIcon sx={{ fontSize: 32 }} />,
+      icon: <AnalyzeIcon sx={{ fontSize: 28 }} />,
       action: 'Analyze',
       path: '/analyze',
       color: '#9c27b0',
+      size: 'small',
     },
   ];
 
@@ -89,19 +126,36 @@ const Dashboard: React.FC = () => {
   const fetchRecentActivities = async () => {
     try {
       const response = await axios.get('/api/recent-activities');
-      setRecentActivities(response.data.activities || []);
+      if (response.data.success) {
+        setRecentActivities(response.data.activities || []);
+      } else {
+        console.error(
+          'Failed to fetch recent activities:',
+          response.data.error
+        );
+        // Fallback to demo data if API fails
+        const fallbackActivities: RecentActivity[] = [
+          {
+            id: 'demo-1',
+            type: 'API Error',
+            title: 'Failed to load recent activities',
+            status: 'failed',
+            timestamp: new Date().toISOString(),
+          },
+        ];
+        setRecentActivities(fallbackActivities);
+      }
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to fetch recent activities:', error);
-
       // Fallback to demo data if API fails
       const fallbackActivities: RecentActivity[] = [
         {
           id: 'demo-1',
-          type: 'Demo Data',
-          title: 'API Connection Failed - Showing Demo',
-          status: 'pending',
-          timestamp: 'Demo mode',
+          type: 'Connection Error',
+          title: 'Unable to connect to backend',
+          status: 'failed',
+          timestamp: new Date().toISOString(),
         },
       ];
       setRecentActivities(fallbackActivities);
@@ -158,9 +212,27 @@ const Dashboard: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Welcome to MCPEval
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
           Your comprehensive MCP evaluation framework dashboard
         </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Designed by
+          </Typography>
+          <Chip
+            label="Salesforce AI Research Team"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderColor: '#1976d2',
+              color: '#1976d2',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: '#e3f2fd',
+              },
+            }}
+          />
+        </Box>
       </Box>
 
       {/* Quick Actions */}
@@ -169,60 +241,125 @@ const Dashboard: React.FC = () => {
           Quick Actions
         </Typography>
         <Grid container spacing={3}>
-          {quickActions.map(action => (
-            <Grid item xs={12} sm={6} md={3} key={action.title}>
-              <Card
-                sx={{
-                  height: '100%',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                  },
-                }}
-                onClick={() => navigate(action.path)}
-              >
-                <CardContent sx={{ textAlign: 'center', p: 3 }}>
-                  <Avatar
+          {quickActions.map(action => {
+            const gridSize =
+              action.size === 'large'
+                ? { xs: 12, sm: 12, md: 8, lg: 6 }
+                : { xs: 12, sm: 6, md: 4, lg: 3 };
+
+            return (
+              <Grid item {...gridSize} key={action.title}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                    },
+                  }}
+                  onClick={() => navigate(action.path)}
+                >
+                  <CardContent
                     sx={{
-                      bgcolor: action.color,
-                      width: 64,
-                      height: 64,
-                      mx: 'auto',
-                      mb: 2,
+                      textAlign: 'center',
+                      p: action.size === 'large' ? 4 : 3,
+                      display: 'flex',
+                      flexDirection: action.size === 'large' ? 'row' : 'column',
+                      alignItems: 'center',
+                      gap: action.size === 'large' ? 3 : 0,
                     }}
                   >
-                    {action.icon}
-                  </Avatar>
-                  <Typography variant="h6" gutterBottom>
-                    {action.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 2 }}
-                  >
-                    {action.description}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    sx={{
-                      backgroundColor: action.color,
-                      '&:hover': {
-                        backgroundColor: action.color,
-                        filter: 'brightness(0.9)',
-                      },
-                    }}
-                    startIcon={<PlayArrow />}
-                  >
-                    {action.action}
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+                    {action.size === 'large' ? (
+                      <>
+                        <Avatar
+                          sx={{
+                            bgcolor: action.color,
+                            width: 80,
+                            height: 80,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {action.icon}
+                        </Avatar>
+                        <Box sx={{ textAlign: 'left', flex: 1 }}>
+                          <Typography
+                            variant="h5"
+                            gutterBottom
+                            sx={{ fontWeight: 600 }}
+                          >
+                            {action.title}
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            color="text.secondary"
+                            sx={{ mb: 3 }}
+                          >
+                            {action.description}
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            size="large"
+                            sx={{
+                              backgroundColor: action.color,
+                              '&:hover': {
+                                backgroundColor: action.color,
+                                filter: 'brightness(0.9)',
+                              },
+                              px: 4,
+                              py: 1.5,
+                            }}
+                            startIcon={<PlayArrow />}
+                          >
+                            {action.action}
+                          </Button>
+                        </Box>
+                      </>
+                    ) : (
+                      <>
+                        <Avatar
+                          sx={{
+                            bgcolor: action.color,
+                            width: 56,
+                            height: 56,
+                            mx: 'auto',
+                            mb: 2,
+                          }}
+                        >
+                          {action.icon}
+                        </Avatar>
+                        <Typography variant="h6" gutterBottom>
+                          {action.title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 2 }}
+                        >
+                          {action.description}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          sx={{
+                            backgroundColor: action.color,
+                            '&:hover': {
+                              backgroundColor: action.color,
+                              filter: 'brightness(0.9)',
+                            },
+                          }}
+                          startIcon={<PlayArrow />}
+                        >
+                          {action.action}
+                        </Button>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
 
@@ -348,19 +485,19 @@ const Dashboard: React.FC = () => {
 
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Active Tasks
+                  Total Activities
                 </Typography>
                 <Typography variant="h4" color="primary">
-                  24
+                  {recentActivities.length}
                 </Typography>
               </Box>
 
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Models Evaluated
+                  Running Jobs
                 </Typography>
-                <Typography variant="h4" color="secondary">
-                  8
+                <Typography variant="h4" color="warning.main">
+                  {recentActivities.filter(a => a.status === 'running').length}
                 </Typography>
               </Box>
 
@@ -369,7 +506,15 @@ const Dashboard: React.FC = () => {
                   Success Rate
                 </Typography>
                 <Typography variant="h4" color="success.main">
-                  87%
+                  {recentActivities.length > 0
+                    ? Math.round(
+                        (recentActivities.filter(a => a.status === 'completed')
+                          .length /
+                          recentActivities.length) *
+                          100
+                      )
+                    : 0}
+                  %
                 </Typography>
               </Box>
             </CardContent>

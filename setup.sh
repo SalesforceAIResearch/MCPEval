@@ -14,6 +14,83 @@ if [ ! -f "pyproject.toml" ]; then
     exit 1
 fi
 
+# Function to install nvm
+install_nvm() {
+    echo "📦 Installing nvm (Node Version Manager)..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+    
+    # Load nvm
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    
+    echo "✅ nvm installed successfully"
+}
+
+# Function to install Node.js 18
+install_nodejs() {
+    echo "📦 Installing Node.js 18..."
+    nvm install 18
+    nvm use 18
+    nvm alias default 18
+    echo "✅ Node.js 18 installed and set as default"
+}
+
+# Install Node.js first (required for MCP servers)
+echo "🔧 Setting up Node.js environment (required for MCP servers)..."
+
+# Check if nvm is installed
+if ! command -v nvm &> /dev/null; then
+    # Try to load nvm if it exists but isn't in PATH
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    
+    if ! command -v nvm &> /dev/null; then
+        echo "❌ nvm is not installed. Installing it now..."
+        install_nvm
+    fi
+fi
+
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js is not installed. Installing Node.js 18..."
+    install_nodejs
+else
+    # Check Node.js version
+    NODE_VERSION=$(node --version | cut -d'v' -f2)
+    REQUIRED_VERSION="18.0.0"
+
+    if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$NODE_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then 
+        echo "❌ Node.js version $NODE_VERSION is too old. Required: $REQUIRED_VERSION+"
+        echo "🔄 Installing Node.js 18..."
+        install_nodejs
+    else
+        echo "✅ Node.js version $NODE_VERSION is compatible"
+    fi
+fi
+
+# Verify Node.js installation
+echo "🔍 Verifying Node.js installation..."
+node --version
+npm --version
+npx --version
+
+# Export Node.js paths for the rest of the setup
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Add Node.js to PATH for the rest of this script
+if [ -d "$HOME/.nvm/versions/node" ]; then
+    # Find the latest Node.js version and add it to PATH
+    LATEST_NODE=$(ls -1 "$HOME/.nvm/versions/node" | sort -V | tail -n1)
+    export PATH="$HOME/.nvm/versions/node/$LATEST_NODE/bin:$PATH"
+    echo "✅ Node.js environment configured for setup"
+fi
+
+echo ""
+
 # Install main project dependencies using uv
 echo "📦 Setting up main project..."
 if ! command -v uv &> /dev/null; then
@@ -35,20 +112,22 @@ echo "✅ Main project setup complete"
 echo "✅ mcp-eval CLI command is now available"
 echo ""
 
-# Setup Backend
+# Setup Backend (now with Node.js environment available)
 echo "🔧 Setting up Backend API..."
 cd backend
 chmod +x setup.sh
-./setup.sh
+# Pass Node.js environment to backend setup
+NVM_DIR="$NVM_DIR" PATH="$PATH" ./setup.sh
 cd ..
 
 echo ""
 
-# Setup Frontend
+# Setup Frontend (Node.js already installed, but still run for npm dependencies)
 echo "🎨 Setting up Frontend UI..."
 cd frontend
 chmod +x setup.sh
-./setup.sh
+# Pass Node.js environment to frontend setup
+NVM_DIR="$NVM_DIR" PATH="$PATH" ./setup.sh
 cd ..
 
 echo ""
@@ -78,4 +157,8 @@ echo "   • Frontend UI: frontend/README.md"
 echo "   • Main Project: README.md"
 echo ""
 echo "💡 To make mcp-eval available in new terminals, run:"
-echo "   export PATH=\"\$PWD/.venv/bin:\$PATH\"" 
+echo "   export PATH=\"\$PWD/.venv/bin:\$PATH\""
+echo ""
+echo "🔧 For MCP servers to work properly, ensure Node.js is in PATH:"
+echo "   export NVM_DIR=\"\$HOME/.nvm\""
+echo "   [ -s \"\$NVM_DIR/nvm.sh\" ] && \\. \"\$NVM_DIR/nvm.sh\"" 

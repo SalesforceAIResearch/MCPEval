@@ -1,7 +1,7 @@
 {
-    "model": "qwen3_32b",
+    "model": "mistral_small_3.2_24b-instruct_2506",
     "api_key": "default",
     "temperature": 0.01,
-    "max_tokens": 3000,
-    "base_url": "http://10.3.91.185:8006/v1"
+    "max_tokens": 1000,
+    "base_url": "http://10.3.91.185:8007/v1"
 } 

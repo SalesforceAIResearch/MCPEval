@@ -43,17 +43,19 @@ const BackendFiles: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch('/api/backend-files');
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch backend files');
       }
-      
+
       setBackendFiles(data.files || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch backend files');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch backend files'
+      );
     } finally {
       setLoading(false);
     }
@@ -130,7 +132,11 @@ const BackendFiles: React.FC = () => {
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
           <BackendIcon sx={{ mr: 1 }} />
           Backend Files
         </Typography>
@@ -171,14 +177,14 @@ const BackendFiles: React.FC = () => {
                     <Box display="flex" alignItems="center" mb={2}>
                       {React.cloneElement(getFileTypeIcon(file.type), {
                         color: 'primary',
-                        sx: { mr: 1 }
+                        sx: { mr: 1 },
                       })}
                       <Typography variant="h6" component="h2">
                         {file.name}
                       </Typography>
-                      <Chip 
-                        label={file.extension} 
-                        size="small" 
+                      <Chip
+                        label={file.extension}
+                        size="small"
                         sx={{ ml: 'auto', fontSize: '0.7rem' }}
                       />
                     </Box>
@@ -238,8 +244,8 @@ const BackendFiles: React.FC = () => {
                           </Typography>
                         </Box>
 
-                        <Chip 
-                          label={file.type.toUpperCase()} 
+                        <Chip
+                          label={file.type.toUpperCase()}
                           variant="outlined"
                           size="small"
                           sx={{ mt: 1 }}
@@ -251,10 +257,11 @@ const BackendFiles: React.FC = () => {
               </Grid>
             ))}
           </Grid>
-          
+
           <Box mt={4} textAlign="center">
             <Typography variant="body2" color="text.secondary">
-              Found {backendFiles.length} backend file{backendFiles.length !== 1 ? 's' : ''} in the workspace
+              Found {backendFiles.length} backend file
+              {backendFiles.length !== 1 ? 's' : ''} in the workspace
             </Typography>
           </Box>
         </>
@@ -263,4 +270,4 @@ const BackendFiles: React.FC = () => {
   );
 };
 
-export default BackendFiles; 
+export default BackendFiles;

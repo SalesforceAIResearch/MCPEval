@@ -51,11 +51,10 @@ interface ServerDebugInfo {
   }>;
 }
 
-
-
 const ServerFiles: React.FC = () => {
   const [servers, setServers] = useState<ServerInfo[]>([]);
-  const [serverDebugInfo, setServerDebugInfo] = useState<ServerDebugInfo | null>(null);
+  const [serverDebugInfo, setServerDebugInfo] =
+    useState<ServerDebugInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,14 +62,14 @@ const ServerFiles: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch('/api/servers');
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch servers');
       }
-      
+
       setServers(data.servers || []);
       setServerDebugInfo(data.debug_info || null);
     } catch (err) {
@@ -135,7 +134,11 @@ const ServerFiles: React.FC = () => {
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
           <CodeIcon sx={{ mr: 1 }} />
           MCP Server Files
         </Typography>
@@ -149,14 +152,14 @@ const ServerFiles: React.FC = () => {
         </Button>
       </Box>
 
-
-
       {/* MCP Server Files Section */}
       <Box mb={4}>
         {servers.length === 0 ? (
           <Paper sx={{ p: 3 }}>
             <Box textAlign="center" mb={3}>
-              <StorageIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+              <StorageIcon
+                sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }}
+              />
               <Typography variant="body1" color="text.secondary" gutterBottom>
                 No MCP Server Files Found
               </Typography>
@@ -164,7 +167,7 @@ const ServerFiles: React.FC = () => {
                 No server files were found in the expected directories.
               </Typography>
             </Box>
-            
+
             {/* Debug Information */}
             {serverDebugInfo && (
               <Box>
@@ -174,10 +177,12 @@ const ServerFiles: React.FC = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" gutterBottom>
-                      <strong>Configured Path:</strong> {serverDebugInfo.configured_path || 'Not configured'}
+                      <strong>Configured Path:</strong>{' '}
+                      {serverDebugInfo.configured_path || 'Not configured'}
                     </Typography>
                     <Typography variant="body2" gutterBottom>
-                      <strong>Used Path:</strong> {serverDebugInfo.used_path || 'No valid path found'}
+                      <strong>Used Path:</strong>{' '}
+                      {serverDebugInfo.used_path || 'No valid path found'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -185,36 +190,45 @@ const ServerFiles: React.FC = () => {
                       <strong>Searched Locations:</strong>
                     </Typography>
                     <List dense>
-                      {serverDebugInfo.locations_status.map((location, index) => (
-                        <ListItem key={index} disablePadding>
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            {location.exists ? (
-                              location.has_content ? (
-                                <CheckCircle color="success" fontSize="small" />
+                      {serverDebugInfo.locations_status.map(
+                        (location, index) => (
+                          <ListItem key={index} disablePadding>
+                            <ListItemIcon sx={{ minWidth: 36 }}>
+                              {location.exists ? (
+                                location.has_content ? (
+                                  <CheckCircle
+                                    color="success"
+                                    fontSize="small"
+                                  />
+                                ) : (
+                                  <Cancel color="warning" fontSize="small" />
+                                )
                               ) : (
-                                <Cancel color="warning" fontSize="small" />
-                              )
-                            ) : (
-                              <Cancel color="error" fontSize="small" />
-                            )}
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={
-                              <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                                {location.path}
-                              </Typography>
-                            }
-                            secondary={
-                              <Typography variant="caption">
-                                {location.exists 
-                                  ? (location.has_content ? 'Exists with content' : 'Exists but empty')
-                                  : 'Does not exist'
-                                }
-                              </Typography>
-                            }
-                          />
-                        </ListItem>
-                      ))}
+                                <Cancel color="error" fontSize="small" />
+                              )}
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontFamily: 'monospace' }}
+                                >
+                                  {location.path}
+                                </Typography>
+                              }
+                              secondary={
+                                <Typography variant="caption">
+                                  {location.exists
+                                    ? location.has_content
+                                      ? 'Exists with content'
+                                      : 'Exists but empty'
+                                    : 'Does not exist'}
+                                </Typography>
+                              }
+                            />
+                          </ListItem>
+                        )
+                      )}
                     </List>
                   </Grid>
                 </Grid>
@@ -239,9 +253,9 @@ const ServerFiles: React.FC = () => {
                       <Typography variant="h6" component="h2">
                         {server.name}
                       </Typography>
-                      <Chip 
-                        label=".py" 
-                        size="small" 
+                      <Chip
+                        label=".py"
+                        size="small"
                         sx={{ ml: 'auto', fontSize: '0.7rem' }}
                       />
                     </Box>
@@ -346,7 +360,8 @@ const ServerFiles: React.FC = () => {
 
       <Box mt={4} textAlign="center">
         <Typography variant="body2" color="text.secondary">
-          Found {servers.length} MCP server file{servers.length !== 1 ? 's' : ''} in the workspace
+          Found {servers.length} MCP server file
+          {servers.length !== 1 ? 's' : ''} in the workspace
         </Typography>
       </Box>
     </Box>

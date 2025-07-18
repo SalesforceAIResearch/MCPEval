@@ -1,0 +1,4095 @@
+{
+  "task_results": [
+    {
+      "task_id": "a670ef9d-4201-4fd2-868a-0e72af52b1ec",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://codesandbox.io"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "a670ef9d-4201-4fd2-868a-0e72af52b1ec",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "6a351c09-60eb-4e50-8bb2-b27a87e08542",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://repl.it"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "6a351c09-60eb-4e50-8bb2-b27a87e08542",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "dc8c741a-1817-4695-a67a-6df5107829b4",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com/editor"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "dc8c741a-1817-4695-a67a-6df5107829b4",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "c4ba73bf-4516-46cc-a052-a06ff9a3c36f",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demo-portfolio-builder.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demo-portfolio-builder.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "c4ba73bf-4516-46cc-a052-a06ff9a3c36f",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "0e8b60c4-cff8-4445-82c7-909c6f24f015",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.examplewhiteboard.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.examplewhiteboard.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "0e8b60c4-cff8-4445-82c7-909c6f24f015",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "a07e76a9-38d2-42d6-8324-0cf6b52a3d01",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetester.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetester.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "a07e76a9-38d2-42d6-8324-0cf6b52a3d01",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "ecdf0c27-ba9a-4c55-b7ba-1a62a3d52113",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://community-event-photos.com/submit"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "ecdf0c27-ba9a-4c55-b7ba-1a62a3d52113",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "76632861-cf36-4743-a954-fae9f09167a8",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetester.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetester.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "76632861-cf36-4743-a954-fae9f09167a8",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "f2b49afb-72fd-4911-8413-3042abdd76ac",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com/upload"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com/upload"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "f2b49afb-72fd-4911-8413-3042abdd76ac",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "9ed16d65-2b71-414c-b436-7e9bd30a5b5c",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "9ed16d65-2b71-414c-b436-7e9bd30a5b5c",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "7fbf035e-8614-4d5d-836c-afea0a064921",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.bbc.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.bbc.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "7fbf035e-8614-4d5d-836c-afea0a064921",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "fe119f25-9083-4ef4-b1c7-f4d771a3cb6c",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://news.ycombinator.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://news.ycombinator.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "fe119f25-9083-4ef4-b1c7-f4d771a3cb6c",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "dd2e9dba-de70-42d5-8f8a-a7ac7453e0a9",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "dd2e9dba-de70-42d5-8f8a-a7ac7453e0a9",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "df70503c-34d3-4cbc-a965-b9d86d04c585",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "df70503c-34d3-4cbc-a965-b9d86d04c585",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "764623b0-0f89-46ee-a249-788b97b74bd7",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demo-calendar-app.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demo-calendar-app.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "764623b0-0f89-46ee-a249-788b97b74bd7",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "db8e8690-2c34-4bd3-a48b-1a6ca91eeb65",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://web-audio-recorder-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "db8e8690-2c34-4bd3-a48b-1a6ca91eeb65",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "2bd73e7d-244e-44e7-883b-cdb65a373ae7",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "2bd73e7d-244e-44e7-883b-cdb65a373ae7",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "267c1777-ec6a-49e0-bd89-486ba810ad94",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.example-resumebuilder.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.example-resumebuilder.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "267c1777-ec6a-49e0-bd89-486ba810ad94",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "aae8eb70-90a5-41e2-91e9-c72b60b999cf",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demo.photoprintservice.com/upload"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demo.photoprintservice.com/upload"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "aae8eb70-90a5-41e2-91e9-c72b60b999cf",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "fea50f89-93c7-4833-b207-6f877fb5a261",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.example.com/contact"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "fea50f89-93c7-4833-b207-6f877fb5a261",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "bd34181c-51e6-4869-acba-3072a518db99",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://whiteboard.example.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "bd34181c-51e6-4869-acba-3072a518db99",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "38f4ff6b-d184-4fb7-a9d2-6eb2c644dea8",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "38f4ff6b-d184-4fb7-a9d2-6eb2c644dea8",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "911b29b3-5235-49e5-975b-235421f9aefc",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "911b29b3-5235-49e5-975b-235421f9aefc",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "416d37e0-f7c1-4a2d-8c5f-514b9ea6de7a",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://photofolio.example.com/upload"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "416d37e0-f7c1-4a2d-8c5f-514b9ea6de7a",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "d2f38921-1685-4409-8cbe-e1f7d63dd677",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://portfolio-demo.example.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://portfolio-demo.example.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "d2f38921-1685-4409-8cbe-e1f7d63dd677",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "507cdbe4-989c-4815-9150-85b08b10776e",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "507cdbe4-989c-4815-9150-85b08b10776e",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "8c1e092d-b0fa-4f59-8884-9de56e3ea82d",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "8c1e092d-b0fa-4f59-8884-9de56e3ea82d",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "267e2db1-9327-41f8-82a6-e6293f02e490",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "267e2db1-9327-41f8-82a6-e6293f02e490",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "d7aaeaf1-c5bb-496c-af2a-478a69b489ce",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.example-resume-builder.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "d7aaeaf1-c5bb-496c-af2a-478a69b489ce",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "ef0f35f5-1317-482f-9592-338fc37235e3",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_resize",
+          "tool_parameters": {
+            "width": 375,
+            "height": 667
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "ef0f35f5-1317-482f-9592-338fc37235e3",
+        "counts": {
+          "ground_truth_tool_count": 4,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_resize",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "5ddab9a0-7af8-4e6f-8c89-f00981bf92e4",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "5ddab9a0-7af8-4e6f-8c89-f00981bf92e4",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "3483592d-3922-4f92-b5bd-f853682ce1fd",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "3483592d-3922-4f92-b5bd-f853682ce1fd",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "143e4e58-ce95-415f-97b0-3ddfd9afb329",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "143e4e58-ce95-415f-97b0-3ddfd9afb329",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "cc1b5db2-47cd-457b-851f-a9ed709d7feb",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumepreviewer.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumepreviewer.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "cc1b5db2-47cd-457b-851f-a9ed709d7feb",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "7ffc339b-1aef-4f07-a4af-3baa9a4bc6e6",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example-photo-print.com/upload"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "7ffc339b-1aef-4f07-a4af-3baa9a4bc6e6",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "6d120dde-8819-4739-b4e0-cca3c17cde7c",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "6d120dde-8819-4739-b4e0-cca3c17cde7c",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "9f2a9f6e-a9b8-48a2-919b-bcf7dc9db494",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example-support.com/feedback"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "9f2a9f6e-a9b8-48a2-919b-bcf7dc9db494",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "4bb7f14d-7212-44c9-8631-65019746ae2b",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demoqa.com/automation-practice-form"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://demoqa.com/automation-practice-form"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "4bb7f14d-7212-44c9-8631-65019746ae2b",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "b9bcdcf9-e309-4354-8f2c-9cc78387e306",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "b9bcdcf9-e309-4354-8f2c-9cc78387e306",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "8cf2ebb4-e3ec-44c6-aec3-d3fd3396335e",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "8cf2ebb4-e3ec-44c6-aec3-d3fd3396335e",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "240972c4-573a-4505-9bbb-885f8c504f7e",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://draw-app-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://draw-app-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "240972c4-573a-4505-9bbb-885f8c504f7e",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "7379120f-91b0-4e9d-91b1-07ed22bc7dad",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumeformatcompare.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumeformatcompare.com"
+          }
+        }
+      ],
+      "prediction_calls": [],
+      "evaluation": {
+        "task_id": "7379120f-91b0-4e9d-91b1-07ed22bc7dad",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 0,
+          "tool_count_match": false,
+          "name_only_matches": 0,
+          "exact_matches": 0
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.0,
+          "tool_name_score": 0.0,
+          "param_match_score": 0.0,
+          "order_score": 0.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [
+          "browser_navigate",
+          "browser_install",
+          "browser_navigate"
+        ],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {}
+      }
+    },
+    {
+      "task_id": "7f7a1ae5-acd7-4df1-a606-1f9abc7043b1",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com/demo"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com/demo"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com/demo"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumebuilder.com/demo"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "7f7a1ae5-acd7-4df1-a606-1f9abc7043b1",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "8b48cd36-a6ad-450e-b60e-adfdc2839bfe",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.com/gallery/upload"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.com/gallery/upload"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.com/gallery/upload"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.com/gallery/upload"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "8b48cd36-a6ad-450e-b60e-adfdc2839bfe",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "e70db095-d5ff-4090-bc88-707306a2e3c8",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetemplates.io/demo"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetemplates.io/demo"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetemplates.io/demo"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumetemplates.io/demo"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "e70db095-d5ff-4090-bc88-707306a2e3c8",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "bbcf1f70-15b6-4ae5-9f3c-8bd4af8bb700",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example-portfolio.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example-portfolio.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "bbcf1f70-15b6-4ae5-9f3c-8bd4af8bb700",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 1
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.7333333333333334,
+          "tool_name_score": 1.0,
+          "param_match_score": 0.3333333333333333,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.8666666666666667,
+          "tool_name_score": 1.0,
+          "param_match_score": 0.6666666666666666,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {
+          "browser_navigate_0": {
+            "url": [
+              "https://my-portfolio-demo.com",
+              "https://example-portfolio.com"
+            ]
+          },
+          "browser_navigate_2": {
+            "url": [
+              "https://my-portfolio-demo.com",
+              "https://example-portfolio.com"
+            ]
+          }
+        },
+        "param_matches": {
+          "browser_navigate_0": 0.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 0.0
+        }
+      }
+    },
+    {
+      "task_id": "78fd7b0d-d318-4efd-8336-8b9fe3392b19",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "78fd7b0d-d318-4efd-8336-8b9fe3392b19",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "88030b37-b909-4d61-926f-7b4d1053a0b7",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumepreviewer.com/demo"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumepreviewer.com/demo"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumepreviewer.com/demo"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.resumepreviewer.com/demo"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "88030b37-b909-4d61-926f-7b4d1053a0b7",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "82657799-19e3-44bd-bcdd-56326289f6a0",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://photofolio.example.com/upload"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://photofolio.example.com/upload"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://photofolio.example.com/upload"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "82657799-19e3-44bd-bcdd-56326289f6a0",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 3,
+          "tool_count_match": false,
+          "name_only_matches": 1,
+          "exact_matches": 1
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [
+          "browser_install"
+        ],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "489650e4-db7e-43c0-b922-991f0d354c29",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "489650e4-db7e-43c0-b922-991f0d354c29",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "81c4e921-4043-4297-923d-b65aafddebf4",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "81c4e921-4043-4297-923d-b65aafddebf4",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "b38332a7-bf41-4802-8260-6feb911b00be",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "b38332a7-bf41-4802-8260-6feb911b00be",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "50c8ce7c-af5c-46bd-b1be-32b7d1ee9d87",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "50c8ce7c-af5c-46bd-b1be-32b7d1ee9d87",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 3,
+          "tool_count_match": false,
+          "name_only_matches": 1,
+          "exact_matches": 1
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [
+          "browser_install"
+        ],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "08cb9531-67c7-409a-b475-2d3f801d6e79",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://sketch.io/sketchpad/"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://sketch.io/sketchpad/"
+          }
+        },
+        {
+          "tool_name": "browser_resize",
+          "tool_parameters": {
+            "width": 1200,
+            "height": 800
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://sketch.io/sketchpad/"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "08cb9531-67c7-409a-b475-2d3f801d6e79",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 4,
+          "tool_count_match": false,
+          "name_only_matches": 1,
+          "exact_matches": 1
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [
+          "browser_resize",
+          "browser_install"
+        ],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "910dc092-bcaa-4663-8045-e68792fdd155",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "910dc092-bcaa-4663-8045-e68792fdd155",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "da3da2aa-c596-464d-972f-60b71d8d5da2",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://example.com/feedback"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "da3da2aa-c596-464d-972f-60b71d8d5da2",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "195f438a-4e23-4ac4-8a57-dbfe6b73897a",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://whiteboard-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://whiteboard-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://whiteboard-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "195f438a-4e23-4ac4-8a57-dbfe6b73897a",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 3,
+          "tool_count_match": false,
+          "name_only_matches": 1,
+          "exact_matches": 1
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [
+          "browser_install"
+        ],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "b20e8bc0-4748-4609-9f26-7fb6c83aefc6",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "b20e8bc0-4748-4609-9f26-7fb6c83aefc6",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "1e329922-ac67-414e-af1f-1b529db08ebb",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.example-support.com/feedback"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.example-support.com/feedback"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.example-support.com/feedback"
+          }
+        },
+        {
+          "tool_name": "browser_resize",
+          "tool_parameters": {
+            "width": 1024,
+            "height": 768
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://www.example-support.com/feedback"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "1e329922-ac67-414e-af1f-1b529db08ebb",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 4,
+          "tool_count_match": false,
+          "name_only_matches": 1,
+          "exact_matches": 1
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 0.7333333333333334,
+          "tool_name_score": 0.3333333333333333,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": false,
+          "overall_score": 0.7333333333333334,
+          "tool_name_score": 0.3333333333333333,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [
+          "browser_resize"
+        ],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "372e15c7-39c7-40e2-8ee4-1216105c241f",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://collabwhiteboard.example.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://collabwhiteboard.example.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://collabwhiteboard.example.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "372e15c7-39c7-40e2-8ee4-1216105c241f",
+        "counts": {
+          "ground_truth_tool_count": 1,
+          "prediction_tool_count": 3,
+          "tool_count_match": false,
+          "name_only_matches": 1,
+          "exact_matches": 1
+        },
+        "strict": {
+          "success": false,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [
+          "browser_install"
+        ],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "56497f1f-609e-4d62-8212-33008ae9839a",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.example.com/contact"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.example.com/contact"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.example.com/contact"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://myportfolio.example.com/contact"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "56497f1f-609e-4d62-8212-33008ae9839a",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    },
+    {
+      "task_id": "93cba298-c61f-494b-bc84-670596b60ec5",
+      "ground_truth_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "prediction_calls": [
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        },
+        {
+          "tool_name": "browser_install",
+          "tool_parameters": {}
+        },
+        {
+          "tool_name": "browser_navigate",
+          "tool_parameters": {
+            "url": "https://my-portfolio-demo.com"
+          }
+        }
+      ],
+      "evaluation": {
+        "task_id": "93cba298-c61f-494b-bc84-670596b60ec5",
+        "counts": {
+          "ground_truth_tool_count": 3,
+          "prediction_tool_count": 3,
+          "tool_count_match": true,
+          "name_only_matches": 3,
+          "exact_matches": 3
+        },
+        "strict": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "flexible": {
+          "success": true,
+          "overall_score": 1.0,
+          "tool_name_score": 1.0,
+          "param_match_score": 1.0,
+          "order_score": 1.0
+        },
+        "weights": {
+          "name": 0.4,
+          "params": 0.4,
+          "order": 0.2
+        },
+        "thresholds": {
+          "flexible_param": 0.6,
+          "flexible_order": 0.5
+        },
+        "missing_tools": [],
+        "extra_tools": [],
+        "param_mismatches": {},
+        "param_matches": {
+          "browser_navigate_0": 1.0,
+          "browser_install": 1.0,
+          "browser_navigate_2": 1.0
+        }
+      }
+    }
+  ],
+  "summary_metrics": {
+    "total_tasks": 62,
+    "tasks_with_matching_tools": 20,
+    "exact_match": {
+      "tasks_with_complete_success": 13,
+      "average_name_match_score": 0.3118279569892473,
+      "average_param_match_score": 0.3118279569892473,
+      "average_order_match_score": 0.3225806451612903,
+      "average_overall_score": 0.31397849462365596
+    },
+    "flexible_match": {
+      "tasks_with_complete_success": 18,
+      "average_name_match_score": 0.3118279569892473,
+      "average_param_match_score": 0.3172043010752688,
+      "average_order_match_score": 0.3225806451612903,
+      "average_overall_score": 0.31612903225806455
+    },
+    "weights": {
+      "name": 0.4,
+      "params": 0.4,
+      "order": 0.2
+    },
+    "thresholds": {
+      "flexible_param": 0.6,
+      "flexible_order": 0.5
+    }
+  }
+}

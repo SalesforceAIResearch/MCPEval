@@ -21,7 +21,7 @@ class MCPClientManager:
             src_dir = os.path.join(parent_dir, 'src')
             sys.path.insert(0, src_dir)
             
-            from mcp_eval_llm.client.openai_client import OpenAIMCPClient
+            from mcpeval.client.openai_client import OpenAIMCPClient
             
             # Handle server types - default to 'local' if not provided
             if server_types is None:

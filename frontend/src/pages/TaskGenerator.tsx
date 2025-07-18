@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Card,
@@ -23,11 +24,14 @@ import {
   Download,
   Upload,
   Info,
+  FolderOpen,
+  Launch,
 } from '@mui/icons-material';
 
 interface ServerConfig {
   path: string;
   args: string[];
+  env: { [key: string]: string };
 }
 
 interface GenerationProgress {
@@ -36,13 +40,20 @@ interface GenerationProgress {
   totalTasks: number;
   status: string;
   logs: string[];
+  jobId?: string;
+  currentTaskName?: string;
+  estimatedTimeRemaining?: string;
+  serverName?: string;
+  outputPath?: string;
 }
 
 const TaskGenerator: React.FC = () => {
+  const navigate = useNavigate();
   const [servers, setServers] = useState<ServerConfig[]>([
-    { path: '', args: [] },
+    { path: '', args: [], env: {} },
   ]);
-  const [outputFile, setOutputFile] = useState('generated_tasks.jsonl');
+  const [outputFolderName, setOutputFolderName] = useState('');
+  const [outputFileName, setOutputFileName] = useState('');
   const [numTasks, setNumTasks] = useState(10);
   const [existingFiles, setExistingFiles] = useState<string[]>([]);
   const [promptFile, setPromptFile] = useState('');
@@ -58,10 +69,31 @@ const TaskGenerator: React.FC = () => {
     totalTasks: 0,
     status: '',
     logs: [],
+    jobId: undefined,
+    currentTaskName: undefined,
+    estimatedTimeRemaining: undefined,
+    serverName: undefined,
+    outputPath: undefined,
   });
 
+  // Ref to track the active polling interval
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const addServer = () => {
-    setServers([...servers, { path: '', args: [] }]);
+    setServers([...servers, { path: '', args: [], env: {} }]);
   };
 
   const removeServer = (index: number) => {
@@ -80,6 +112,28 @@ const TaskGenerator: React.FC = () => {
     setServers(newServers);
   };
 
+  const updateServerEnv = (index: number, envString: string) => {
+    const newServers = [...servers];
+    const env: { [key: string]: string } = {};
+
+    if (envString.trim()) {
+      // Parse environment variables in format: KEY1=value1,KEY2=value2
+      const envPairs = envString
+        .split(',')
+        .map(pair => pair.trim())
+        .filter(pair => pair);
+      envPairs.forEach(pair => {
+        const [key, ...valueParts] = pair.split('=');
+        if (key && valueParts.length > 0) {
+          env[key.trim()] = valueParts.join('=').trim();
+        }
+      });
+    }
+
+    newServers[index].env = env;
+    setServers(newServers);
+  };
+
   const addExistingFile = () => {
     setExistingFiles([...existingFiles, '']);
   };
@@ -94,6 +148,71 @@ const TaskGenerator: React.FC = () => {
     setExistingFiles(newFiles);
   };
 
+  const getOutputFiles = (): string[] => {
+    const outputFiles: string[] = [];
+    const logs = progress.logs || [];
+
+    // Try to get output files from job metadata stored in logs
+    const metadataLog = logs.find(
+      log => log.includes('output_path') || log.includes('output_files')
+    );
+    if (metadataLog) {
+      try {
+        // Extract file paths from metadata
+        const pathMatches = metadataLog.match(/data\/[^"\s]+/g);
+        if (pathMatches) {
+          outputFiles.push(...pathMatches);
+        }
+      } catch (err) {
+        console.error('Error parsing metadata log:', err);
+      }
+    }
+
+    // Also check for common output patterns in logs
+    logs.forEach(log => {
+      // Look for file paths in logs
+      const filePathMatches = log.match(
+        /(?:saved to|output|generated).*?data\/[^"\s]+/gi
+      );
+      if (filePathMatches) {
+        filePathMatches.forEach(match => {
+          const pathMatch = match.match(/data\/[^"\s]+/);
+          if (pathMatch) {
+            outputFiles.push(pathMatch[0]);
+          }
+        });
+      }
+    });
+
+    return Array.from(new Set(outputFiles)); // Remove duplicates
+  };
+
+  const handleViewOutputFiles = () => {
+    const outputFiles = getOutputFiles();
+    if (outputFiles.length > 0) {
+      // Navigate to DataFiles with the first output file's directory
+      const firstFile = outputFiles[0];
+      const dirPath = firstFile.substring(0, firstFile.lastIndexOf('/'));
+      navigate(
+        `/data-files?path=${encodeURIComponent(dirPath)}&highlight=${encodeURIComponent(firstFile)}`
+      );
+    } else if (progress.outputPath) {
+      // Fallback: If no files found in logs, try to use outputPath
+      // Check if outputPath is a file or directory
+      const outputPath = progress.outputPath;
+      if (outputPath.includes('.')) {
+        // It's likely a file path, extract the directory
+        const dirPath = outputPath.substring(0, outputPath.lastIndexOf('/'));
+        navigate(
+          `/data-files?path=${encodeURIComponent(dirPath)}&highlight=${encodeURIComponent(outputPath)}`
+        );
+      } else {
+        // It's likely a directory path
+        navigate(`/data-files?path=${encodeURIComponent(outputPath)}`);
+      }
+    }
+  };
+
   const handleGenerate = async () => {
     setProgress({
       isRunning: true,
@@ -101,12 +220,18 @@ const TaskGenerator: React.FC = () => {
       totalTasks: numTasks,
       status: 'Starting task generation...',
       logs: ['Initializing task generator...'],
+      jobId: undefined,
     });
 
     try {
       const payload = {
-        servers: servers.filter(s => s.path.trim()),
-        output: outputFile,
+        servers: servers
+          .filter(s => s.path.trim())
+          .map(server => ({
+            path: server.path,
+            args: server.args,
+            env: server.env,
+          })),
         num_tasks: numTasks,
         existing_files: existingFiles.filter(f => f.trim()),
         prompt_file: promptFile || null,
@@ -115,39 +240,201 @@ const TaskGenerator: React.FC = () => {
         max_tokens: maxTokens,
         top_p: topP,
         api_key: apiKey || null,
+        output_folder_name: outputFolderName.trim() || null,
+        output_file_name: outputFileName.trim() || null,
       };
 
-      // TODO: Replace with actual API call
-      console.log('Generation payload:', payload);
+      // Call the backend API
+      const response = await fetch('/api/generate-tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-      // Simulate progress
-      for (let i = 1; i <= numTasks; i++) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setProgress(prev => ({
-          ...prev,
-          currentTask: i,
-          status: `Generating task ${i}/${numTasks}`,
-          logs: [...prev.logs, `Generated task ${i}: Sample task name`],
-        }));
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error ||
+            `Server error: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+
+      const jobId = data.job_id;
+      const serverName = data.server_name;
+      const outputPath = data.output_path;
+
+      setProgress(prev => ({
+        ...prev,
+        status: 'Task generation started successfully',
+        logs: [
+          ...prev.logs,
+          'Task generation job started, tracking progress...',
+          outputPath ? `Files will be saved to: ${outputPath}` : '',
+        ],
+        jobId: jobId,
+        serverName: serverName,
+        outputPath: outputPath,
+      }));
+
+      // Poll job status for progress updates
+      pollIntervalRef.current = setInterval(async () => {
+        try {
+          const statusResponse = await fetch(`/api/job/${jobId}`);
+          const statusData = await statusResponse.json();
+
+          if (statusResponse.ok && statusData) {
+            const { progress: jobProgress, logs: jobLogs } = statusData;
+
+            // Parse logs to extract current task progress - use backend progress + actual CLI patterns
+            const parseProgressFromLogs = (logs: string[]) => {
+              if (!logs || logs.length === 0)
+                return { currentTask: 0, currentTaskName: undefined };
+
+              // Join all logs into a single string for easier parsing
+              const allLogs = logs.join('\n');
+
+              // Look for patterns - use actual CLI output patterns
+              const taskPattern =
+                /(?:Starting generation for task|Generated task) (\d+)\/\d+(?:: (.+?)(?:\n|$))?/g;
+              const taskStartMatches: RegExpExecArray[] = [];
+              let match;
+
+              while ((match = taskPattern.exec(allLogs)) !== null) {
+                taskStartMatches.push(match);
+              }
+
+              if (taskStartMatches.length > 0) {
+                const lastMatch = taskStartMatches[taskStartMatches.length - 1];
+                const taskNumber = parseInt(lastMatch[1]);
+                const taskName = lastMatch[2]?.trim();
+
+                return {
+                  currentTask: taskNumber,
+                  currentTaskName: taskName,
+                };
+              }
+
+              // Also check for completed status in logs
+              if (
+                allLogs.includes('Task generation complete') ||
+                allLogs.includes('completed successfully')
+              ) {
+                return { currentTask: numTasks, currentTaskName: undefined };
+              }
+
+              return { currentTask: 0, currentTaskName: undefined };
+            };
+
+            const { currentTask, currentTaskName } =
+              parseProgressFromLogs(jobLogs);
+
+            // Use backend progress if available, otherwise fall back to log parsing
+            const backendProgress = jobProgress.progress || 0;
+            const progressPercentage = backendProgress > 0 ? backendProgress : 
+              (numTasks > 0 && currentTask > 0) ? Math.round((currentTask / numTasks) * 100) : 0;
+
+            setProgress(prev => ({
+              ...prev,
+              status:
+                jobProgress.status === 'running'
+                  ? currentTask > 0
+                    ? `Generating task ${currentTask}/${numTasks}... (${progressPercentage}%)`
+                    : 'Initializing...'
+                  : jobProgress.status === 'completed'
+                    ? 'Generation completed successfully!'
+                    : jobProgress.status === 'failed'
+                      ? 'Generation failed'
+                      : prev.status,
+              logs: jobLogs || prev.logs,
+              currentTask:
+                jobProgress.status === 'completed' ? numTasks : currentTask,
+              currentTaskName: currentTaskName,
+            }));
+
+            // Stop polling when job is complete
+            if (
+              jobProgress.status === 'completed' ||
+              jobProgress.status === 'failed'
+            ) {
+              if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              }
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+              }
+              setProgress(prev => ({
+                ...prev,
+                isRunning: false,
+                currentTask:
+                  jobProgress.status === 'completed'
+                    ? numTasks
+                    : prev.currentTask,
+                currentTaskName:
+                  jobProgress.status === 'completed'
+                    ? undefined
+                    : prev.currentTaskName,
+              }));
+            }
+          }
+        } catch (pollError) {
+          console.error('Error polling job status:', pollError);
+          // Continue polling - don't stop on temporary errors
+        }
+      }, 2000); // Poll every 2 seconds
+
+      // Set a timeout to stop polling after 30 minutes
+      timeoutRef.current = setTimeout(
+        () => {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          setProgress(prev => ({
+            ...prev,
+            isRunning: false,
+            status: 'Generation timed out',
+            logs: [...prev.logs, 'Generation timed out after 30 minutes'],
+          }));
+        },
+        30 * 60 * 1000
+      );
+    } catch (error) {
+      let errorMessage = 'An unknown error occurred';
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          errorMessage =
+            'Cannot connect to backend server. Please make sure the backend is running on port 22358.';
+        } else {
+          errorMessage = error.message;
+        }
       }
 
       setProgress(prev => ({
         ...prev,
         isRunning: false,
-        status: 'Generation completed successfully!',
-        logs: [...prev.logs, `All ${numTasks} tasks generated successfully`],
-      }));
-    } catch (error) {
-      setProgress(prev => ({
-        ...prev,
-        isRunning: false,
-        status: `Error: ${error}`,
-        logs: [...prev.logs, `Error: ${error}`],
+        status: `Error: ${errorMessage}`,
+        logs: [...prev.logs, `Error: ${errorMessage}`],
       }));
     }
   };
 
   const handleStop = () => {
+    // Clear polling interval and timeout
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
     setProgress(prev => ({
       ...prev,
       isRunning: false,
@@ -176,6 +463,39 @@ const TaskGenerator: React.FC = () => {
                 Generation Configuration
               </Typography>
 
+              {/* Main Configuration */}
+              <Typography variant="subtitle1" gutterBottom>
+                Main Settings
+              </Typography>
+              <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Task Domain Name"
+                    value={outputFolderName}
+                    onChange={e => setOutputFolderName(e.target.value)}
+                    placeholder="healthcare"
+                    helperText={
+                      outputFolderName
+                        ? `→ workspace/data/${outputFolderName}/tasks/`
+                        : 'Leave empty for auto-generated name. Files will be organized by evaluation stage.'
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Number of Tasks"
+                    value={numTasks}
+                    onChange={e => setNumTasks(parseInt(e.target.value) || 10)}
+                    inputProps={{ min: 1, max: 1000 }}
+                  />
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 3 }} />
+
               {/* Server Configuration */}
               <Box sx={{ mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -197,77 +517,132 @@ const TaskGenerator: React.FC = () => {
                       p: 2,
                       border: '1px solid #e0e0e0',
                       borderRadius: 1,
+                      backgroundColor: '#fafafa',
                     }}
                   >
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={12} md={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 'bold', flexGrow: 1 }}
+                      >
+                        Server {index + 1}
+                      </Typography>
+                      {servers.length > 1 && (
+                        <IconButton
+                          onClick={() => removeServer(index)}
+                          color="error"
+                          size="small"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </Box>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label={`Server ${index + 1} Path`}
+                          label="Server Path"
                           value={server.path}
                           onChange={e =>
                             updateServerPath(index, e.target.value)
                           }
-                          placeholder="@openbnb/mcp-server-airbnb"
+                          placeholder="mcp_servers/healthcare/server.py or @modelcontextprotocol/server-name"
                           size="small"
                         />
                       </Grid>
-                      <Grid item xs={12} md={5}>
+                      <Grid item xs={12} md={6}>
                         <TextField
                           fullWidth
-                          label="Server Arguments"
+                          label="Server Arguments (Optional)"
                           value={server.args.join(' ')}
                           onChange={e =>
                             updateServerArgs(index, e.target.value)
                           }
                           placeholder="--debug --timeout 30"
                           size="small"
+                          helperText="Space-separated arguments"
                         />
                       </Grid>
-                      <Grid item xs={12} md={1}>
-                        {servers.length > 1 && (
-                          <IconButton
-                            onClick={() => removeServer(index)}
-                            color="error"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        )}
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Environment Variables (Optional)"
+                          value={Object.entries(server.env)
+                            .map(([key, value]) => `${key}=${value}`)
+                            .join(', ')}
+                          onChange={e => updateServerEnv(index, e.target.value)}
+                          placeholder="API_KEY=secret123, DEBUG=true"
+                          size="small"
+                          helperText="Format: KEY1=value1, KEY2=value2"
+                        />
                       </Grid>
                     </Grid>
+
+                    {/* Show current environment variables as chips */}
+                    {Object.keys(server.env).length > 0 && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ mb: 1, color: 'text.secondary' }}
+                        >
+                          Environment Variables:
+                        </Typography>
+                        <Box
+                          sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                        >
+                          {Object.entries(server.env).map(([key, value]) => (
+                            <Chip
+                              key={key}
+                              label={`${key}=${value.length > 10 ? value.substring(0, 10) + '...' : value}`}
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                            />
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
                 ))}
               </Box>
 
               <Divider sx={{ my: 3 }} />
 
-              {/* Basic Settings */}
+              {/* Output Configuration */}
+              <Typography variant="subtitle1" gutterBottom>
+                Output Settings
+              </Typography>
+              <Grid container spacing={3} sx={{ mb: 3 }}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Output File Name (Optional)"
+                    value={outputFileName}
+                    onChange={e => setOutputFileName(e.target.value)}
+                    placeholder="healthcare_tasks_v1.jsonl"
+                    helperText={
+                      outputFolderName
+                        ? `→ workspace/data/${outputFolderName}/tasks/${outputFileName || 'auto_generated_name.jsonl'}`
+                        : 'Auto-generated with timestamp if empty'
+                    }
+                  />
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Advanced Configuration */}
+              <Typography variant="subtitle1" gutterBottom>
+                Advanced Settings
+              </Typography>
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Output File"
-                    value={outputFile}
-                    onChange={e => setOutputFile(e.target.value)}
-                    helperText="Path where generated tasks will be saved"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Number of Tasks"
-                    value={numTasks}
-                    onChange={e => setNumTasks(parseInt(e.target.value) || 10)}
-                    inputProps={{ min: 1, max: 1000 }}
-                  />
-                </Grid>
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
                     label="Prompt File (Optional)"
                     value={promptFile}
                     onChange={e => setPromptFile(e.target.value)}
+                    placeholder="custom_prompt.json"
                     helperText="JSON file with custom system and user messages"
                   />
                 </Grid>
@@ -380,10 +755,11 @@ const TaskGenerator: React.FC = () => {
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                 <Button
                   variant="contained"
-                  onClick={handleGenerate}
-                  disabled={progress.isRunning || !servers[0].path}
+                  onClick={progress.isRunning ? handleStop : handleGenerate}
+                  disabled={!progress.isRunning && !servers[0].path}
                   startIcon={progress.isRunning ? <Stop /> : <PlayArrow />}
                   size="large"
+                  color={progress.isRunning ? 'error' : 'primary'}
                 >
                   {progress.isRunning ? 'Stop Generation' : 'Generate Tasks'}
                 </Button>
@@ -403,8 +779,51 @@ const TaskGenerator: React.FC = () => {
               {progress.isRunning && (
                 <Box sx={{ mb: 2 }}>
                   <LinearProgress
+                    variant={
+                      progress.currentTask === 0
+                        ? 'indeterminate'
+                        : 'determinate'
+                    }
+                    value={
+                      progress.currentTask === 0
+                        ? 0
+                        : (progress.currentTask / progress.totalTasks) * 100
+                    }
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
+                    {progress.currentTask === 0
+                      ? `Generating ${progress.totalTasks} tasks...`
+                      : `${progress.currentTask} / ${progress.totalTasks} tasks completed (${Math.round((progress.currentTask / progress.totalTasks) * 100)}%)`}
+                  </Typography>
+
+                  {progress.currentTaskName && (
+                    <Typography
+                      variant="body2"
+                      color="primary"
+                      sx={{
+                        mt: 1,
+                        fontStyle: 'italic',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Current: {progress.currentTaskName}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+
+              {!progress.isRunning && progress.currentTask > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <LinearProgress
                     variant="determinate"
-                    value={(progress.currentTask / progress.totalTasks) * 100}
+                    value={100}
                     sx={{ height: 8, borderRadius: 4 }}
                   />
                   <Typography
@@ -413,14 +832,75 @@ const TaskGenerator: React.FC = () => {
                     sx={{ mt: 1 }}
                   >
                     {progress.currentTask} / {progress.totalTasks} tasks
-                    completed
+                    completed (100%)
                   </Typography>
                 </Box>
               )}
 
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Status: {progress.status || 'Ready to generate'}
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <strong>Status:</strong>{' '}
+                {progress.status || 'Ready to generate'}
               </Typography>
+
+              {/* Show View Files button prominently when generation is complete */}
+              {!progress.isRunning &&
+                progress.currentTask > 0 &&
+                (getOutputFiles().length > 0 || progress.outputPath) && (
+                  <Box sx={{ mt: 2, mb: 2 }}>
+                    <Tooltip title="Click to open the generated task files in the Data Files page">
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        startIcon={<Launch />}
+                        onClick={handleViewOutputFiles}
+                        color="success"
+                        size="small"
+                      >
+                        📁 Open Generated Files
+                      </Button>
+                    </Tooltip>
+                  </Box>
+                )}
+
+              {progress.isRunning && progress.totalTasks > 0 && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  <strong>Progress:</strong>{' '}
+                  {progress.currentTask > 0
+                    ? `${progress.currentTask}/${progress.totalTasks} tasks`
+                    : 'Initializing...'}
+                </Typography>
+              )}
+
+              {/* Show predicted or actual save path */}
+              {(progress.outputPath ||
+                outputFolderName ||
+                servers.some(s => s.path.trim())) && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
+                  <strong>Save Path:</strong>{' '}
+                  {(() => {
+                    const outputFiles = getOutputFiles();
+                    if (outputFiles.length > 0) {
+                      const firstFile = outputFiles[0];
+                      const dirPath = firstFile.substring(
+                        0,
+                        firstFile.lastIndexOf('/')
+                      );
+                      return `${dirPath}/ (${outputFiles.length} file${outputFiles.length > 1 ? 's' : ''})`;
+                    }
+                    return progress.outputPath
+                      ? progress.outputPath
+                      : `workspace/data/${outputFolderName || 'generated_tasks'}/tasks/`;
+                  })()}
+                </Typography>
+              )}
 
               {progress.logs.length > 0 && (
                 <Box
@@ -442,17 +922,19 @@ const TaskGenerator: React.FC = () => {
 
               {!progress.isRunning && progress.currentTask > 0 && (
                 <Box sx={{ mt: 2 }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<Download />}
-                    onClick={() => {
-                      // TODO: Implement file download
-                      console.log('Download file:', outputFile);
-                    }}
-                  >
-                    Download Results
-                  </Button>
+                  <Tooltip title="Navigate to the Data Files page to view and manage the generated task files">
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={<FolderOpen />}
+                      onClick={handleViewOutputFiles}
+                      disabled={
+                        getOutputFiles().length === 0 && !progress.outputPath
+                      }
+                    >
+                      View Output Files
+                    </Button>
+                  </Tooltip>
                 </Box>
               )}
             </CardContent>
@@ -471,6 +953,12 @@ const TaskGenerator: React.FC = () => {
               </Typography>
 
               <Typography variant="body2" sx={{ mb: 1 }}>
+                • Specify a task domain name to organize your tasks
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                • Files are automatically timestamped for uniqueness
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
                 • Use multiple servers to generate diverse tasks
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
@@ -479,8 +967,62 @@ const TaskGenerator: React.FC = () => {
               <Typography variant="body2" sx={{ mb: 1 }}>
                 • Custom prompt files should contain system and user messages
               </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                • Environment variables use format: KEY1=value1, KEY2=value2
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                • API keys and secrets should be passed as environment variables
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                • Example: NPS_API_KEY=your-key-here for National Parks server
+              </Typography>
               <Typography variant="body2">
-                • Existing files help avoid generating duplicate tasks
+                • Use multiple env vars: API_KEY=secret,DEBUG=true,TIMEOUT=30
+              </Typography>
+            </CardContent>
+          </Card>
+
+          {/* Pipeline Organization Card */}
+          <Card sx={{ mt: 2 }}>
+            <CardContent>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{ display: 'flex', alignItems: 'center' }}
+              >
+                🔄 Evaluation Pipeline
+              </Typography>
+
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Generated files will be organized into stages:
+              </Typography>
+
+              <Typography variant="body2" sx={{ mb: 0.5, fontSize: '0.8rem' }}>
+                📝 <strong>tasks/</strong> - Generated tasks
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5, fontSize: '0.8rem' }}>
+                ✅ <strong>verified_tasks/</strong> - Verified and approved
+                tasks
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5, fontSize: '0.8rem' }}>
+                ⚡ <strong>evaluations/</strong> - Model evaluation results
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5, fontSize: '0.8rem' }}>
+                🧠 <strong>judging/</strong> - LLM judge scoring
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 0.5, fontSize: '0.8rem' }}>
+                📊 <strong>reports/</strong> - Analysis reports
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                🔍 <strong>analysis/</strong> - Comparative analysis
+              </Typography>
+
+              <Typography
+                variant="body2"
+                sx={{ mt: 1, fontStyle: 'italic', fontSize: '0.75rem' }}
+              >
+                This organization makes it easy to navigate through the complete
+                evaluation workflow.
               </Typography>
             </CardContent>
           </Card>

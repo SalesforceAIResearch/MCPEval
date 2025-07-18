@@ -12,10 +12,16 @@ import DataSplitter from './pages/DataSplitter';
 import ModelEvaluator from './pages/ModelEvaluator';
 import Analyzer from './pages/Analyzer';
 import LLMJudger from './pages/LLMJudger';
+import JudgeRubric from './pages/JudgeRubric';
 import Results from './pages/Results';
 import ServerFiles from './pages/ServerFiles';
 import BackendFiles from './pages/BackendFiles';
+import DataFiles from './pages/DataFiles';
 import MCPChatClient from './pages/MCPChatClient';
+import AutoWorkflow from './pages/AutoWorkflow';
+import DebugJobs from './pages/DebugJobs';
+import ReportGenerator from './pages/ReportGenerator';
+import Activities from './pages/Activities';
 import './App.css';
 
 const theme = createTheme({
@@ -93,10 +99,16 @@ function App() {
                 <Route path="/evaluate" element={<ModelEvaluator />} />
                 <Route path="/analyze" element={<Analyzer />} />
                 <Route path="/judge" element={<LLMJudger />} />
+                <Route path="/judge-rubric" element={<JudgeRubric />} />
                 <Route path="/results" element={<Results />} />
                 <Route path="/server-files" element={<ServerFiles />} />
                 <Route path="/backend-files" element={<BackendFiles />} />
+                <Route path="/data-files" element={<DataFiles />} />
                 <Route path="/mcp-chat" element={<MCPChatClient />} />
+                <Route path="/auto-workflow" element={<AutoWorkflow />} />
+                <Route path="/debug-jobs" element={<DebugJobs />} />
+                <Route path="/generate-report" element={<ReportGenerator />} />
+                <Route path="/activities" element={<Activities />} />
               </Routes>
             </Box>
           </Box>

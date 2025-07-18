@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Define arguments
+DOMAIN="airbnb"
+MODEL="mistral_small_24b"
+MAX_TURNS=30
+REPORT_MODEL="gpt-4.1-2025-04-14"
+JUDGE_MODEL="gpt-4o"
+SERVER="@openbnb/mcp-server-airbnb"
+SERVER_ARGS="--ignore-robots-txt"
+MODEL_CONFIG="benchmarks/${DOMAIN}/eval_models/${MODEL}.json"
+TASKS_FILE="data/${DOMAIN}/evaluation_tasks_verified.jsonl"
+OUTPUT="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation.json"
+PROMPT_FILE="benchmarks/${DOMAIN}/evaluation_prompt.json"
+EVAL_LOG="benchmarks/${DOMAIN}/logs/${MODEL}_task_evaluation.log"
+ANALYSIS_LOG="benchmarks/${DOMAIN}/logs/${MODEL}_task_evaluation.log"
+REPORT_OUTPUT="benchmarks/${DOMAIN}/report/${MODEL}_task_evaluation.md"
+RESULTS_DIR="benchmarks/${DOMAIN}/results"
+TRAJECTORY_FILE="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation_trajectory.json"
+COMPLETION_FILE="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation_completion.json"
+REPORT_DIR="benchmarks/${DOMAIN}/report"
+
+mcp-eval evaluate \
+    --server $SERVER \
+    --server-args="$SERVER_ARGS" \
+    --model-config $MODEL_CONFIG \
+    --tasks-file $TASKS_FILE \
+    --output $OUTPUT \
+    --prompt-file $PROMPT_FILE \
+    --max-turns $MAX_TURNS
+
+echo "Analyzing ${DOMAIN} ${MODEL} results..."
+mcp-eval analyze \
+    --predictions $OUTPUT \
+    --ground-truth $TASKS_FILE \
+    --generate-report \
+    --report-model $REPORT_MODEL \
+    --report-output $REPORT_OUTPUT
+
+echo "Judging ${DOMAIN} ${MODEL}..."
+mcp-eval judge --input-file $OUTPUT --output-dir $RESULTS_DIR --model $JUDGE_MODEL
+
+echo "Judging rubric for ${DOMAIN} ${MODEL}..."
+mcp-eval judge-rubric \
+    --trajectory-file $TRAJECTORY_FILE \
+    --completion-file $COMPLETION_FILE \
+    --output-dir $REPORT_DIR

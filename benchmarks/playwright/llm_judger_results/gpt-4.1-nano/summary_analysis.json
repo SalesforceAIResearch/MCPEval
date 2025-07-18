@@ -1,0 +1,140 @@
+{
+  "summary": {
+    "total_tasks": 62,
+    "tasks_with_matching_tools": 34,
+    "exact_match": {
+      "tasks_with_complete_success": 0,
+      "average_name_match_score": 0.2903225806451613,
+      "average_param_match_score": 0.5161290322580645,
+      "average_order_match_score": 0.3118279569892473,
+      "average_overall_score": 0.3849462365591398
+    },
+    "flexible_match": {
+      "tasks_with_complete_success": 9,
+      "average_name_match_score": 0.2903225806451613,
+      "average_param_match_score": 0.5241935483870968,
+      "average_order_match_score": 0.3118279569892473,
+      "average_overall_score": 0.3881720430107527
+    },
+    "weights": {
+      "name": 0.4,
+      "params": 0.4,
+      "order": 0.2
+    },
+    "thresholds": {
+      "flexible_param": 0.6,
+      "flexible_order": 0.5
+    }
+  },
+  "parameter_mismatches": {
+    "browser_navigate_0": {
+      "url": 1
+    }
+  },
+  "tool_usage": {
+    "ground_truth_tools": {
+      "browser_navigate": 105,
+      "browser_install": 43,
+      "browser_resize": 1
+    },
+    "prediction_tools": {
+      "browser_navigate": 41,
+      "browser_resize": 28,
+      "browser_close": 16,
+      "browser_file_upload": 5,
+      "browser_tab_list": 4,
+      "browser_tab_new": 14,
+      "browser_network_requests": 10,
+      "browser_console_messages": 8,
+      "browser_tab_close": 4,
+      "browser_take_screenshot": 4,
+      "browser_install": 1,
+      "browser_snapshot": 10,
+      "browser_tab_select": 2
+    },
+    "missing_tools": {
+      "browser_navigate": 46,
+      "browser_install": 43,
+      "browser_resize": 1
+    },
+    "extra_tools": {
+      "browser_resize": 28,
+      "browser_close": 16,
+      "browser_file_upload": 5,
+      "browser_tab_list": 4,
+      "browser_tab_new": 14,
+      "browser_network_requests": 10,
+      "browser_console_messages": 8,
+      "browser_tab_close": 4,
+      "browser_take_screenshot": 4,
+      "browser_install": 1,
+      "browser_snapshot": 10,
+      "browser_tab_select": 2
+    }
+  },
+  "success_patterns": {
+    "by_tool_count": {
+      "strict": {
+        "success": {
+          "1": 0,
+          "3": 0,
+          "4": 0
+        },
+        "failure": {
+          "1": 19,
+          "3": 42,
+          "4": 1
+        }
+      },
+      "flexible": {
+        "success": {
+          "1": 9,
+          "3": 0,
+          "4": 0
+        },
+        "failure": {
+          "1": 10,
+          "3": 42,
+          "4": 1
+        }
+      }
+    },
+    "by_tool_combination": {
+      "strict": {
+        "success": {},
+        "failure": {
+          "2x browser_navigate, 1x browser_install": 42,
+          "1x browser_navigate": 19,
+          "2x browser_navigate, 1x browser_resize, 1x browser_install": 1
+        }
+      },
+      "flexible": {
+        "success": {
+          "1x browser_navigate": 9
+        },
+        "failure": {
+          "2x browser_navigate, 1x browser_install": 42,
+          "1x browser_navigate": 10,
+          "2x browser_navigate, 1x browser_resize, 1x browser_install": 1
+        }
+      }
+    },
+    "by_tool": {
+      "browser_navigate": {
+        "success_rate": 0.0,
+        "total_tasks": 105,
+        "successful_tasks": 0
+      },
+      "browser_install": {
+        "success_rate": 0.0,
+        "total_tasks": 43,
+        "successful_tasks": 0
+      },
+      "browser_resize": {
+        "success_rate": 0.0,
+        "total_tasks": 1,
+        "successful_tasks": 0
+      }
+    }
+  }
+}

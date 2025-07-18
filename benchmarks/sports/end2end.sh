@@ -6,29 +6,29 @@ mcp-eval verify-tasks --server mcp_servers/sports/server.py --tasks-file data/sp
 
 # Evaluate GPT-4o
 mcp-eval evaluate --server mcp_servers/sports/server.py --model-config benchmarks/sports/eval_models/gpt-4o.json --tasks-file data/sports/evaluation_tasks_verified.jsonl --output benchmarks/sports/results/gpt4o_mix_task_evaluation.json --prompt-file benchmarks/sports/evaluation_prompt.json --max-turns 30
-mcp-eval analyze --predictions benchmarks/sports/results/gpt4o_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/results/gpt4o_sports_report.md
+mcp-eval analyze --predictions benchmarks/sports/results/gpt4o_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --include-charts --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/report/gpt4o_sports_report.md
 
 # Evaluate GPT-4o-mini
 mcp-eval evaluate --server mcp_servers/sports/server.py --model-config benchmarks/sports/eval_models/gpt-4o-mini.json --tasks-file data/sports/evaluation_tasks_verified.jsonl --output benchmarks/sports/results/gpt4o-mini_mix_task_evaluation.json --prompt-file benchmarks/sports/evaluation_prompt.json --max-turns 30
-mcp-eval analyze --predictions benchmarks/sports/results/gpt4o-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/results/gpt4o-mini_sports_report.md
+mcp-eval analyze --predictions benchmarks/sports/results/gpt4o-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --include-charts --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/report/gpt4o-mini_sports_report.md
 
 # Evaluate GPT-4.1-mini
 mcp-eval evaluate --server mcp_servers/sports/server.py --model-config benchmarks/sports/eval_models/gpt-4.1-mini.json --tasks-file data/sports/evaluation_tasks_verified.jsonl --output benchmarks/sports/results/gpt4.1-mini_mix_task_evaluation.json --prompt-file benchmarks/sports/evaluation_prompt.json --max-turns 30
-mcp-eval analyze --predictions benchmarks/sports/results/gpt4.1-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/results/gpt4.1-mini_sports_report.md
+mcp-eval analyze --predictions benchmarks/sports/results/gpt4.1-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --include-charts --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/report/gpt4.1-mini_sports_report.md
 
 # Evaluate GPT-4.1-nano
 mcp-eval evaluate --server mcp_servers/sports/server.py --model-config benchmarks/sports/eval_models/gpt-4.1-nano.json --tasks-file data/sports/evaluation_tasks_verified.jsonl --output benchmarks/sports/results/gpt4.1-nano_mix_task_evaluation.json --prompt-file benchmarks/sports/evaluation_prompt.json --max-turns 30
-mcp-eval analyze --predictions benchmarks/sports/results/gpt4.1-nano_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/results/gpt4.1-nano_sports_report.md
+mcp-eval analyze --predictions benchmarks/sports/results/gpt4.1-nano_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --include-charts --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/report/gpt4.1-nano_sports_report.md
 
 # Evaluate o3
 mcp-eval evaluate --server mcp_servers/sports/server.py --model-config benchmarks/sports/eval_models/o3.json --tasks-file data/sports/evaluation_tasks_verified.jsonl --output benchmarks/sports/results/o3_mix_task_evaluation.json --prompt-file benchmarks/sports/evaluation_prompt.json --max-turns 30
-mcp-eval analyze --predictions benchmarks/sports/results/o3_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/results/o3_sports_report.md
+mcp-eval analyze --predictions benchmarks/sports/results/o3_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --include-charts --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/report/o3_sports_report.md
 
 # Evaluate o3-mini
 mcp-eval evaluate --server mcp_servers/sports/server.py --model-config benchmarks/sports/eval_models/o3-mini.json --tasks-file data/sports/evaluation_tasks_verified.jsonl --output benchmarks/sports/results/o3-mini_mix_task_evaluation.json --prompt-file benchmarks/sports/evaluation_prompt.json --max-turns 30
-mcp-eval analyze --predictions benchmarks/sports/results/o3-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/results/o3-mini_sports_report.md
+mcp-eval analyze --predictions benchmarks/sports/results/o3-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --include-charts --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/report/o3-mini_sports_report.md
 
 # Evaluate o4-mini
 mcp-eval evaluate --server mcp_servers/sports/server.py --model-config benchmarks/sports/eval_models/o4-mini.json --tasks-file data/sports/evaluation_tasks_verified.jsonl --output benchmarks/sports/results/o4-mini_mix_task_evaluation.json --prompt-file benchmarks/sports/evaluation_prompt.json --max-turns 30
-mcp-eval analyze --predictions benchmarks/sports/results/o4-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/results/o4-mini_sports_report.md
+mcp-eval analyze --predictions benchmarks/sports/results/o4-mini_mix_task_evaluation.json --ground-truth data/sports/evaluation_tasks_verified.jsonl --generate-report --include-charts --report-model gpt-4.1-2025-04-14 --report-output benchmarks/sports/report/o4-mini_sports_report.md
  

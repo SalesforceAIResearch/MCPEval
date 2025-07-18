@@ -1,0 +1,7 @@
+{
+    "model": "mistral_small_3.2_24b-instruct_2506",
+    "api_key": "default",
+    "temperature": 0.01,
+    "max_tokens": 1000,
+    "base_url": "http://10.3.58.29:8003/v1"
+} 
