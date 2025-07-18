@@ -23,12 +23,12 @@
 
 ---
 
-A Model Context Protocol (MCP) based LLM evaluation pipeline for assessing and benchmarking Large Language Models.
+A Model Context Protocol (MCP) based LLM deep evaluation framework.
 
 ## Overview
 
-This project provides a framework for evaluating Large Language Models using the [Model Context Protocol](https://github.com/modelcontextprotocol). It enables automates end-
-to-end task generation and deep evaluation of LLM agents across diverse dimension.
+This project provides a framework for evaluating Large Language Models using the [Model Context Protocol](https://github.com/modelcontextprotocol). It enables automating end-
+to-end task generation and deep evaluation of LLM agents across diverse dimensions.
 
 ## Demo
 
