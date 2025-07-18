@@ -155,9 +155,6 @@ uv run mcp_clients/example_openai_client/client.py --servers @openbnb/mcp-server
 
 For more details on the OpenAI client usage, see the [OpenAI Client README](mcp_clients/example_openai_client/README.md).
 
-## Development
-
-For detailed development instructions including frontend, backend, and CLI development, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ### Quick Development Setup
 ```bash
@@ -185,7 +182,6 @@ For each benchmark contribution, please follow the following steps:
 For web interface contributions:
 - Frontend components: `frontend/src/components/` and `frontend/src/pages/`
 - Backend API endpoints: `backend/app.py`
-- See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed guidelines
 
 ## Development Roadmap
 
