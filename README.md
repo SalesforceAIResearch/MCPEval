@@ -118,17 +118,17 @@ After running the setup script:
    cd backend
    uv run app.py
    ```
-   Backend will run on http://localhost:22358
+   Backend will run on `http://localhost:22358`
 
 2. **Start the frontend (in a new terminal):**
    ```bash
    cd frontend
    npm start
    ```
-   Frontend will run on http://localhost:22359
+   Frontend will run on `http://localhost:22359`
 
 3. **Access the web application:**
-   - Open http://localhost:22359 in your browser
+   - Open `http://localhost:22359` in your browser
    - Use the intuitive interface to generate tasks, run evaluations, and view results
    - Real-time progress tracking for all operations
 
