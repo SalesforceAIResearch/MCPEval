@@ -23,12 +23,12 @@
 
 ---
 
-A Model Context Protocol (MCP) based LLM evaluation pipeline for assessing and benchmarking Large Language Models.
+A Model Context Protocol (MCP) based LLM deep evaluation framework.
 
 ## Overview
 
-This project provides a framework for evaluating Large Language Models using the [Model Context Protocol](https://github.com/modelcontextprotocol). It enables automates end-
-to-end task generation and deep evaluation of LLM agents across diverse dimension.
+This project provides a framework for evaluating Large Language Models using the [Model Context Protocol](https://github.com/modelcontextprotocol). It enables automating end-
+to-end task generation and deep evaluation of LLM agents across diverse dimensions.
 
 ## Demo
 
@@ -118,17 +118,17 @@ After running the setup script:
    cd backend
    uv run app.py
    ```
-   Backend will run on http://localhost:22358
+   Backend will run on `http://localhost:22358`
 
 2. **Start the frontend (in a new terminal):**
    ```bash
    cd frontend
    npm start
    ```
-   Frontend will run on http://localhost:22359
+   Frontend will run on `http://localhost:22359`
 
 3. **Access the web application:**
-   - Open http://localhost:22359 in your browser
+   - Open `http://localhost:22359` in your browser
    - Use the intuitive interface to generate tasks, run evaluations, and view results
    - Real-time progress tracking for all operations
 
@@ -155,9 +155,6 @@ uv run mcp_clients/example_openai_client/client.py --servers @openbnb/mcp-server
 
 For more details on the OpenAI client usage, see the [OpenAI Client README](mcp_clients/example_openai_client/README.md).
 
-## Development
-
-For detailed development instructions including frontend, backend, and CLI development, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ### Quick Development Setup
 ```bash
@@ -185,7 +182,6 @@ For each benchmark contribution, please follow the following steps:
 For web interface contributions:
 - Frontend components: `frontend/src/components/` and `frontend/src/pages/`
 - Backend API endpoints: `backend/app.py`
-- See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed guidelines
 
 ## Development Roadmap
 
