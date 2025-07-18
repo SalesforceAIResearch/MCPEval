@@ -2,6 +2,6 @@
     "model": "qwen3_32b",
     "api_key": "default",
     "temperature": 0.01,
-    "max_tokens": 3000,
+    "max_tokens": 1000,
     "base_url": "http://10.3.91.185:8006/v1"
 } 

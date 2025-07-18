@@ -8,7 +8,7 @@ class MCPClientManager:
     def __init__(self):
         self.mcp_client = None
 
-    def connect_to_servers(self, servers, server_args, llm_config, server_types=None):
+    def connect_to_servers(self, servers, server_args, llm_config, server_types=None, server_envs=None):
         """Connect to multiple MCP servers"""
         try:
             if not servers:
@@ -21,7 +21,7 @@ class MCPClientManager:
             src_dir = os.path.join(parent_dir, 'src')
             sys.path.insert(0, src_dir)
             
-            from mcp_eval_llm.client.openai_client import OpenAIMCPClient
+            from mcpeval.client.openai_client import OpenAIMCPClient
             
             # Handle server types - default to 'local' if not provided
             if server_types is None:
@@ -47,10 +47,20 @@ class MCPClientManager:
                         absolute_path = os.path.join(parent_dir, server_path)
                         resolved_servers.append(absolute_path)
             
+            # Handle server environment variables - default to empty dict if not provided
+            if server_envs is None:
+                server_envs = [{} for _ in servers]
+            elif len(server_envs) != len(servers):
+                # Pad with empty dicts if length mismatch
+                server_envs = server_envs[:len(servers)]
+                while len(server_envs) < len(servers):
+                    server_envs.append({})
+            
             print(f"Original server paths: {servers}")
             print(f"Server types: {server_types}")
             print(f"Resolved server paths: {resolved_servers}")
             print(f"Server args: {server_args}")
+            print(f"Server envs: {server_envs}")
             print(f"LLM config: {llm_config}")
             
             def connect_servers():
@@ -68,6 +78,17 @@ class MCPClientManager:
                             print("Using API key from environment")
                         else:
                             print("Warning: No valid API key provided in config and OPENAI_API_KEY not set in environment")
+                        
+                        # Set environment variables for MCP servers
+                        env_vars_set = []
+                        for i, server_env in enumerate(server_envs):
+                            if server_env:
+                                for key, value in server_env.items():
+                                    os.environ[key] = str(value)
+                                    env_vars_set.append(f"{key}={value}")
+                        
+                        if env_vars_set:
+                            print(f"Set environment variables: {', '.join(env_vars_set)}")
                         
                         print(f"Creating OpenAI client with model: {llm_config.get('model', 'gpt-4o')}")
                         client = OpenAIMCPClient(
@@ -91,7 +112,7 @@ class MCPClientManager:
                         print(f"  server_args_list: {server_args_list}")
                         
                         # Connect to multiple servers using resolved paths
-                        server_mapping = await client.connect_to_multiple_servers(resolved_servers, server_args_list)
+                        server_mapping = await client.connect_to_multiple_servers(resolved_servers, server_args_list, server_envs)
                         print(f"Server mapping result: {list(server_mapping.keys())}")
                         
                         return client, server_mapping
@@ -198,9 +219,16 @@ class MCPClientManager:
                 try:
                     print(f"Processing message: {message}")
                     # Use the process_query method from the OpenAIMCPClient
-                    response_content = await self.mcp_client.process_query(message)
-                    print(f"Response received: {response_content[:200]}...")  # First 200 chars
-                    return response_content
+                    result = await self.mcp_client.process_query(message)
+                    print(f"Response received: {result['response'][:200]}...")  # First 200 chars
+                    
+                    # Log tool call information
+                    if result['tool_calls']:
+                        print(f"Tool calls made: {len(result['tool_calls'])}")
+                        for tool_call in result['tool_calls']:
+                            print(f"  - {tool_call['name']}({tool_call['arguments']})")
+                    
+                    return result
                 except Exception as e:
                     print(f"Error in process_query: {e}")
                     import traceback
@@ -213,13 +241,13 @@ class MCPClientManager:
             
             return run_async_function(_send)
         
-        response_content = send_message_async()
+        result = send_message_async()
         
         return {
             'success': True,
-            'response': response_content,
-            'tool_calls': [],  # Tool calls are handled internally by process_query
-            'tool_results': []  # Tool results are also handled internally
+            'response': result['response'],
+            'tool_calls': result['tool_calls'],
+            'tool_results': result['tool_results']
         }
 
     def get_status(self):

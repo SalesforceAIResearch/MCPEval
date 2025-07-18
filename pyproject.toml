@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mcp_eval_llm"
+name = "mcpeval"
 version = "1.0.0"
 description = "Model Context Protocol (MCP) based LLM evaluation pipeline"
 readme = "README.md"
@@ -43,6 +43,9 @@ dependencies = [
     "colorlog>=6.7.0",
     "cerberus>=1.3.4",
     "gunicorn>=21.2.0",
+    "plotly>=6.2.0",
+    "kaleido>=1.0.0",
+    "tiktoken>=0.9.0",
 ]
 
 [project.optional-dependencies]
@@ -61,14 +64,14 @@ dev = [
 ]
 
 [project.scripts]
-mcp-eval = "mcp_eval_llm.cli.main:main"
+mcp-eval = "mcpeval.cli.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["mcp_eval_llm*"]
+include = ["mcpeval*"]
 
 [tool.setuptools.package-data]
-mcp_eval_llm = ["py.typed"]
+mcpeval = ["py.typed"]
 
 [tool.black]
 line-length = 88

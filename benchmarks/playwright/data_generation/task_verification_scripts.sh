@@ -1,0 +1,1 @@
+mcp-eval verify-tasks --server @playwright/mcp --tasks-file data/playwright/evaluation_tasks.jsonl --model gpt-4.1-2025-04-14 --output data/playwright/evaluation_tasks_verified.jsonl --prompt-file benchmarks/playwright/data_generation/task_verification_prompt.json --num-tasks 500 

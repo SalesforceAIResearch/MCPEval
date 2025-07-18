@@ -19,13 +19,13 @@ TRAJECTORY_FILE="benchmarks/${DOMAIN}/results/${MODEL}_mix_task_evaluation_traje
 COMPLETION_FILE="benchmarks/${DOMAIN}/results/${MODEL}_mix_task_evaluation_completion.json"
 REPORT_DIR="benchmarks/${DOMAIN}/report"
 
-# mcp-eval evaluate \
-#     --server $SERVER \
-#     --model-config $MODEL_CONFIG \
-#     --tasks-file $TASKS_FILE \
-#     --output $OUTPUT \
-#     --prompt-file $PROMPT_FILE \
-#     --max-turns $MAX_TURNS
+mcp-eval evaluate \
+    --server $SERVER \
+    --model-config $MODEL_CONFIG \
+    --tasks-file $TASKS_FILE \
+    --output $OUTPUT \
+    --prompt-file $PROMPT_FILE \
+    --max-turns $MAX_TURNS
 
 echo "Analyzing ${DOMAIN} ${MODEL} results..."
 mcp-eval analyze \

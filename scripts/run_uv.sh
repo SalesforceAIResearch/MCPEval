@@ -35,7 +35,7 @@ source .venv/bin/activate
 # Print status message
 echo ""
 echo "Virtual environment is active!"
-echo "Project: mcp_eval_llm"
+echo "Project: mcpeval"
 echo "Python: $(python --version)"
 echo "Working directory: $(pwd)"
 echo ""

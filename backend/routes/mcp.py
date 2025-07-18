@@ -13,9 +13,10 @@ def create_mcp_routes(mcp_client_manager):
             servers = data.get('servers', [])
             server_args = data.get('server_args', [])
             server_types = data.get('server_types', [])
+            server_envs = data.get('server_envs', [])
             llm_config = data.get('llm_config', {})
             
-            result = mcp_client_manager.connect_to_servers(servers, server_args, llm_config, server_types)
+            result = mcp_client_manager.connect_to_servers(servers, server_args, llm_config, server_types, server_envs)
             return jsonify(result)
             
         except Exception as e:

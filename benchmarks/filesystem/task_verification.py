@@ -20,9 +20,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from mcp_eval_llm.cli.mcp_task_verifier.verify import verify_task
-from mcp_eval_llm.synthesis.utils import load_tasks_from_jsonl
-from mcp_eval_llm.utils.cli import save_tasks_to_jsonl, generate_output_filename, handle_existing_file, load_prompt_from_file
+from mcpeval.cli.mcp_task_verifier.verify import verify_task
+from mcpeval.synthesis.utils import load_tasks_from_jsonl
+from mcpeval.utils.cli import save_tasks_to_jsonl, generate_output_filename, handle_existing_file, load_prompt_from_file
 from dotenv import load_dotenv
 
 # Import shared utilities
@@ -38,7 +38,7 @@ async def verify_tasks_with_clean_workspace(args):
     
     # Setup output files
     output_file = generate_output_filename(args.tasks_file, args.output, prefix="verified")
-    output_file, _ = handle_existing_file(output_file)
+    output_file, _ = handle_existing_file(output_file, non_interactive=True)
     
     # Load already verified task IDs to skip duplicates
     verified_task_ids = set()
@@ -70,7 +70,7 @@ async def verify_tasks_with_clean_workspace(args):
     # Create unverified tasks file
     base_name, ext = os.path.splitext(output_file)
     unverified_file = f"{base_name}_unverified{ext}"
-    unverified_file, _ = handle_existing_file(unverified_file)
+    unverified_file, _ = handle_existing_file(unverified_file, non_interactive=True)
     
     # Get server args and system message
     server_args = getattr(args, 'server_args', [])

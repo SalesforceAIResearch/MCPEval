@@ -8,13 +8,23 @@ from typing import Dict, Any, List, Optional, Literal
 import urllib.parse
 import aiohttp
 import ssl
+from dotenv import load_dotenv
 
 from mcp.server.fastmcp import FastMCP
 
-# Set API keys if not already set
+# Load environment variables from .env file
+load_dotenv()
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Validate required API keys are set
+if not os.getenv("FDA_API_KEY"):
+    logger.warning("FDA_API_KEY not found in environment variables. FDA functions may not work properly.")
+
+if not os.getenv("PUBMED_API_KEY"):
+    logger.warning("PUBMED_API_KEY not found in environment variables. PubMed functions may not work properly.")
 
 # Initialize the MCP server
 mcp_healthcare = FastMCP("Healthcare Assistant")

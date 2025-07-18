@@ -7,24 +7,63 @@ set -e
 
 echo "🚀 Setting up MCP Eval UI Frontend..."
 
-# Check if Node.js is installed
-if ! command -v node &> /dev/null; then
-    echo "❌ Node.js is not installed. Please install Node.js 18+ or use nvm."
-    echo "💡 Install with: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash"
-    exit 1
+# Function to install nvm
+install_nvm() {
+    echo "📦 Installing nvm (Node Version Manager)..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+    
+    # Load nvm
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    
+    echo "✅ nvm installed successfully"
+}
+
+# Function to install Node.js 18
+install_nodejs() {
+    echo "📦 Installing Node.js 18..."
+    nvm install 18
+    nvm use 18
+    nvm alias default 18
+    echo "✅ Node.js 18 installed and set as default"
+}
+
+# Load Node.js environment (may already be available from main setup)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Check if Node.js is already available (from main setup)
+if command -v node &> /dev/null && command -v npm &> /dev/null; then
+    NODE_VERSION=$(node --version | cut -d'v' -f2)
+    REQUIRED_VERSION="18.0.0"
+    
+    if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$NODE_VERSION" | sort -V | head -n1)" = "$REQUIRED_VERSION" ]; then
+        echo "✅ Node.js $NODE_VERSION already available (from main setup)"
+    else
+        echo "⚠️  Node.js version $NODE_VERSION is too old. Required: $REQUIRED_VERSION+"
+        echo "🔄 Installing Node.js 18..."
+        install_nodejs
+    fi
+else
+    echo "⚠️  Node.js not found. Installing Node.js environment..."
+    
+    # Check if nvm is installed
+    if ! command -v nvm &> /dev/null; then
+        echo "❌ nvm is not installed. Installing it now..."
+        install_nvm
+    fi
+    
+    # Install Node.js
+    echo "❌ Node.js is not installed. Installing Node.js 18..."
+    install_nodejs
 fi
 
-# Check Node.js version
-NODE_VERSION=$(node --version | cut -d'v' -f2)
-REQUIRED_VERSION="18.0.0"
-
-if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$NODE_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then 
-    echo "❌ Node.js version $NODE_VERSION is too old. Required: $REQUIRED_VERSION+"
-    echo "💡 Use nvm to install: nvm install 18 && nvm use 18"
-    exit 1
-fi
-
-echo "✅ Node.js version $NODE_VERSION is compatible"
+# Verify installation
+echo "🔍 Verifying Node.js installation..."
+node --version
+npm --version
 
 # Check for npm vs yarn vs pnpm
 PACKAGE_MANAGER="npm"
@@ -49,6 +88,20 @@ case $PACKAGE_MANAGER in
         ;;
     *)
         npm install
+        ;;
+esac
+
+# Install additional dependencies for markdown viewer
+echo "📝 Installing markdown viewer dependencies..."
+case $PACKAGE_MANAGER in
+    "yarn")
+        yarn add react-markdown remark-gfm rehype-highlight
+        ;;
+    "pnpm")
+        pnpm add react-markdown remark-gfm rehype-highlight
+        ;;
+    *)
+        npm install react-markdown remark-gfm rehype-highlight
         ;;
 esac
 

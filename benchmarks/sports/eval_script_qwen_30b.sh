@@ -19,13 +19,13 @@ TRAJECTORY_FILE="benchmarks/${DOMAIN}/results/${MODEL}_mix_task_evaluation_traje
 COMPLETION_FILE="benchmarks/${DOMAIN}/results/${MODEL}_mix_task_evaluation_completion.json"
 REPORT_DIR="benchmarks/${DOMAIN}/report"
 
-# mcp-eval evaluate \
-#     --server $SERVER \
-#     --model-config $MODEL_CONFIG \
-#     --tasks-file $TASKS_FILE \
-#     --output $OUTPUT \
-#     --prompt-file $PROMPT_FILE \
-#     --max-turns $MAX_TURNS
+mcp-eval evaluate \
+    --server $SERVER \
+    --model-config $MODEL_CONFIG \
+    --tasks-file $TASKS_FILE \
+    --output $OUTPUT \
+    --prompt-file $PROMPT_FILE \
+    --max-turns $MAX_TURNS
 
 echo "Analyzing ${DOMAIN} ${MODEL} results..."
 mcp-eval analyze \
@@ -35,8 +35,8 @@ mcp-eval analyze \
     --report-model $REPORT_MODEL \
     --report-output $REPORT_OUTPUT > $ANALYSIS_LOG 2>&1 &
 
-# echo "Judging ${DOMAIN} ${MODEL}..."
-# mcp-eval judge --input-file $OUTPUT --output-dir $RESULTS_DIR --model $JUDGE_MODEL
+echo "Judging ${DOMAIN} ${MODEL}..."
+mcp-eval judge --input-file $OUTPUT --output-dir $RESULTS_DIR --model $JUDGE_MODEL
 
 echo "Judging rubric for ${DOMAIN} ${MODEL}..."
 mcp-eval judge-rubric \

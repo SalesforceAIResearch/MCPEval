@@ -1,0 +1,5 @@
+{
+    "model": "o3-mini",
+    "temperature": 0.01,
+    "max_tokens": 100000
+} 

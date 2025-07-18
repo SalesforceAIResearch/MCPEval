@@ -1,22 +1,63 @@
 # MCPEval: Automatic MCP-based Deep Evaluation for AI Agent Models
 
+<br/>
+
+<div align="center">
+
+  [![arXiv](https://img.shields.io/badge/arXiv-2507.12806-b31b1b.svg)](https://arxiv.org/abs/2507.12806)
+  [![Release Notes](https://img.shields.io/github/release/SalesforceAIResearch/MCPEval)](https://github.com/SalesforceAIResearch/MCPEval/releases)
+  ![Python 3.12+](https://img.shields.io/badge/Python-3.9%2B-brightgreen.svg)
+  [![License](https://img.shields.io/badge/License-Apache_2.0-green.svg)](https://github.com/SalesforceAIResearch/MCPEval/blob/main/LICENSE.txt)
+  [![GitHub star chart](https://img.shields.io/github/stars/SalesforceAIResearch/MCPEval?style=social)](https://star-history.com/#SalesforceAIResearch/MCPEval)
+
+</div>
+
+<p align="center">
+  <a href="https://arxiv.org/abs/2507.12806">Paper</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#features">Features</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#installation">Installation</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#usage">Usage</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#mcpeval-cli-usage">CLI</a> |
+  <a href="https://github.com/SalesforceAIResearch/MCPEval#development">Development</a>
+</p>
+
+---
+
 A Model Context Protocol (MCP) based LLM evaluation pipeline for assessing and benchmarking Large Language Models.
 
 ## Overview
 
-This project provides a framework for evaluating Large Language Models using the [Model Context Protocol](https://github.com/modelcontextprotocol). It enables structured testing of LLMs across various dimensions such as tool usage, reasoning, knowledge, instruction following, and more.
+This project provides a framework for evaluating Large Language Models using the [Model Context Protocol](https://github.com/modelcontextprotocol). It enables automates end-
+to-end task generation and deep evaluation of LLM agents across diverse dimension.
+
+## Demo
+
+🎬 **[Watch Full Demo Video (with audio)](https://github.com/SalesforceAIResearch/MCPEval/releases/latest/download/MCPEval-demo.mp4)**
+
+*Click above to download and view the complete MCPEval demonstration with audio explanation*
 
 ## Features
 
-- **MCP-compliant evaluation pipelines** for structured LLM testing
-- **Web UI Interface** with React-based dashboard for easy interaction
-- **REST API Backend** providing programmatic access to all CLI features
-- **Support for any MCP server** to evaluate LLMs
-- **Generation of tasks and validation** of results using OpenAI models
-- **Support for benchmark datasets** with multiple data formats
-- **Configurable evaluation metrics** and criteria
-- **Real-time progress tracking** for long-running evaluations
-- **File management system** for uploads, downloads, and result storage
+- 🚀 **Automated End-to-End Evaluation**
+- 🔧 **MCP Protocol Integration**
+- 📊 **Comprehensive Analysis & Insights**
+- 💻 **User-Friendly Web-based Interface**
+- ⚡  **Advanced CLI Commands**
+- 🔬 **Research & Development Support**
+
+## Citation
+If you find our system or paper useful, please cite
+```
+@misc{liu2025mcpevalautomaticmcpbaseddeep,
+      title={MCPEval: Automatic MCP-based Deep Evaluation for AI Agent Models}, 
+      author={Zhiwei Liu and Jielin Qiu and Shiyu Wang and Jianguo Zhang and Zuxin Liu and Roshan Ram and Haolin Chen and Weiran Yao and Huan Wang and Shelby Heinecke and Silvio Savarese and Caiming Xiong},
+      year={2025},
+      eprint={2507.12806},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2507.12806}, 
+}
+```
 
 ## Installation
 
@@ -26,8 +67,8 @@ For complete setup including both CLI and Web UI:
 
 ```bash
 # Clone the repository
-git clone git@github.com:airesearch-emu/mcp-eval-llm.git
-cd mcp-eval-llm
+git clone https://github.com/SalesforceAIResearch/MCPEval.git
+cd MCPEval
 
 # Run unified setup script (installs CLI, backend API, and frontend UI)
 ./setup.sh
@@ -101,10 +142,18 @@ For advanced users and automation:
 We provide an example about a [special calculator MCP application](examples/special_calculator/README.md). We define an example [special calculator MCP server](mcp_servers/special_calculator/server.py) and use [OpenAI client](mcp_clients/example_openai_client/client.py) to interact with the server.
 
 Quick start:
+```bash
+# Basic example with local MCP server
+uv run mcp_clients/example_openai_client/client.py --servers mcp_servers/special_calculator/server.py
+
+# Multiple servers with environment variables (use ^ for env vars)
+uv run mcp_clients/example_openai_client/client.py --servers @modelcontextprotocol/server-sequential-thinking mcp-server-nationalparks^NPS_API_KEY=your-api-key-here
+
+# Combined example with arguments and environment variables
+uv run mcp_clients/example_openai_client/client.py --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt mcp-server-nationalparks^NPS_API_KEY=your-api-key-here
 ```
-# Run the example
-uv run mcp_clients/example_openai_client/client.py mcp_servers/special_calculator/server.py
-```
+
+For more details on the OpenAI client usage, see the [OpenAI Client README](mcp_clients/example_openai_client/README.md).
 
 ## Development
 
@@ -139,54 +188,12 @@ For web interface contributions:
 - See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed guidelines
 
 ## Development Roadmap
-### MCP Server 🖥️
-- ✅ Python stdio server support
-- ✅ node.js stdio server support
 
-### MCP Client 🤖
-- ✅ Stdio client implementation
-- ✅ message processing ability for LLM generation
-- ✅ chatting ability
-- ✅ support for connecting multiple servers
-
-### Synthetic Data Generation 📝
-- ✅ Tool use task generation
-    - ✅ single turn
-    - 🔲 multi-turn
-- ✅ Task verification
-
-### Evaluation 📊
-- ✅ Implement core evaluation metrics (accuracy, latency)
-- ✅ Create automated testing framework
-
-### Data Pipeline 🔄
-- ✅ Design unified data schema for all benchmarks
-- ✅ Implement data preprocessing tools
-- ✅ Add support for multiple data formats
-
-### Benchmarks 🧪
-- ✅ Airbnb MCP benchmark
-- ✅ Healthcare MCP benchmark
-- ✅ yahoo finance MCP benchmark
-- ✅ Sports benchmark
-- ✅ travel_assistant benchmark
-- ✅ File System benchmark
-
-### LLM Provider 🧠
-- ✅ OpenAI API integration (used for data generation and testing)
-- ✅ local vllm-based model 
-
-### CLI 🔧
-- ✅ Task generator
-- ✅ Task verifier
-- ✅ Data converter
-- ✅ Model evaluator
-- ✅ Report generator
-- ✅ Auto end-to-end evaluation
+See our detailed [Development Roadmap](ROADMAP.md) for the current progress and planned features across all components.
 
 ## MCPEval CLI Usage
 
-The MCPEval CLI provides a comprehensive toolkit for managing MCP servers and evaluating LLMs. For detailed documentation, parameter descriptions, and advanced usage examples, see the [CLI README](src/mcp_eval_llm/cli/README.md).
+The MCPEval CLI provides a comprehensive toolkit for managing MCP servers and evaluating LLMs. For detailed documentation, parameter descriptions, and advanced usage examples, see the [CLI README](src/mcpeval/cli/README.md).
 
 ### Quick Start
 
@@ -273,11 +280,11 @@ Models are configured using JSON files. Examples:
 For custom endpoints:
 ```json
 {
-  "model": "xlam_2_32b_fc_r",
+  "model": "mistral-24b",
   "api_key": "default",
   "temperature": 0.01,
   "max_tokens": 3000,
-  "base_url": "http://<ip_address:port>/v1"
+  "base_url": "http://<IP_Address>:<port>/v1"
 }
 ```
 
@@ -292,7 +299,7 @@ mcp-eval generate-tasks --help
 mcp-eval evaluate --help
 ```
 
-For comprehensive documentation, examples, and advanced usage patterns, see the **[Complete CLI Documentation](src/mcp_eval_llm/cli/README.md)**.
+For comprehensive documentation, examples, and advanced usage patterns, see the **[Complete CLI Documentation](src/mcpeval/cli/README.md)**.
 
 ## License
 

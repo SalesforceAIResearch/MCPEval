@@ -1,5 +1,5 @@
 {
-    "model": "gpt-4o-2024-08-06",
+    "model": "gpt-4o-2024-11-20",
     "temperature": 0.01,
-    "max_tokens": 16000
-}
+    "max_tokens": 16384
+} 

@@ -11,7 +11,8 @@ echo "Analyzing gpt4o..."
 mcp-eval judge-rubric \
     --trajectory-file benchmarks/sqlite/results/gpt4o_mix_task_evaluation_trajectory.json \
     --completion-file benchmarks/sqlite/results/gpt4o_mix_task_evaluation_completion.json \
-    --output-dir benchmarks/sqlite/report
+    --output-dir benchmarks/sqlite/report \
+    --include-charts
 
 # GPT-4.1-mini
 echo "Processing gpt4.1-mini..."
@@ -21,7 +22,8 @@ echo "Analyzing gpt4.1-mini..."
 mcp-eval judge-rubric \
     --trajectory-file benchmarks/sqlite/results/gpt4.1-mini_mix_task_evaluation_trajectory.json \
     --completion-file benchmarks/sqlite/results/gpt4.1-mini_mix_task_evaluation_completion.json \
-    --output-dir benchmarks/sqlite/report
+    --output-dir benchmarks/sqlite/report \
+    --include-charts
 
 # GPT-4.1-nano
 echo "Processing gpt4.1-nano..."
@@ -31,7 +33,8 @@ echo "Analyzing gpt4.1-nano..."
 mcp-eval judge-rubric \
     --trajectory-file benchmarks/sqlite/results/gpt4.1-nano_mix_task_evaluation_trajectory.json \
     --completion-file benchmarks/sqlite/results/gpt4.1-nano_mix_task_evaluation_completion.json \
-    --output-dir benchmarks/sqlite/report
+    --output-dir benchmarks/sqlite/report \
+    --include-charts
 
 # GPT-4o-mini
 echo "Processing gpt4o-mini..."
@@ -41,7 +44,8 @@ echo "Analyzing gpt4o-mini..."
 mcp-eval judge-rubric \
     --trajectory-file benchmarks/sqlite/results/gpt4o-mini_mix_task_evaluation_trajectory.json \
     --completion-file benchmarks/sqlite/results/gpt4o-mini_mix_task_evaluation_completion.json \
-    --output-dir benchmarks/sqlite/report
+    --output-dir benchmarks/sqlite/report \
+    --include-charts
 
 # O3
 echo "Processing o3..."
@@ -51,7 +55,8 @@ echo "Analyzing o3..."
 mcp-eval judge-rubric \
     --trajectory-file benchmarks/sqlite/results/o3_mix_task_evaluation_trajectory.json \
     --completion-file benchmarks/sqlite/results/o3_mix_task_evaluation_completion.json \
-    --output-dir benchmarks/sqlite/report
+    --output-dir benchmarks/sqlite/report \
+    --include-charts
 
 # O3-mini
 echo "Processing o3-mini..."
@@ -61,7 +66,8 @@ echo "Analyzing o3-mini..."
 mcp-eval judge-rubric \
     --trajectory-file benchmarks/sqlite/results/o3-mini_mix_task_evaluation_trajectory.json \
     --completion-file benchmarks/sqlite/results/o3-mini_mix_task_evaluation_completion.json \
-    --output-dir benchmarks/sqlite/report
+    --output-dir benchmarks/sqlite/report \
+    --include-charts
 
 # O4-mini
 echo "Processing o4-mini..."
@@ -71,6 +77,7 @@ echo "Analyzing o4-mini..."
 mcp-eval judge-rubric \
     --trajectory-file benchmarks/sqlite/results/o4-mini_mix_task_evaluation_trajectory.json \
     --completion-file benchmarks/sqlite/results/o4-mini_mix_task_evaluation_completion.json \
-    --output-dir benchmarks/sqlite/report
+    --output-dir benchmarks/sqlite/report \
+    --include-charts
 
 echo "✅ LLM judge evaluation and analysis completed for all models!" 
