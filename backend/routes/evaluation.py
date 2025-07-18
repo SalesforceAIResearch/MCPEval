@@ -88,14 +88,14 @@ def create_evaluation_routes(config, job_manager):
             if output_filename:
                 output_file_abs = workspace_path / 'data' / domain_name / 'evaluations' / output_filename
             else:
-                output_file_abs = workspace_path / 'data' / domain_name / 'evaluations' / f"evaluation_results.json"
+                output_file_abs = workspace_path / 'data' / domain_name / 'evaluations' / f"evaluation_results.jsonl"
             
             # Create relative paths for CLI commands (since CLI runs from workspace)
             input_file = Path('data') / domain_name / 'verified_tasks' / tasks_filename
             if output_filename:
                 output_file = Path('data') / domain_name / 'evaluations' / output_filename
             else:
-                output_file = Path('data') / domain_name / 'evaluations' / f"evaluation_results.json"
+                output_file = Path('data') / domain_name / 'evaluations' / f"evaluation_results.jsonl"
             
             # Ensure the output directory exists
             output_file_abs.parent.mkdir(parents=True, exist_ok=True)
@@ -158,7 +158,7 @@ def create_evaluation_routes(config, job_manager):
                     model_name = model.get('name', f'model_{i+1}')
                     
                     # Create individual output file for this model
-                    model_output_file = output_file.parent / f"{model_name}_evaluation.json"
+                    model_output_file = output_file.parent / f"{model_name}_evaluation.jsonl"
                     
                     # Build command using the correct CLI format for single evaluation
                     cmd_parts = ['mcp-eval', 'evaluate']
