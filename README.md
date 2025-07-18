@@ -36,6 +36,18 @@ to-end task generation and deep evaluation of LLM agents across diverse dimensio
 
 *Click above to download and view the complete MCPEval demonstration with audio explanation*
 
+## Architecture
+
+![MCP-based LLM Evaluation Pipeline](page/MCP-based%20LLM%20evaluation%20pipeline.jpg)
+
+*MCPEval system architecture showing the complete evaluation pipeline from task generation to analysis*
+
+## Homepage
+
+![MCPEval Homepage](page/Homepage.png)
+
+*MCPEval web interface providing intuitive access to all evaluation features*
+
 ## Features
 
 - 🚀 **Automated End-to-End Evaluation**

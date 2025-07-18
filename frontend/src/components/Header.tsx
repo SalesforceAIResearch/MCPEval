@@ -54,8 +54,7 @@ const Header: React.FC = () => {
               color="inherit"
               onClick={() =>
                 window.open(
-                  'https://github.com/your-repo/mcp-eval-llm',
-                  '_blank'
+                  'https://github.com/SalesforceAIResearch/MCPEval'
                 )
               }
             >
