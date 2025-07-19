@@ -12,11 +12,6 @@ import ssl
 
 from mcp.server.fastmcp import FastMCP
 
-# Set API key if not already set
-if not os.getenv("BALLDONTLIE_API_KEY"):
-    # Set the API key directly
-    os.environ["BALLDONTLIE_API_KEY"] = "557d339b-e0f5-4d4f-8334-3f7e3776b103"
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
