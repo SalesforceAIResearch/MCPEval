@@ -19,19 +19,13 @@
 ### Evaluation 📊
 - ✅ Implement core evaluation metrics (accuracy, latency)
 - ✅ Create automated testing framework
+- 🔲 Automatic Deep Evaluating 
+- 🔲 Evaluating the implementation of MCP server
 
 ### Data Pipeline 🔄
 - ✅ Design unified data schema for all benchmarks
 - ✅ Implement data preprocessing tools
 - ✅ Add support for multiple data formats
-
-### Benchmarks 🧪
-- ✅ Airbnb MCP benchmark
-- ✅ Healthcare MCP benchmark
-- ✅ yahoo finance MCP benchmark
-- ✅ Sports benchmark
-- ✅ travel_assistant benchmark
-- ✅ File System benchmark
 
 ### LLM Provider 🧠
 - ✅ OpenAI API integration (used for data generation and testing)
