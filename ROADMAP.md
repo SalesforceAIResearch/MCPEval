@@ -38,3 +38,16 @@
 - ✅ Model evaluator
 - ✅ Report generator
 - ✅ Auto end-to-end evaluation
+
+### Front-end 🎨
+- ✅ React application setup with TypeScript
+- ✅ Core navigation and routing
+- ✅ MCP server configuration interface
+- ✅ Chat client for MCP interactions
+- ✅ Task generation and verification UI
+- ✅ Model evaluation dashboard
+- ✅ Results and analytics pages
+- ✅ Data management interfaces
+- 🔲 Unifying the model config for all the pages and sharing the same component
+- 🔲 Real-time evaluation monitoring and live updates
+- 🔲 Advanced data visualization and interactive charts
