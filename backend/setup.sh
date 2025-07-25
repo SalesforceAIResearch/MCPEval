@@ -52,9 +52,12 @@ echo "📦 Backend dependencies managed by main project's virtual environment"
 echo "✅ Using shared virtual environment from project root"
 
 # Set up environment variables
-if [ ! -f ".env" ]; then
-    echo "⚙️  Setting up environment configuration..."
-    cp .env.example .env
+PROJECT_ROOT=$(dirname $PWD)
+echo currently in $PWD
+echo copying environment template in $PROJECT_ROOT
+if [ ! -f "$PROJECT_ROOT/.env" ]; then
+    echo "⚙️  Setting up environment configuration in $PROJECT_ROOT ..."
+    cp $PROJECT_ROOT/.env.template $PROJECT_ROOT/.env
     echo "📝 Created .env file from template. Please review and update as needed."
 else
     echo "✅ Environment file already exists"
