@@ -119,7 +119,7 @@ const MCPServerConfiguration: React.FC<MCPServerConfigurationProps> = ({
                 placeholder="mcp_servers/healthcare/server.py or @modelcontextprotocol/server-name"
                 size="small"
                 required={required}
-                helperText="Path to local server script or NPM package name"
+                helperText="Path to local server script, NPM package name, or HTTP URL"
               />
             </Grid>
 
