@@ -49,5 +49,4 @@
 - ✅ Results and analytics pages
 - ✅ Data management interfaces
 - 🔲 Unifying the model config for all the pages and sharing the same component
-- 🔲 Real-time evaluation monitoring and live updates
-- 🔲 Advanced data visualization and interactive charts
+- 🔲 Saving any existing model config as a config file and support load it again
