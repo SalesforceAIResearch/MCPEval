@@ -302,3 +302,4 @@ nohup.out
 ignore*
 .cursor/
 workspace/
+.python-version
