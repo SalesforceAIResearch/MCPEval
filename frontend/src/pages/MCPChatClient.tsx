@@ -971,7 +971,7 @@ const MCPChatClient: React.FC = () => {
               <Typography variant="body2" component="div">
                 1. Configure your LLM settings in the Settings tab
                 <br />
-                2. Add MCP servers (local .py files or npm packages)
+                2. Add MCP servers (local .py files, npm packages, or HTTP URLs)
                 <br />
                 3. Click Connect to establish connections
                 <br />
@@ -1138,6 +1138,7 @@ const MCPChatClient: React.FC = () => {
               >
                 <MenuItem value="local">Local Server (.py file)</MenuItem>
                 <MenuItem value="npm">NPM Package</MenuItem>
+                <MenuItem value="http">HTTP Server</MenuItem>
               </Select>
             </FormControl>
 
@@ -1156,7 +1157,9 @@ const MCPChatClient: React.FC = () => {
               helperText={
                 newServer.type === 'local'
                   ? 'Path to your local server script'
-                  : 'NPM package name'
+                  : newServer.type === 'npm'
+                  ? 'NPM package name'
+                  : 'HTTP URL (e.g., http://127.0.0.1:8000/mcp)'
               }
             />
 
