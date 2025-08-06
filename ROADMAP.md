@@ -50,3 +50,8 @@
 - ✅ Data management interfaces
 - 🔲 Unifying the model config for all the pages and sharing the same component
 - 🔲 Saving any existing model config as a config file and support load it again
+
+## Issues
+- Evluating multiple models does not working
+- Analyze feature does not support not generating AI report
+- Judge Rubrics select not generate report
