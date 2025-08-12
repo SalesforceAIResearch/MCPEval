@@ -3,6 +3,8 @@
 ### MCP Server 🖥️
 - ✅ Python stdio server support
 - ✅ node.js stdio server support
+- ✅ http mcp server support
+- 🔲 connecting mcp servers with json file as a standard way
 
 ### MCP Client 🤖
 - ✅ Stdio client implementation

@@ -772,7 +772,7 @@ const ModelEvaluator: React.FC = () => {
                 servers={servers}
                 onServersChange={setServers}
                 title="MCP Servers"
-                subtitle="Configure servers for model evaluation"
+                subtitle="Configure or import servers for model evaluation"
                 required
               />
 

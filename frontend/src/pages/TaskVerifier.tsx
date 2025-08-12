@@ -780,7 +780,7 @@ const TaskVerifier: React.FC = () => {
                 servers={servers}
                 onServersChange={setServers}
                 title="MCP Servers"
-                subtitle="Configure servers for task verification"
+                subtitle="Configure or import servers for task verification"
                 required
               />
 

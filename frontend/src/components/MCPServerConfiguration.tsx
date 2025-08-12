@@ -7,6 +7,11 @@ import {
   IconButton,
   Tooltip,
   Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { ServerConfig, parseEnvString, formatEnvString } from './types';
@@ -30,6 +35,11 @@ const MCPServerConfiguration: React.FC<MCPServerConfigurationProps> = ({
   allowRemove = true,
   required = false,
 }) => {
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [pasteOpen, setPasteOpen] = React.useState(false);
+  const [pasteValue, setPasteValue] = React.useState('');
+  const [pasteError, setPasteError] = React.useState<string | null>(null);
+
   const addServer = () => {
     const newServers = [...servers, { path: '', args: [], env: {} }];
     onServersChange(newServers);
@@ -58,6 +68,150 @@ const MCPServerConfiguration: React.FC<MCPServerConfigurationProps> = ({
     onServersChange(newServers);
   };
 
+  const normalizeServersFromJson = (data: unknown): ServerConfig[] | null => {
+    try {
+      const pickPackageFromArgs = (args: any[]): string | null => {
+        for (const a of args) {
+          const s = String(a);
+          if (s.startsWith('@')) return s; // npm scoped package
+          if (/mcp/i.test(s)) return s; // heuristic: contains mcp
+        }
+        return args.length > 0 ? String(args[args.length - 1]) : null;
+      };
+
+      const asArrayIfPresent = (obj: any): any[] | null => {
+        if (Array.isArray(obj)) return obj;
+        if (obj && Array.isArray(obj.servers)) return obj.servers;
+        return null;
+      };
+
+      // Case 1: array or { servers: [...] }
+      const rawListOrNull = asArrayIfPresent(data as any);
+      if (rawListOrNull) {
+        const normalized: ServerConfig[] = rawListOrNull.map((item: any) => {
+          if (typeof item === 'string') {
+            return { path: item, args: [], env: {} } as ServerConfig;
+          }
+          const path: string = String(item.path || '').trim();
+          const args: string[] = Array.isArray(item.args)
+            ? item.args.map((a: any) => String(a))
+            : typeof item.args === 'string'
+              ? String(item.args)
+                  .split(' ')
+                  .map(s => s.trim())
+                  .filter(Boolean)
+              : [];
+          const env: Record<string, string> = item.env && typeof item.env === 'object' ? Object.fromEntries(
+            Object.entries(item.env).map(([k, v]) => [k, String(v)])
+          ) : {};
+
+          if (!path) {
+            throw new Error('Each server must have a non-empty path');
+          }
+          return { path, args, env } as ServerConfig;
+        });
+        return normalized;
+      }
+
+      // Case 2: { mcpServers: { name: { command, args, env } | { url } } }
+      const obj = data as any;
+      if (obj && obj.mcpServers && typeof obj.mcpServers === 'object') {
+        const normalized: ServerConfig[] = [];
+        for (const [_name, cfg] of Object.entries<any>(obj.mcpServers)) {
+          if (!cfg || typeof cfg !== 'object') continue;
+          let path = '';
+          let args: string[] = [];
+          const env: Record<string, string> = cfg.env && typeof cfg.env === 'object' ? Object.fromEntries(
+            Object.entries(cfg.env).map(([k, v]) => [k, String(v)])
+          ) : {};
+
+          if (typeof cfg.url === 'string' && cfg.url.trim()) {
+            path = cfg.url.trim();
+          } else if (Array.isArray(cfg.args)) {
+            const pkg = pickPackageFromArgs(cfg.args);
+            if (pkg) path = pkg.trim();
+            // We intentionally do not forward npx flags like -y as server args.
+            // If cfg.serverArgs is provided in future, we could merge them here.
+            args = [];
+          }
+
+          if (path) normalized.push({ path, args, env });
+        }
+        if (normalized.length > 0) return normalized;
+      }
+
+      return null;
+    } catch (err) {
+      console.error('Failed to normalize MCP servers JSON:', err);
+      return null;
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const normalized = normalizeServersFromJson(json);
+      if (!normalized || normalized.length === 0) {
+        window.alert('Invalid MCP servers JSON. Expected { "servers": [...] } or an array.');
+        return;
+      }
+      onServersChange(normalized);
+    } catch (err: any) {
+      console.error('Error importing MCP servers JSON:', err);
+      window.alert(`Failed to import JSON: ${err?.message || String(err)}`);
+    } finally {
+      // Reset input so importing the same file again triggers change
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleExport = () => {
+    const payload = { servers };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'mcp_servers.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleOpenPaste = () => {
+    setPasteValue('');
+    setPasteError(null);
+    setPasteOpen(true);
+  };
+
+  const handleClosePaste = () => {
+    setPasteOpen(false);
+    setPasteError(null);
+  };
+
+  const handleApplyPaste = () => {
+    try {
+      setPasteError(null);
+      const json = JSON.parse(pasteValue);
+      const normalized = normalizeServersFromJson(json);
+      if (!normalized || normalized.length === 0) {
+        setPasteError('Invalid MCP servers JSON. Expected an array, { "servers": [...] }, or { "mcpServers": { ... } }');
+        return;
+      }
+      onServersChange(normalized);
+      setPasteOpen(false);
+    } catch (err: any) {
+      setPasteError(err?.message || 'Failed to parse JSON');
+    }
+  };
+
   return (
     <Box sx={{ mb: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -71,14 +225,65 @@ const MCPServerConfiguration: React.FC<MCPServerConfigurationProps> = ({
             </Typography>
           )}
         </Box>
-        {showAddButton && (
-          <Tooltip title="Add another server">
-            <IconButton onClick={addServer} color="primary">
-              <AddIcon />
-            </IconButton>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <Tooltip title="Paste servers from JSON content">
+            <span>
+              <Button size="small" variant="outlined" onClick={handleOpenPaste}>
+                Paste JSON
+              </Button>
+            </span>
           </Tooltip>
-        )}
+          <Tooltip title="Import servers from JSON">
+            <span>
+              <Button size="small" variant="outlined" onClick={handleImportClick}>
+                Import JSON
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip title="Export current servers to JSON">
+            <span>
+              <Button size="small" variant="outlined" onClick={handleExport}>
+                Export JSON
+              </Button>
+            </span>
+          </Tooltip>
+          {showAddButton && (
+            <Tooltip title="Add another server">
+              <IconButton onClick={addServer} color="primary">
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Box>
+
+      <Dialog open={pasteOpen} onClose={handleClosePaste} maxWidth="md" fullWidth>
+        <DialogTitle>Paste MCP Servers JSON</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            multiline
+            minRows={10}
+            fullWidth
+            placeholder='{"servers": [...]} or {"mcpServers": {...}}'
+            value={pasteValue}
+            onChange={e => setPasteValue(e.target.value)}
+            error={!!pasteError}
+            helperText={pasteError || 'Paste your JSON and click Apply'}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePaste}>Cancel</Button>
+          <Button variant="contained" onClick={handleApplyPaste}>Apply</Button>
+        </DialogActions>
+      </Dialog>
 
       {servers.map((server, index) => (
         <Box
