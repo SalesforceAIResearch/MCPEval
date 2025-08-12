@@ -4,8 +4,10 @@ import os
 from pathlib import Path
 from contextlib import AsyncExitStack
 from typing import Tuple, Any, Optional, List, Dict
+from urllib.parse import urlparse
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from mcp.client.streamable_http import streamablehttp_client
 
 
 def find_npx_path() -> str:
@@ -44,6 +46,57 @@ def find_npx_path() -> str:
     return "npx"
 
 
+def is_http_server(server_path: str) -> bool:
+    """Check if the server path is an HTTP URL."""
+    try:
+        parsed = urlparse(server_path)
+        return parsed.scheme in ["http", "https"]
+    except Exception:
+        return False
+
+
+async def connect_http_mcp_server(
+    server_url: str,
+    exit_stack: AsyncExitStack,
+    server_args: Optional[List[str]] = None,
+    env: Optional[Dict[str, str]] = None,
+) -> Tuple[ClientSession, Any, Any]:
+    """Connect to an HTTP MCP server and return the session and IO interfaces
+
+    Args:
+        server_url: HTTP URL of the MCP server
+        exit_stack: AsyncExitStack for managing resources
+        server_args: Not used for HTTP servers (kept for compatibility)
+        env: Not used for HTTP servers (kept for compatibility)
+
+    Returns:
+        Tuple containing (session, sse_transport, write)
+    """
+    # Validate URL
+    parsed_url = urlparse(server_url)
+    if not parsed_url.scheme or not parsed_url.netloc:
+        raise ValueError(f"Invalid server URL: {server_url}")
+
+    if parsed_url.scheme not in ["http", "https"]:
+        raise ValueError(
+            f"Unsupported scheme: {parsed_url.scheme}. Only http and https are supported."
+        )
+
+    # Create streamable HTTP client for HTTP transport
+    http_transport = await exit_stack.enter_async_context(
+        streamablehttp_client(server_url)
+    )
+    read, write, get_session_id = http_transport
+
+    # Create client session
+    session = await exit_stack.enter_async_context(ClientSession(read, write))
+
+    # Initialize the session
+    await session.initialize()
+
+    return session, http_transport, write
+
+
 async def connect_mcp_server(
     server_script_path: str,
     exit_stack: AsyncExitStack,
@@ -53,14 +106,19 @@ async def connect_mcp_server(
     """Connect to an MCP server and return the session and IO interfaces
 
     Args:
-        server_script_path: Path to the server script (.py or .js)
+        server_script_path: Path to the server script (.py or .js) or HTTP URL
         exit_stack: AsyncExitStack for resource management
-        server_args: Optional list of arguments to pass to the server
-        env: Optional environment variables dictionary
+        server_args: Optional list of arguments to pass to the server (ignored for HTTP)
+        env: Optional environment variables dictionary (ignored for HTTP)
 
     Returns:
-        Tuple containing (session, stdio, write)
+        Tuple containing (session, stdio/transport, write)
     """
+    # Check if this is an HTTP server
+    if is_http_server(server_script_path):
+        return await connect_http_mcp_server(
+            server_script_path, exit_stack, server_args, env
+        )
     is_python = server_script_path.endswith(".py")
 
     if is_python:
