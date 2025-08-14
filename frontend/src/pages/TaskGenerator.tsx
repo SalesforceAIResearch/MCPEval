@@ -27,12 +27,10 @@ import {
   FolderOpen,
   Launch,
 } from '@mui/icons-material';
+import UnifiedMCPServerConfiguration from '../components/UnifiedMCPServerConfiguration';
+import { ServerConfig } from '../components/types';
 
-interface ServerConfig {
-  path: string;
-  args: string[];
-  env: { [key: string]: string };
-}
+type EditableServer = ServerConfig & { id?: string; name?: string; type?: 'local' | 'npm' | 'http' };
 
 interface GenerationProgress {
   isRunning: boolean;
@@ -49,9 +47,7 @@ interface GenerationProgress {
 
 const TaskGenerator: React.FC = () => {
   const navigate = useNavigate();
-  const [servers, setServers] = useState<ServerConfig[]>([
-    { path: '', args: [], env: {} },
-  ]);
+  const [servers, setServers] = useState<EditableServer[]>([{ path: '', args: [], env: {} }]);
   const [outputFolderName, setOutputFolderName] = useState('');
   const [outputFileName, setOutputFileName] = useState('');
   const [numTasks, setNumTasks] = useState(10);
@@ -92,47 +88,7 @@ const TaskGenerator: React.FC = () => {
     };
   }, []);
 
-  const addServer = () => {
-    setServers([...servers, { path: '', args: [], env: {} }]);
-  };
 
-  const removeServer = (index: number) => {
-    setServers(servers.filter((_, i) => i !== index));
-  };
-
-  const updateServerPath = (index: number, path: string) => {
-    const newServers = [...servers];
-    newServers[index].path = path;
-    setServers(newServers);
-  };
-
-  const updateServerArgs = (index: number, argsString: string) => {
-    const newServers = [...servers];
-    newServers[index].args = argsString.split(' ').filter(arg => arg.trim());
-    setServers(newServers);
-  };
-
-  const updateServerEnv = (index: number, envString: string) => {
-    const newServers = [...servers];
-    const env: { [key: string]: string } = {};
-
-    if (envString.trim()) {
-      // Parse environment variables in format: KEY1=value1,KEY2=value2
-      const envPairs = envString
-        .split(',')
-        .map(pair => pair.trim())
-        .filter(pair => pair);
-      envPairs.forEach(pair => {
-        const [key, ...valueParts] = pair.split('=');
-        if (key && valueParts.length > 0) {
-          env[key.trim()] = valueParts.join('=').trim();
-        }
-      });
-    }
-
-    newServers[index].env = env;
-    setServers(newServers);
-  };
 
   const addExistingFile = () => {
     setExistingFiles([...existingFiles, '']);
@@ -497,114 +453,28 @@ const TaskGenerator: React.FC = () => {
               <Divider sx={{ my: 3 }} />
 
               {/* Server Configuration */}
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
-                    MCP Servers
-                  </Typography>
-                  <Tooltip title="Add another server for multi-server task generation">
-                    <IconButton onClick={addServer} color="primary">
-                      <AddIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-
-                {servers.map((server, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      mb: 2,
-                      p: 2,
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 1,
-                      backgroundColor: '#fafafa',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 'bold', flexGrow: 1 }}
-                      >
-                        Server {index + 1}
-                      </Typography>
-                      {servers.length > 1 && (
-                        <IconButton
-                          onClick={() => removeServer(index)}
-                          color="error"
-                          size="small"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      )}
-                    </Box>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Server Path"
-                          value={server.path}
-                          onChange={e =>
-                            updateServerPath(index, e.target.value)
-                          }
-                          placeholder="mcp_servers/healthcare/server.py or @modelcontextprotocol/server-name"
-                          size="small"
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Server Arguments (Optional)"
-                          value={server.args.join(' ')}
-                          onChange={e =>
-                            updateServerArgs(index, e.target.value)
-                          }
-                          placeholder="--debug --timeout 30"
-                          size="small"
-                          helperText="Space-separated arguments"
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Environment Variables (Optional)"
-                          value={Object.entries(server.env)
-                            .map(([key, value]) => `${key}=${value}`)
-                            .join(', ')}
-                          onChange={e => updateServerEnv(index, e.target.value)}
-                          placeholder="API_KEY=secret123, DEBUG=true"
-                          size="small"
-                          helperText="Format: KEY1=value1, KEY2=value2"
-                        />
-                      </Grid>
-                    </Grid>
-
-                    {/* Show current environment variables as chips */}
-                    {Object.keys(server.env).length > 0 && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{ mb: 1, color: 'text.secondary' }}
-                        >
-                          Environment Variables:
-                        </Typography>
-                        <Box
-                          sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
-                        >
-                          {Object.entries(server.env).map(([key, value]) => (
-                            <Chip
-                              key={key}
-                              label={`${key}=${value.length > 10 ? value.substring(0, 10) + '...' : value}`}
-                              size="small"
-                              variant="outlined"
-                              color="primary"
-                            />
-                          ))}
-                        </Box>
-                      </Box>
-                    )}
-                  </Box>
-                ))}
-              </Box>
+              <UnifiedMCPServerConfiguration
+                servers={servers}
+                onServersChange={(updated: any[]) =>
+                  setServers(
+                    updated.map((s: any) => ({
+                      id: s.id,
+                      name: s.name || (s.path ? s.path.split('/').pop() : ''),
+                      path: s.path || '',
+                      args: Array.isArray(s.args) ? s.args : [],
+                      env: s.env || {},
+                      type: (s.type === 'local' || s.type === 'npm' || s.type === 'http')
+                        ? s.type
+                        : (s.path?.startsWith('http')
+                            ? 'http'
+                            : (s.path?.startsWith('@') ? 'npm' : 'local')),
+                    }))
+                  )
+                }
+                title="MCP Servers"
+                subtitle="Configure or import servers for task generation"
+                required
+              />
 
               <Divider sx={{ my: 3 }} />
 
@@ -756,7 +626,7 @@ const TaskGenerator: React.FC = () => {
                 <Button
                   variant="contained"
                   onClick={progress.isRunning ? handleStop : handleGenerate}
-                  disabled={!progress.isRunning && !servers[0].path}
+                  disabled={!progress.isRunning && !servers.some(s => s.path && s.path.trim())}
                   startIcon={progress.isRunning ? <Stop /> : <PlayArrow />}
                   size="large"
                   color={progress.isRunning ? 'error' : 'primary'}

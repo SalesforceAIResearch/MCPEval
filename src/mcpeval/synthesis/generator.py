@@ -96,7 +96,3 @@ class LLMGenerator:
             raise ValueError(f"Unsupported model provider: {self.model_provider}")
 
 
-# TODO: ScenarioGenerator class not implemented yet - requires scenarios module
-# class ScenarioGenerator:
-#     """Generator for creating tool use scenarios."""
-#     pass

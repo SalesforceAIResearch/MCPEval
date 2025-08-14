@@ -10,7 +10,7 @@ export interface ServerConfig {
 export interface MCPServer extends ServerConfig {
   id: string;
   name: string;
-  type: 'local' | 'npm';
+  type: 'local' | 'npm' | 'http';
   status: 'disconnected' | 'connecting' | 'connected' | 'error';
   tools?: Tool[];
   error?: string;

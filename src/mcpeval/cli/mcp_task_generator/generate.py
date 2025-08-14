@@ -10,12 +10,11 @@ import sys
 import logging
 import time
 import json
-from typing import List, Optional
 from pathlib import Path
 
 from mcpeval.client.openai_client import OpenAIMCPClient
 from mcpeval.synthesis.task_generator import TaskGenerator
-from mcpeval.commons.types import Task, ToolLibrary
+from mcpeval.commons.types import ToolLibrary
 from mcpeval.utils.cli import print_task, setup_colored_logging
 from dotenv import load_dotenv
 

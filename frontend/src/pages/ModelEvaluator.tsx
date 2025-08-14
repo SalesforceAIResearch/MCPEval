@@ -35,7 +35,7 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { ServerConfig } from '../components/types';
-import MCPServerConfiguration from '../components/MCPServerConfiguration';
+import UnifiedMCPServerConfiguration from '../components/UnifiedMCPServerConfiguration';
 
 interface ModelConfig {
   name: string;
@@ -72,9 +72,7 @@ interface EvaluationProgress {
 
 const ModelEvaluator: React.FC = () => {
   const navigate = useNavigate();
-  const [servers, setServers] = useState<ServerConfig[]>([
-    { path: '', args: [], env: {} },
-  ]);
+  const [servers, setServers] = useState<(ServerConfig & { id?: string; name?: string; type?: 'local' | 'npm' | 'http' } )[]>([{ path: '', args: [], env: {} }]);
   const [domainName, setDomainName] = useState('');
   const [tasksFileName, setTasksFileName] = useState('');
   const [outputFileName, setOutputFileName] = useState('');
@@ -768,11 +766,26 @@ const ModelEvaluator: React.FC = () => {
               <Divider sx={{ my: 3 }} />
 
               {/* Server Configuration */}
-              <MCPServerConfiguration
+              <UnifiedMCPServerConfiguration
                 servers={servers}
-                onServersChange={setServers}
+                onServersChange={(updated: any[]) =>
+                  setServers(
+                    updated.map((s: any) => ({
+                      id: s.id,
+                      name: s.name || (s.path ? s.path.split('/').pop() : ''),
+                      path: s.path || '',
+                      args: Array.isArray(s.args) ? s.args : [],
+                      env: s.env || {},
+                      type: (s.type === 'local' || s.type === 'npm' || s.type === 'http')
+                        ? s.type
+                        : (s.path?.startsWith('http')
+                            ? 'http'
+                            : (s.path?.startsWith('@') ? 'npm' : 'local')),
+                    }))
+                  )
+                }
                 title="MCP Servers"
-                subtitle="Configure servers for model evaluation"
+                subtitle="Configure or import servers for model evaluation"
                 required
               />
 
