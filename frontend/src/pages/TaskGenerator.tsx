@@ -27,7 +27,7 @@ import {
   FolderOpen,
   Launch,
 } from '@mui/icons-material';
-import MCPServerConfiguration from '../components/MCPServerConfiguration';
+import UnifiedMCPServerConfiguration from '../components/UnifiedMCPServerConfiguration';
 import { ServerConfig } from '../components/types';
 
 interface GenerationProgress {
@@ -45,9 +45,7 @@ interface GenerationProgress {
 
 const TaskGenerator: React.FC = () => {
   const navigate = useNavigate();
-  const [servers, setServers] = useState<ServerConfig[]>([
-    { path: '', args: [], env: {} },
-  ]);
+  const [servers, setServers] = useState<ServerConfig[]>([{ path: '', args: [], env: {} }]);
   const [outputFolderName, setOutputFolderName] = useState('');
   const [outputFileName, setOutputFileName] = useState('');
   const [numTasks, setNumTasks] = useState(10);
@@ -453,9 +451,17 @@ const TaskGenerator: React.FC = () => {
               <Divider sx={{ my: 3 }} />
 
               {/* Server Configuration */}
-              <MCPServerConfiguration
+              <UnifiedMCPServerConfiguration
                 servers={servers}
-                onServersChange={setServers}
+                onServersChange={(updated: any[]) =>
+                  setServers(
+                    updated.map((s: any) => ({
+                      path: s.path || '',
+                      args: Array.isArray(s.args) ? s.args : [],
+                      env: s.env || {},
+                    }))
+                  )
+                }
                 title="MCP Servers"
                 subtitle="Configure or import servers for task generation"
                 required
@@ -611,7 +617,7 @@ const TaskGenerator: React.FC = () => {
                 <Button
                   variant="contained"
                   onClick={progress.isRunning ? handleStop : handleGenerate}
-                  disabled={!progress.isRunning && !servers[0].path}
+                  disabled={!progress.isRunning && !servers.some(s => s.path && s.path.trim())}
                   startIcon={progress.isRunning ? <Stop /> : <PlayArrow />}
                   size="large"
                   color={progress.isRunning ? 'error' : 'primary'}

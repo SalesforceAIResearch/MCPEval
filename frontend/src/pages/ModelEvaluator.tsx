@@ -35,7 +35,7 @@ import {
   Refresh,
 } from '@mui/icons-material';
 import { ServerConfig } from '../components/types';
-import MCPServerConfiguration from '../components/MCPServerConfiguration';
+import UnifiedMCPServerConfiguration from '../components/UnifiedMCPServerConfiguration';
 
 interface ModelConfig {
   name: string;
@@ -72,9 +72,7 @@ interface EvaluationProgress {
 
 const ModelEvaluator: React.FC = () => {
   const navigate = useNavigate();
-  const [servers, setServers] = useState<ServerConfig[]>([
-    { path: '', args: [], env: {} },
-  ]);
+  const [servers, setServers] = useState<ServerConfig[]>([{ path: '', args: [], env: {} }]);
   const [domainName, setDomainName] = useState('');
   const [tasksFileName, setTasksFileName] = useState('');
   const [outputFileName, setOutputFileName] = useState('');
@@ -768,9 +766,17 @@ const ModelEvaluator: React.FC = () => {
               <Divider sx={{ my: 3 }} />
 
               {/* Server Configuration */}
-              <MCPServerConfiguration
+              <UnifiedMCPServerConfiguration
                 servers={servers}
-                onServersChange={setServers}
+                onServersChange={(updated: any[]) =>
+                  setServers(
+                    updated.map((s: any) => ({
+                      path: s.path || '',
+                      args: Array.isArray(s.args) ? s.args : [],
+                      env: s.env || {},
+                    }))
+                  )
+                }
                 title="MCP Servers"
                 subtitle="Configure or import servers for model evaluation"
                 required

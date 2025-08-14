@@ -19,18 +19,12 @@ import {
   Tab,
   Paper,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Grid,
   Accordion,
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
 import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
   Chat as ChatIcon,
   Settings as SettingsIcon,
   Storage as ServerIcon,
@@ -45,8 +39,8 @@ import {
 } from '@mui/icons-material';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { MCPServer, Tool, parseEnvString } from '../components/types';
-import MCPChatServerConfiguration from '../components/MCPChatServerConfiguration';
+import { MCPServer } from '../components/types';
+import UnifiedMCPServerConfiguration from '../components/UnifiedMCPServerConfiguration';
 
 interface LLMConfig {
   model: string;
@@ -95,7 +89,6 @@ const MCPChatClient: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAddServerDialog, setShowAddServerDialog] = useState(false);
   const [showServerSelectionDialog, setShowServerSelectionDialog] =
     useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -107,14 +100,7 @@ const MCPChatClient: React.FC = () => {
     new Set()
   );
 
-  // Server configuration state
-  const [newServer, setNewServer] = useState({
-    name: '',
-    path: '',
-    args: '',
-    env: '',
-    type: 'local' as 'local' | 'npm',
-  });
+  // Server configuration state handled via UnifiedMCPServerConfiguration
 
   // LLM configuration state
   const [llmConfig, setLLMConfig] = useState<LLMConfig>({
@@ -217,41 +203,6 @@ const MCPChatClient: React.FC = () => {
     }
   };
 
-  const addServer = () => {
-    if (!newServer.name || !newServer.path) {
-      setSnackbar({
-        open: true,
-        message: 'Please fill in all required fields',
-        severity: 'error',
-      });
-      return;
-    }
-
-    const server: MCPServer = {
-      id: Date.now().toString(),
-      name: newServer.name,
-      path: newServer.path,
-      args: newServer.args
-        ? newServer.args.split(',').map(arg => arg.trim())
-        : [],
-      env: parseEnvString(newServer.env),
-      type: newServer.type,
-      status: 'disconnected',
-    };
-
-    const updatedServers = [...servers, server];
-    setServers(updatedServers);
-    saveConfig(updatedServers);
-
-    setNewServer({ name: '', path: '', args: '', env: '', type: 'local' });
-    setShowAddServerDialog(false);
-    setSnackbar({
-      open: true,
-      message: 'Server added successfully',
-      severity: 'success',
-    });
-  };
-
   const addServerFromWorkspace = (workspaceServer: any) => {
     // Check if server is already added
     const existingServer = servers.find(s => s.path === workspaceServer.path);
@@ -286,12 +237,7 @@ const MCPChatClient: React.FC = () => {
     });
   };
 
-  const removeServer = (serverId: string) => {
-    const updatedServers = servers.filter(s => s.id !== serverId);
-    setServers(updatedServers);
-    saveConfig(updatedServers);
-    setSnackbar({ open: true, message: 'Server removed', severity: 'info' });
-  };
+  // Server removal handled via editing list if needed
 
   const connectToServers = async () => {
     if (servers.length === 0) {
@@ -954,13 +900,7 @@ const MCPChatClient: React.FC = () => {
                 >
                   Select from Workspace
                 </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => setShowAddServerDialog(true)}
-                >
-                  Add Custom Server
-                </Button>
+                {/* Removed Add Custom Server button */}
               </Box>
             </Box>
 
@@ -979,9 +919,26 @@ const MCPChatClient: React.FC = () => {
               </Typography>
             </Alert>
 
-            <MCPChatServerConfiguration
+            <UnifiedMCPServerConfiguration
               servers={servers}
-              onRemoveServer={removeServer}
+              onServersChange={(updated) => {
+                const normalized = updated.map((s: any) => ({
+                  id: s.id || Date.now().toString() + Math.random().toString(36).slice(2),
+                  name: s.name || s.path.split('/').pop() || 'Server',
+                  path: s.path || '',
+                  args: Array.isArray(s.args) ? s.args : [],
+                  env: s.env || {},
+                  type: (s.type === 'local' || s.type === 'npm' || s.type === 'http') ? s.type : (s.path?.startsWith('http') ? 'http' : (s.path?.startsWith('@') ? 'npm' : 'local')),
+                  status: s.status || 'disconnected',
+                  tools: s.tools,
+                  error: s.error,
+                }));
+                setServers(normalized);
+                saveConfig(normalized);
+              }}
+              title="MCP Servers"
+              subtitle="Configure or import servers for chat"
+              required
             />
           </Box>
         </TabPanel>
@@ -1093,106 +1050,7 @@ const MCPChatClient: React.FC = () => {
         </TabPanel>
       </Card>
 
-      {/* Add Server Dialog */}
-      <Dialog
-        open={showAddServerDialog}
-        onClose={() => setShowAddServerDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Add MCP Server</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <Alert severity="info" sx={{ mb: 1 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Examples:
-              </Typography>
-              <Typography variant="body2" component="div">
-                • Local: <code>mcp_servers/yfinance/server.py</code>
-                <br />• NPM: <code>@openbnb/mcp-server-airbnb</code>
-                <br />• NPM:{' '}
-                <code>@modelcontextprotocol/server-sequential-thinking</code>
-              </Typography>
-            </Alert>
-
-            <TextField
-              fullWidth
-              label="Server Name"
-              value={newServer.name}
-              onChange={e =>
-                setNewServer({ ...newServer, name: e.target.value })
-              }
-              placeholder="e.g., YFinance Server"
-            />
-
-            <FormControl fullWidth>
-              <InputLabel>Server Type</InputLabel>
-              <Select
-                value={newServer.type}
-                onChange={e =>
-                  setNewServer({
-                    ...newServer,
-                    type: e.target.value as 'local' | 'npm',
-                  })
-                }
-              >
-                <MenuItem value="local">Local Server (.py file)</MenuItem>
-                <MenuItem value="npm">NPM Package</MenuItem>
-                <MenuItem value="http">HTTP Server</MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField
-              fullWidth
-              label="Server Path"
-              value={newServer.path}
-              onChange={e =>
-                setNewServer({ ...newServer, path: e.target.value })
-              }
-              placeholder={
-                newServer.type === 'local'
-                  ? 'mcp_servers/yfinance/server.py'
-                  : '@openbnb/mcp-server-airbnb'
-              }
-              helperText={
-                newServer.type === 'local'
-                  ? 'Path to your local server script'
-                  : newServer.type === 'npm'
-                  ? 'NPM package name'
-                  : 'HTTP URL (e.g., http://127.0.0.1:8000/mcp)'
-              }
-            />
-
-            <TextField
-              fullWidth
-              label="Arguments (Optional)"
-              value={newServer.args}
-              onChange={e =>
-                setNewServer({ ...newServer, args: e.target.value })
-              }
-              placeholder="--ignore-robots-txt, --debug"
-              helperText="Comma-separated arguments to pass to the server"
-            />
-
-            <TextField
-              fullWidth
-              label="Environment Variables (Optional)"
-              value={newServer.env}
-              onChange={e =>
-                setNewServer({ ...newServer, env: e.target.value })
-              }
-              placeholder="API_KEY=secret123, DEBUG=true"
-              helperText="Format: KEY1=value1, KEY2=value2"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowAddServerDialog(false)}>Cancel</Button>
-          <Button onClick={addServer} variant="contained">
-            Add Server
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Removed Add Server Dialog */}
 
       {/* Server Selection Dialog */}
       <Dialog

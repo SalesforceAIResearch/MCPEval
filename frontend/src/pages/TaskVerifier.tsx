@@ -36,7 +36,7 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { ServerConfig } from '../components/types';
-import MCPServerConfiguration from '../components/MCPServerConfiguration';
+import UnifiedMCPServerConfiguration from '../components/UnifiedMCPServerConfiguration';
 
 interface FileInfo {
   name: string;
@@ -61,9 +61,7 @@ interface VerificationProgress {
 
 const TaskVerifier: React.FC = () => {
   const navigate = useNavigate();
-  const [servers, setServers] = useState<ServerConfig[]>([
-    { path: '', args: [], env: {} },
-  ]);
+  const [servers, setServers] = useState<ServerConfig[]>([{ path: '', args: [], env: {} }]);
   const [domainName, setDomainName] = useState('');
   const [tasksFileName, setTasksFileName] = useState('');
   const [outputFileName, setOutputFileName] = useState('');
@@ -116,48 +114,7 @@ const TaskVerifier: React.FC = () => {
     }
   }, [domainName]);
 
-  // Server manipulation functions
-  const addServer = () => {
-    setServers([...servers, { path: '', args: [], env: {} }]);
-  };
-
-  const removeServer = (index: number) => {
-    setServers(servers.filter((_, i) => i !== index));
-  };
-
-  const updateServerPath = (index: number, path: string) => {
-    const newServers = [...servers];
-    newServers[index].path = path;
-    setServers(newServers);
-  };
-
-  const updateServerArgs = (index: number, argsString: string) => {
-    const newServers = [...servers];
-    newServers[index].args = argsString.split(' ').filter(arg => arg.trim());
-    setServers(newServers);
-  };
-
-  const updateServerEnv = (index: number, envString: string) => {
-    const newServers = [...servers];
-    const env: { [key: string]: string } = {};
-
-    if (envString.trim()) {
-      // Parse environment variables in format: KEY1=value1,KEY2=value2
-      const envPairs = envString
-        .split(',')
-        .map(pair => pair.trim())
-        .filter(pair => pair);
-      envPairs.forEach(pair => {
-        const [key, ...valueParts] = pair.split('=');
-        if (key && valueParts.length > 0) {
-          env[key.trim()] = valueParts.join('=').trim();
-        }
-      });
-    }
-
-    newServers[index].env = env;
-    setServers(newServers);
-  };
+  // Server configuration is handled via UnifiedMCPServerConfiguration
 
   const fetchFiles = async (domain: string) => {
     if (!domain.trim()) {
@@ -295,15 +252,7 @@ const TaskVerifier: React.FC = () => {
     });
 
     try {
-      const payload: {
-        servers: ServerConfig[];
-        domain_name: string;
-        tasks_filename: string;
-        output_filename: string;
-        model: string;
-        num_tasks: number;
-        api_key: string | null;
-      } = {
+      const payload = {
         servers: servers
           .filter(s => s.path.trim())
           .map(server => ({
@@ -776,9 +725,17 @@ const TaskVerifier: React.FC = () => {
               <Divider sx={{ my: 3 }} />
 
               {/* Server Configuration */}
-              <MCPServerConfiguration
+              <UnifiedMCPServerConfiguration
                 servers={servers}
-                onServersChange={setServers}
+                onServersChange={(updated: any[]) =>
+                  setServers(
+                    updated.map((s: any) => ({
+                      path: s.path || '',
+                      args: Array.isArray(s.args) ? s.args : [],
+                      env: s.env || {},
+                    }))
+                  )
+                }
                 title="MCP Servers"
                 subtitle="Configure or import servers for task verification"
                 required
