@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { ServerConfig, MCPServer, parseEnvString, formatEnvString, Tool } from './types';
-import { mapJsonConfigToServers } from '../utils/mcpConfig';
+import { mapJsonConfigToServers, inferTypeFromPath } from '../utils/mcpConfig';
 
 type EditableServer = (ServerConfig & {
   id?: string;
@@ -53,13 +53,13 @@ const UnifiedMCPServerConfiguration: React.FC<UnifiedMCPServerConfigurationProps
   const [pasteOpen, setPasteOpen] = React.useState(false);
   const [pasteValue, setPasteValue] = React.useState('');
   const [pasteError, setPasteError] = React.useState<string | null>(null);
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: '',
+    severity: 'error' as 'success' | 'error' | 'info' | 'warning',
+  });
 
-  const inferTypeFromPath = (path: string): 'local' | 'npm' | 'http' => {
-    if (!path) return 'local';
-    if (path.startsWith('http://') || path.startsWith('https://')) return 'http';
-    if (path.startsWith('@')) return 'npm';
-    return 'local';
-  };
+  // Use shared helper from utils/mcpConfig
 
   const ensureEditable = (s: Partial<EditableServer>): EditableServer => {
     const path = (s.path || '').trim();
@@ -168,8 +168,7 @@ const UnifiedMCPServerConfiguration: React.FC<UnifiedMCPServerConfigurationProps
             const pick = (arr: any[]) => {
               for (const a of arr) {
                 const s = String(a);
-                if (s.startsWith('@')) return s;
-                if (/mcp/i.test(s)) return s;
+                if (inferTypeFromPath(s) === 'npm') return s;
               }
               return arr.length > 0 ? String(arr[arr.length - 1]) : '';
             };
@@ -203,13 +202,21 @@ const UnifiedMCPServerConfiguration: React.FC<UnifiedMCPServerConfigurationProps
       const json = JSON.parse(text);
       const normalized = normalizeServersFromJson(json);
       if (!normalized || normalized.length === 0) {
-        window.alert('Invalid MCP servers JSON. Expected an array, { "servers": [...] }, or { "mcpServers": { ... } }');
+        setSnackbar({
+          open: true,
+          severity: 'error',
+          message: 'Invalid MCP servers JSON. Expected an array, { "servers": [...] }, or { "mcpServers": { ... } }',
+        });
         return;
       }
       onServersChange(normalized);
     } catch (err: any) {
       console.error('Error importing MCP servers JSON:', err);
-      window.alert(`Failed to import JSON: ${err?.message || String(err)}`);
+      setSnackbar({
+        open: true,
+        severity: 'error',
+        message: `Failed to import JSON: ${err?.message || String(err)}`,
+      });
     } finally {
       if (e.target) e.target.value = '';
     }

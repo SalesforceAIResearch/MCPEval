@@ -72,7 +72,7 @@ interface EvaluationProgress {
 
 const ModelEvaluator: React.FC = () => {
   const navigate = useNavigate();
-  const [servers, setServers] = useState<ServerConfig[]>([{ path: '', args: [], env: {} }]);
+  const [servers, setServers] = useState<(ServerConfig & { id?: string; name?: string; type?: 'local' | 'npm' | 'http' } )[]>([{ path: '', args: [], env: {} }]);
   const [domainName, setDomainName] = useState('');
   const [tasksFileName, setTasksFileName] = useState('');
   const [outputFileName, setOutputFileName] = useState('');
@@ -771,9 +771,16 @@ const ModelEvaluator: React.FC = () => {
                 onServersChange={(updated: any[]) =>
                   setServers(
                     updated.map((s: any) => ({
+                      id: s.id,
+                      name: s.name || (s.path ? s.path.split('/').pop() : ''),
                       path: s.path || '',
                       args: Array.isArray(s.args) ? s.args : [],
                       env: s.env || {},
+                      type: (s.type === 'local' || s.type === 'npm' || s.type === 'http')
+                        ? s.type
+                        : (s.path?.startsWith('http')
+                            ? 'http'
+                            : (s.path?.startsWith('@') ? 'npm' : 'local')),
                     }))
                   )
                 }

@@ -11,7 +11,7 @@ export const inferTypeFromPath = (path: string): ServerType => {
   if (!path) return 'local';
   if (path.startsWith('http://') || path.startsWith('https://')) return 'http';
   if (path.startsWith('@')) return 'npm';
-  const looksLikeBareNpm = !path.includes('/') && !path.includes('\\') && !path.includes('.') && /mcp/i.test(path);
+  const looksLikeBareNpm = !path.includes('/') && !path.includes('\\') && !path.includes('.') && /^mcp(-|$)/i.test(path);
   if (looksLikeBareNpm) return 'npm';
   return 'local';
 };
@@ -87,7 +87,7 @@ export const mapJsonConfigToServers = (data: unknown): MappedServer[] => {
         for (let i = 0; i < rawArgs.length; i++) {
           const s = rawArgs[i];
           if (s.startsWith('-')) continue;
-          if (s.startsWith('@') || (/mcp/i.test(s) && !s.includes('.') && !s.includes('/') && !s.includes('\\'))) {
+          if (inferTypeFromPath(s) === 'npm') {
             pkgIndex = i;
             break;
           }
