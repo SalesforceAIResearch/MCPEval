@@ -1,16 +1,9 @@
 from openai import OpenAI
 import os
-from pydantic import BaseModel
-from typing import Dict, List, Any, Optional, Type
+from typing import Dict, List, Any, Optional
 import logging
 
-from mcpeval.synthesis.tools import ToolLibrary
-
 # from mcpeval.synthesis.scenarios import Scenario, ScenarioLibrary, ScenarioNameDescFormat  # TODO: scenarios module not implemented yet
-from mcpeval.commons.prompts import (
-    scenario_generation_system_prompt,
-    scenario_generation_user_prompt,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -48,36 +41,6 @@ class LLMGenerator:
     def _get_llm(self):
         if self.model_provider == "openai":
             return OpenAI(api_key=self.api_key or os.getenv("OPENAI_API_KEY"))
-        else:
-            raise ValueError(f"Unsupported model provider: {self.model_provider}")
-
-    def generate_structured_response(
-        self, messages: List[Dict[str, Any]], response_format: Type[BaseModel]
-    ) -> BaseModel:
-        """Generate a response using the configured LLM.
-
-        Args:
-            messages: List of message dictionaries with role and content
-            response_format: Pydantic BaseModel class used for parsing the response
-
-        Returns:
-            The parsed response from the LLM as an instance of the provided BaseModel
-        """
-        if self.model_provider == "openai":
-            completion = self.llm.beta.chat.completions.parse(
-                model=self.model_name,
-                messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.model_temperature,
-                top_p=self.top_p,
-                response_format=response_format,
-            )
-            logger.debug(f"Completion: {completion}")
-            message = completion.choices[0].message
-            if message.parsed:
-                return message.parsed
-            else:
-                return message.content
         else:
             raise ValueError(f"Unsupported model provider: {self.model_provider}")
 

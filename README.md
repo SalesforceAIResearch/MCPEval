@@ -32,7 +32,7 @@ to-end task generation and deep evaluation of LLM agents across diverse dimensio
 
 ## Demo
 
-🎬 **[Watch Full Demo Video (with audio)](https://github.com/SalesforceAIResearch/MCPEval/releases/latest/download/MCPEval-demo.mp4)**
+🎬 **[Watch Full Demo Video (with audio)](https://github.com/SalesforceAIResearch/MCPEval/releases/download/v1.0.0/MCPEval-demo.mp4)**
 
 *Click above to download and view the complete MCPEval demonstration with audio explanation*
 
