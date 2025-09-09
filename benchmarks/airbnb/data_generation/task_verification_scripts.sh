@@ -1,1 +1,1 @@
-mcp-eval verify-tasks --server @openbnb/mcp-server-airbnb --server-args="--ignore-robots-txt" --tasks-file data/airbnb/tasks.jsonl --model-config benchmarks/airbnb/eval_models/gpt-4o.json --output data/airbnb/verified_tasks.jsonl
+uv run mcp-eval verify-tasks --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt --tasks-file data/airbnb/tasks.jsonl --model-config benchmarks/airbnb/eval_models/gpt-4o.json --output data/airbnb/verified_tasks.jsonl

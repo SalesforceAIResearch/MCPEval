@@ -47,6 +47,7 @@ async def verify_task(
     server_args_list,
     server_envs=None,
     model="gpt-4o",
+    model_config=None,
     api_key=None,
     system_message=None,
     max_turns=10,
@@ -68,14 +69,26 @@ async def verify_task(
     """
     logger.info(f"Starting verification for task: {task.name}")
 
-    # Initialize OpenAI LLM for the evaluator
-    llm = OpenAIWrapper(model=model, api_key=api_key)
+    # Use model_config if provided, otherwise create default config
+    if model_config is None:
+        model_config = {
+            "model": model,
+            "temperature": 0.01,
+            "max_tokens": 16384
+        }
+    
+    # Initialize OpenAI LLM for the evaluator using the same pattern as TaskGenerator
+    llm = OpenAIWrapper(
+        api_key=api_key,
+        model_config=model_config
+    )
 
     # Initialize evaluator
     evaluator = LLMTaskVerifier(llm)
 
-    # Initialize OpenAI MCP client
-    client = OpenAIMCPClient(model=model, api_key=api_key)
+    # Initialize OpenAI MCP client using the model from config
+    final_model = model_config.get("model", model)
+    client = OpenAIMCPClient(model=final_model, api_key=api_key)
     logger.info("OpenAI MCP client created")
 
     try:
@@ -101,14 +114,10 @@ async def verify_task(
             logger.error("No valid tools found. Cannot verify task.")
             return False, None
 
-        # Initialize task generator with the tools from the server
+        # Initialize task generator with the tools from the server using the same pattern
         task_generator = TaskGenerator(
             tool_library=ToolLibrary(tools=tools_data),
-            model_provider="openai",
-            model_name=model,
-            max_tokens=4000,
-            model_temperature=0.2,
-            top_p=0.95,
+            model_config=model_config,
             api_key=api_key,
         )
 
@@ -312,6 +321,7 @@ async def verify_tasks(args):
                 server_args_list=server_args_list,
                 server_envs=server_envs,
                 model=final_model_name,
+                model_config=model_config,
                 api_key=getattr(args, "api_key", None),
                 system_message=system_message,
                 max_turns=getattr(args, "max_turns", 10),
