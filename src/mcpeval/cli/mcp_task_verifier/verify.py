@@ -138,8 +138,6 @@ async def verify_task(
             task=task,
             tools=tools_data,
             tool_name_to_session=tool_name_to_session,
-            temperature=0.2,
-            max_tokens=1000,
             max_turns=max_turns,  # Configurable max turns for complex tasks
             system_message=system_message,
         )

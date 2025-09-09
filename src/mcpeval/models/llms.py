@@ -46,6 +46,15 @@ class OpenAIWrapper:
         # kwargs take precedence over stored config
         chat_kwargs = {**self.chat_params, **kwargs}
 
+        # Temporary model-specific parameter normalization
+        # Some newer models (e.g., GPT-5 family) expect 'max_completion_tokens'
+        # instead of 'max_tokens'. Normalize when needed to avoid API errors.
+        if "max_tokens" in chat_kwargs and isinstance(self.model, str):
+            normalized_model = self.model.lower()
+            if normalized_model.startswith("gpt-5"):
+                # Map and remove the legacy key
+                chat_kwargs["max_completion_tokens"] = chat_kwargs.pop("max_tokens")
+
         response = self.client.chat.completions.create(
             model=self.model, messages=messages, tools=tools, **chat_kwargs
         )
