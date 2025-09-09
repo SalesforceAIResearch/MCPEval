@@ -5,9 +5,11 @@ Task Verifier CLI Tool
 This module provides functionality for verifying tasks against an MCP server.
 """
 import asyncio
+import json
 import os
 import logging
 import time
+from pathlib import Path
 
 from mcpeval.client.openai_client import OpenAIMCPClient
 from mcpeval.synthesis.task_verifier import LLMTaskVerifier
@@ -195,6 +197,31 @@ async def verify_task(
 
 async def verify_tasks(args):
     """Verify tasks from a JSONL file and save results."""
+    # Model configuration - load this first
+    model_config = {}
+
+    # Load model configuration from file if provided
+    if hasattr(args, "model_config") and args.model_config:
+        try:
+            config_path = Path(args.model_config)
+            if not config_path.exists():
+                logger.error(f"Model config file not found: {args.model_config}")
+                return
+
+            with open(config_path, "r") as f:
+                model_config = json.load(f)
+
+            logger.info(f"Loaded model configuration from {args.model_config}")
+        except Exception as e:
+            logger.error(f"Error loading model config file {args.model_config}: {e}")
+            return
+    
+    # Determine final model name - prioritize model_config, then fall back to CLI arg
+    final_model_name = model_config.get("model") if model_config else args.model
+    logger.info(
+        f"Using model: {final_model_name} (from {'config file' if model_config.get('model') else 'CLI argument'})"
+    )
+    
     # Load tasks from file
     all_tasks = load_tasks_from_jsonl(args.tasks_file)
 
@@ -284,7 +311,7 @@ async def verify_tasks(args):
                 server_paths=server_paths,
                 server_args_list=server_args_list,
                 server_envs=server_envs,
-                model=args.model,
+                model=final_model_name,
                 api_key=getattr(args, "api_key", None),
                 system_message=system_message,
                 max_turns=getattr(args, "max_turns", 10),

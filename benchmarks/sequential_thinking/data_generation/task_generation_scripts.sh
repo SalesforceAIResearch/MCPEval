@@ -1,1 +1,1 @@
-mcp-eval generate-tasks --server @modelcontextprotocol/server-sequential-thinking --model gpt-4.1-2025-04-14 --num-tasks 100 --prompt-file benchmarks/sequential_thinking/data_generation/task_generation_prompt.json --output data/sequential-thinking/tasks.jsonl
+mcp-eval generate-tasks --server @modelcontextprotocol/server-sequential-thinking --model-config benchmarks/sequential_thinking/eval_models/gpt-4o.json --num-tasks 100 --prompt-file benchmarks/sequential_thinking/data_generation/task_generation_prompt.json --output data/sequential-thinking/tasks.jsonl

@@ -459,6 +459,11 @@ def parse_arguments():
         help="OpenAI model to use for verification (default: gpt-4o)",
     )
     task_verify_parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to JSON file containing model configuration (takes priority over individual model parameters)",
+    )
+    task_verify_parser.add_argument(
         "--num-tasks",
         type=int,
         default=-1,

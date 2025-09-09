@@ -1,1 +1,1 @@
-mcp-eval generate-tasks --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt --model gpt-4.1-2025-04-14 --num-tasks 100 --prompt-file benchmarks/airbnb/data_generation/generation_prompt.json --output data/airbnb/tasks.jsonl 
+mcp-eval generate-tasks --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt --model-config benchmarks/airbnb/eval_models/gpt-4o.json --num-tasks 100 --prompt-file benchmarks/airbnb/data_generation/generation_prompt.json --output data/airbnb/tasks.jsonl
