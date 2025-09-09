@@ -415,6 +415,11 @@ def parse_arguments():
         default=0.95,
         help="Top-p sampling parameter (default: 0.95)",
     )
+    task_gen_parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to JSON file containing model configuration (takes priority over individual model parameters)",
+    )
     task_gen_parser.set_defaults(func=task_generator)
 
     # Task Verifier subcommand

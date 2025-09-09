@@ -16,7 +16,7 @@ Please generate a new scenario that is different from the previous ones.
 
 task_generation_system_prompt = """
 You are a helpful assistant that generates tasks for testing LLM tool use capabilities.
-Tasks should be specific, clear, and include expected tool calls where applicable. Ensure all the required information from the tools is explicitly mentioned in the task description.
+Tasks should be specific, clear, and realistic. Ensure all the required information from the tools is explicitly mentioned in the task description.
 
 IMPORTANT: Your response MUST be ONLY valid JSON, with NO markdown, NO comments, and NO extra text. Do NOT include any explanations or formatting outside the JSON. All property names and string values must be double-quoted. The output must be directly parsable by Python's json.loads().
 
@@ -24,16 +24,7 @@ The required JSON structure is:
 {
   "name": "Task name",
   "description": "Detailed task description",
-  "goal": "Goal of the task",
-  "tool_calls": [
-    {
-      "tool_name": "name of the tool",
-      "tool_parameters": {
-        "param1": "value1",
-        "param2": "value2"
-      }
-    }
-  ]
+  "goal": "Goal of the task"
 }
 """
 
@@ -43,7 +34,7 @@ Generate a task that requires using the following tools:
 Generate a task that is different from the existing tasks:
 {existing_tasks}
 Ensure that your task is creative, specific, and realistic.
-Include example tool calls that show how each tool should be used for this task.
+The task description should clearly indicate how the provided tools would be used to accomplish the goal.
 """
 
 task_revision_system_prompt = """\

@@ -4,9 +4,9 @@ import random
 import json
 from typing import Dict, List, Any, Optional, Union
 
-from ..commons.types import Task, ToolCall
+from ..commons.types import Task
 from .tools import ToolDefinition, ToolLibrary, format_tools_for_prompt
-from .generator import LLMGenerator
+from ..models.llms import OpenAIWrapper
 from ..commons.prompts import (
     task_generation_system_prompt,
     task_generation_with_tools_user_prompt,
@@ -23,9 +23,6 @@ class TaskFormat(BaseModel):
 
     name: str = Field(..., description="Name of the task")
     description: str = Field(..., description="Description of the task")
-    tool_calls: List[ToolCall] = Field(
-        default_factory=list, description="Expected tool calls for this task"
-    )
     goal: str = Field(..., description="Goal of the task")
 
 
@@ -35,41 +32,39 @@ class TaskGenerator:
     def __init__(
         self,
         tool_library: ToolLibrary,
-        model_provider: str = "openai",
-        model_name: str = "gpt-4.1-2025-04-14",
-        model_temperature: float = 0.1,
-        max_tokens: int = 1000,
-        top_p: float = 0.95,
+        model_config: Optional[Dict[str, Any]] = None,
         api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
         system_message: Optional[str] = None,
         existing_tasks: Optional[List[Task]] = None,
-        *args,
         **kwargs,
     ):
         """Initialize the task generator.
 
         Args:
             tool_library: Library of tool definitions
-            scenario_library: Optional library of scenarios
-            model_provider: Provider of the LLM
-            model_name: Name of the model to use
-            model_temperature: Temperature for model generation
-            max_tokens: Maximum number of tokens to generate
-            top_p: Top-p sampling parameter
+            model_config: Model configuration dictionary (e.g., {"model": "gpt-4o", "temperature": 0.01})
             api_key: API key for the model provider
+            base_url: Base URL for the API
             system_message: Optional system message for the LLM
             existing_tasks: Optional list of existing tasks
         """
         self.tool_library = tool_library
-        self.llm_generator = LLMGenerator(
-            model_provider=model_provider,
-            model_name=model_name,
-            model_temperature=model_temperature,
-            max_tokens=max_tokens,
-            top_p=top_p,
+        
+        # Use default model config if none provided
+        if model_config is None:
+            model_config = {
+                "model": "gpt-4o-2024-11-20",
+                "temperature": 0.01,
+                "max_tokens": 16384
+            }
+        
+        # Initialize the OpenAI wrapper with the model config
+        self.llm = OpenAIWrapper(
             api_key=api_key,
-            *args,
-            **kwargs,
+            base_url=base_url,
+            model_config=model_config,
+            **kwargs
         )
 
         self.system_message = system_message or task_generation_system_prompt
@@ -79,7 +74,8 @@ class TaskGenerator:
         self,
         raw_response: str,
         messages: Optional[List[Dict[str, Any]]] = None,
-        max_retries: int = 5,
+        max_retries: int = 3,
+        required_fields: Optional[List[str]] = None,
     ):
         """Parse JSON from a string with retries and cleanup for malformed responses.
 
@@ -87,76 +83,170 @@ class TaskGenerator:
             raw_response: The string containing JSON to parse
             messages: Optional list of message objects to use for retrying with the LLM
             max_retries: Maximum number of retries before giving up
+            required_fields: List of required fields to validate in the parsed JSON
 
         Returns:
             Parsed JSON data or None if parsing failed
         """
+        import re
+        
+        # Default required fields for task generation
+        if required_fields is None:
+            required_fields = ["name", "description", "goal"]
+        
         task_data = None
         retry_count = 0
-        current_response = raw_response
+        current_response = raw_response.strip()
+        last_error = None
 
         while task_data is None and retry_count < max_retries:
             try:
-                # First attempt: direct JSON parsing
-                task_data = json.loads(current_response)
-            except json.JSONDecodeError:
-                # Second attempt: try to extract JSON from markdown code blocks
+                # Strategy 1: Direct JSON parsing
                 try:
-                    import re
+                    parsed_data = json.loads(current_response)
+                    # Validate required fields
+                    if self._validate_task_data(parsed_data, required_fields):
+                        task_data = parsed_data
+                        break
+                    else:
+                        last_error = f"Missing required fields: {[f for f in required_fields if f not in parsed_data]}"
+                except json.JSONDecodeError as e:
+                    last_error = f"JSON decode error: {str(e)}"
 
-                    json_match = re.search(
-                        r"```(?:json)?\s*([\s\S]*?)\s*```", current_response
-                    )
-                    if json_match:
-                        json_str = json_match.group(1).strip()
-                        # Try to parse the extracted JSON
-                        try:
-                            task_data = json.loads(json_str)
-                        except json.JSONDecodeError:
-                            # Third attempt: try to clean up common JSON issues
-                            # Remove comments
-                            cleaned_json = re.sub(
-                                r"//.*?$", "", json_str, flags=re.MULTILINE
-                            )
-                            # Remove trailing commas
-                            cleaned_json = re.sub(r",\s*([}\]])", r"\1", cleaned_json)
+                # Strategy 2: Extract JSON from markdown code blocks
+                if task_data is None:
+                    json_patterns = [
+                        r"```(?:json)?\s*([\s\S]*?)\s*```",  # Standard markdown
+                        r"```json\n([\s\S]*?)\n```",        # Explicit json blocks
+                        r"{[\s\S]*}",                       # Any JSON-like object
+                    ]
+                    
+                    for pattern in json_patterns:
+                        matches = re.findall(pattern, current_response)
+                        for match in matches:
+                            json_str = match.strip()
                             try:
-                                task_data = json.loads(cleaned_json)
+                                parsed_data = json.loads(json_str)
+                                if self._validate_task_data(parsed_data, required_fields):
+                                    task_data = parsed_data
+                                    break
                             except json.JSONDecodeError:
-                                # If still failing, continue with retry logic
-                                pass
+                                continue
+                        if task_data:
+                            break
 
-                    # If we can't extract or parse JSON and messages are provided, retry with the LLM
-                    if task_data is None and messages and retry_count < max_retries - 1:
-                        logger.info(
-                            f"Retrying JSON generation (attempt {retry_count+1}/{max_retries})"
-                        )
+                # Strategy 3: Clean up common JSON issues and retry
+                if task_data is None:
+                    cleaned_responses = self._clean_json_response(current_response)
+                    for cleaned in cleaned_responses:
+                        try:
+                            parsed_data = json.loads(cleaned)
+                            if self._validate_task_data(parsed_data, required_fields):
+                                task_data = parsed_data
+                                break
+                        except json.JSONDecodeError:
+                            continue
+                        if task_data:
+                            break
 
-                        # Append error information to the messages for the retry
-                        retry_messages = messages.copy()
-                        retry_messages.append(
-                            {"role": "assistant", "content": current_response}
-                        )
-                        retry_messages.append(
-                            {
-                                "role": "user",
-                                "content": "The previous response couldn't be parsed as JSON. Please provide a valid JSON response with 'name', 'description', and 'tool_calls' fields. Make sure your response is properly formatted JSON without any comments or trailing commas.",
-                            }
-                        )
+                # Strategy 4: Retry with LLM if we have messages and haven't exhausted retries
+                if task_data is None and messages and retry_count < max_retries - 1:
+                    logger.warning(
+                        f"JSON parsing failed (attempt {retry_count + 1}/{max_retries}): {last_error}"
+                    )
+                    logger.info(f"Problematic response: {current_response[:200]}...")
 
-                        current_response = (
-                            self.llm_generator.generate_unstructured_response(
-                                messages=retry_messages
-                            )
-                        )
-                        logger.info(f"Retry generated: {current_response}")
+                    # Create more specific retry prompt
+                    retry_prompt = self._create_retry_prompt(current_response, last_error, required_fields)
+                    
+                    retry_messages = messages.copy()
+                    retry_messages.append({"role": "assistant", "content": current_response})
+                    retry_messages.append({"role": "user", "content": retry_prompt})
 
-                    retry_count += 1
-                except Exception as e:
-                    logger.error(f"Error extracting JSON: {e}")
-                    retry_count += 1
+                    try:
+                        response = self.llm.chat_completion(messages=retry_messages)
+                        current_response = response["choices"][0]["message"]["content"].strip()
+                        logger.info(f"Retry {retry_count + 1} generated response length: {len(current_response)}")
+                    except Exception as e:
+                        logger.error(f"Error during LLM retry: {e}")
+                        break
+
+                retry_count += 1
+
+            except Exception as e:
+                logger.error(f"Unexpected error during JSON parsing: {e}")
+                last_error = str(e)
+                retry_count += 1
+
+        if task_data is None:
+            logger.error(f"Failed to parse JSON after {retry_count} attempts. Last error: {last_error}")
 
         return task_data
+
+    def _validate_task_data(self, data: Dict[str, Any], required_fields: List[str]) -> bool:
+        """Validate that the parsed JSON contains all required fields."""
+        if not isinstance(data, dict):
+            return False
+        
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return False
+        
+        return True
+
+    def _clean_json_response(self, response: str) -> List[str]:
+        """Apply various cleaning strategies to fix common JSON issues."""
+        import re
+        
+        cleaned_versions = []
+        
+        # Strategy 1: Remove comments and fix trailing commas
+        cleaned = re.sub(r"//.*?$", "", response, flags=re.MULTILINE)  # Remove // comments
+        cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)  # Remove /* */ comments
+        cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)  # Remove trailing commas
+        cleaned_versions.append(cleaned)
+        
+        # Strategy 2: Extract the first complete JSON object
+        json_start = response.find("{")
+        if json_start != -1:
+            brace_count = 0
+            for i, char in enumerate(response[json_start:], json_start):
+                if char == "{":
+                    brace_count += 1
+                elif char == "}":
+                    brace_count -= 1
+                    if brace_count == 0:
+                        potential_json = response[json_start:i+1]
+                        cleaned_versions.append(potential_json)
+                        break
+        
+        # Strategy 3: Fix common quote issues
+        quote_fixed = re.sub(r"'([^']*)':", r'"\1":', response)  # Single to double quotes for keys
+        quote_fixed = re.sub(r":\s*'([^']*)'", r': "\1"', quote_fixed)  # Single to double quotes for values
+        cleaned_versions.append(quote_fixed)
+        
+        return cleaned_versions
+
+    def _create_retry_prompt(self, failed_response: str, error: str, required_fields: List[str]) -> str:
+        """Create a specific retry prompt based on the failure."""
+        return f"""The previous response couldn't be parsed as valid JSON. 
+
+Error: {error}
+
+Please provide a valid JSON response with exactly these required fields: {', '.join(required_fields)}
+
+Requirements:
+1. Must be valid JSON (no comments, no trailing commas)
+2. Must contain all required fields: {', '.join(required_fields)}
+3. Each field must have a non-empty value
+4. Return ONLY the JSON object, no additional text
+
+Example format:
+{{
+    "name": "Task name here",
+    "description": "Detailed task description here", 
+    "goal": "Clear goal statement here"
+}}"""
 
     def generate_task_from_tools(
         self,
@@ -216,9 +306,8 @@ class TaskGenerator:
             {"role": "user", "content": user_message},
         ]
 
-        raw_response = self.llm_generator.generate_unstructured_response(
-            messages=messages
-        )
+        response = self.llm.chat_completion(messages=messages)
+        raw_response = response["choices"][0]["message"]["content"]
         logger.info(f"Generated task: {raw_response}")
 
         # Parse the JSON with retries
@@ -227,23 +316,12 @@ class TaskGenerator:
         if task_data is None:
             raise ValueError("Failed to generate valid JSON after retries")
 
-        # Create tool calls
-        tool_calls = []
-        for tc in task_data.get("tool_calls", []):
-            tool_calls.append(
-                ToolCall(
-                    tool_name=tc.get("tool_name", ""),
-                    tool_parameters=tc.get("tool_parameters", {}),
-                )
-            )
-
         # Create the task
         try:
             task = Task(
                 name=task_data.get("name", ""),
                 description=task_data.get("description", ""),
                 tools=selected_tools,
-                tool_calls=tool_calls,
                 goal=task_data.get("goal", ""),
             )
             self.existing_tasks.append(task.name)
@@ -275,11 +353,8 @@ class TaskGenerator:
             )
             selected_tools = random.sample(self.tool_library.tools, num_tools)
 
-            # Get the tool names
-            tool_names = [tool.name for tool in selected_tools]
-
             # Generate the task
-            task = self.generate_task_from_tools(tool_names)
+            task = self.generate_task_from_tools(selected_tools)
             tasks.append(task)
 
         return tasks
@@ -353,9 +428,8 @@ class TaskGenerator:
             ]
 
         # Generate the updated task content
-        raw_response = self.llm_generator.generate_unstructured_response(
-            messages=messages
-        )
+        response = self.llm.chat_completion(messages=messages)
+        raw_response = response["choices"][0]["message"]["content"]
         logger.info(f"Generated updated task: {raw_response}")
 
         # Parse the response
@@ -366,13 +440,12 @@ class TaskGenerator:
                 "Failed to generate valid JSON for task update after retries"
             )
 
-        # Update only the description and goal, keep the original name, tools, and tool_calls
+        # Update only the description and goal, keep the original name and tools
         updated_task = Task(
             name=task_data.get("name", task.name),
             description=task_data.get("description", task.description),
             goal=task_data.get("goal", task.goal),
             tools=task.tools,
-            tool_calls=task.tool_calls,
         )
 
         # Log the differences
