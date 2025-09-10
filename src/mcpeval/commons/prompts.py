@@ -66,3 +66,38 @@ If the task is unclear or missing any information, use the request_task_updating
 Otherwise, attempt to use the provided tools to complete the task."""
 
 task_executor_system_prompt = """You are an AI assistant completing tasks via using tools. Call tools until you have completed the task."""
+
+# New: task revalidation prompts
+task_revalidation_system_prompt = """You are a precise editor that updates task descriptions so they fully reflect the actual tool usage observed in a conversation.
+
+Requirements:
+- Ensure the description explicitly includes all key inputs/assumptions that were actually used in tool calls.
+- If the goal needs refinement to match the achieved outcome, update it minimally for accuracy.
+- Preserve the task name unless a tiny tweak improves clarity.
+- Do not invent details not evidenced in the conversation or tool results.
+- Do not include information that was only known after the tool calls.
+
+IMPORTANT: Your response MUST be ONLY valid JSON, with NO markdown, NO comments, and NO extra text. All property names and string values must be double-quoted. The output must be directly parsable by Python's json.loads().
+
+The required JSON structure is:
+{
+  "name": "Task name",
+  "description": "Detailed task description that includes all actually used details",
+  "goal": "Accurate goal aligned to the tool usage and final outcome"
+}
+"""
+
+task_revalidation_user_prompt = """You are given an original task and the actual interaction where tools were called.
+
+## Original task:
+{task}
+
+## Available tools at the time:
+{formatted_tools}
+
+## Actual conversation (ordered messages):
+{conversation}
+
+## Actual tool calls (with parameters) and results:
+{tool_calls_and_results}
+"""

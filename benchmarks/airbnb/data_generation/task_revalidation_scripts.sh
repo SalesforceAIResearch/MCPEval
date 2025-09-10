@@ -1,0 +1,1 @@
+uv run mcp-eval revalidate-tasks --verified-tasks-file data/airbnb/evaluation_tasks_verified.jsonl --model-config benchmarks/airbnb/eval_models/gpt-4.1.json --output data/airbnb/revalidated_tasks.jsonl --prompt-file benchmarks/airbnb/data_generation/revalidation_prompt.json
