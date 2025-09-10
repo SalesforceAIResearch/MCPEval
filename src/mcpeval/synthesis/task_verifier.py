@@ -161,6 +161,7 @@ class LLMTaskVerifier:
             description = updated.get("description", task.description)
             goal = updated.get("goal", task.goal)
             return Task(
+                id=task.id,
                 name=name,
                 description=description,
                 goal=goal,
@@ -173,6 +174,7 @@ class LLMTaskVerifier:
         except Exception:
             # Fall back silently to original task if parsing fails
             return Task(
+                id=task.id,
                 name=task.name,
                 description=task.description,
                 goal=task.goal,
