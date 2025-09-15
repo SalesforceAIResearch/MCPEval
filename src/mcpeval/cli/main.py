@@ -187,9 +187,9 @@ def task_revalidator(args):
     if not hasattr(args, "api_key") or args.api_key is None:
         args.api_key = os.getenv("OPENAI_API_KEY")
 
-    from mcpeval.cli.mcp_task_verifier.verify import main_revalidate
+    from mcpeval.cli.mcp_task_revalidator.revalidate import main
 
-    main_revalidate(args)
+    main(args)
 
 
 def data_converter(args):

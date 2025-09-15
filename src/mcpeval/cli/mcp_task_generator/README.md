@@ -64,6 +64,7 @@ Servers can be specified in several formats:
 | `--output` | string | `generated_tasks.jsonl` | Output file path for generated tasks |
 | `--num-tasks` | int | `10` | Number of tasks to generate |
 | `--model` | string | `gpt-4.1-2025-04-14` | OpenAI model for task generation |
+| `--model-config` | string | - | JSON file containing model configuration (takes priority over individual model parameters) |
 | `--prompt-file` | string | - | JSON file containing custom prompts |
 | `--existing-files` | list | `[]` | Existing task files to load (avoid duplicates) |
 | `--temperature` | float | `0.2` | Model temperature for generation |
@@ -98,7 +99,17 @@ mcp-eval generate-tasks \
   --top-p 0.9
 ```
 
-#### 3. Generate Tasks for External Server (e.g., Airbnb)
+#### 3. Generate Tasks with Model Configuration File
+
+```bash
+mcp-eval generate-tasks \
+  --servers mcp_servers/healthcare/server.py \
+  --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
+  --num-tasks 50 \
+  --output data/healthcare/evaluation_tasks.jsonl
+```
+
+#### 4. Generate Tasks for External Server (e.g., Airbnb)
 
 ```bash
 mcp-eval generate-tasks \
@@ -156,6 +167,33 @@ mcp-eval generate-tasks \
   --max-tokens 5000 \
   --output data/sports/creative_tasks.jsonl
 ```
+
+## Model Configuration
+
+You can specify model settings using a JSON configuration file with the `--model-config` parameter:
+
+### Model Configuration File Format
+
+Create a JSON file with model settings:
+
+```json
+{
+  "model": "gpt-4.1-2025-04-14",
+  "temperature": 0.2,
+  "max_tokens": 4000,
+  "top_p": 0.95
+}
+```
+
+**Important**: Model configuration files take priority over individual CLI parameters. If you specify `--model-config`, the individual `--model`, `--temperature`, `--max-tokens`, and `--top-p` arguments will be ignored.
+
+### Example Model Configuration Files
+
+You can find example model configuration files in the benchmarks directory:
+
+- `benchmarks/healthcare/eval_models/gpt-4o.json`
+- `benchmarks/national_parks/eval_models/gpt-4.1-mini.json`
+- `benchmarks/airbnb/eval_models/gpt-4o.json`
 
 ## Custom Prompts
 

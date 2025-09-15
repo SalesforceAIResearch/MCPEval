@@ -17,6 +17,8 @@
     - ✅ single turn
     - 🔲 multi-turn
 - ✅ Task verification
+- ✅ Supporting any model (including gpt-5) to generate tasks with model config args
+- ✅ Implementing a new revalidation feature to revise the task from the actual tool call execution.
 
 ### Evaluation 📊
 - ✅ Implement core evaluation metrics (accuracy, latency)
@@ -50,7 +52,7 @@
 - ✅ Model evaluation dashboard
 - ✅ Results and analytics pages
 - ✅ Data management interfaces
-- 🔲 Unifying the model config for all the pages and sharing the same component
+- ✅ Unifying the model config for all the pages and sharing the same component
 - 🔲 Saving any existing model config as a config file and support load it again
 
 ## Issues

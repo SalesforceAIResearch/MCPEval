@@ -48,6 +48,7 @@ to-end task generation and deep evaluation of LLM agents across diverse dimensio
 
 *MCPEval web interface providing intuitive access to all evaluation features*
 
+
 ## Features
 
 - 🚀 **Automated End-to-End Evaluation**
@@ -224,48 +225,57 @@ For more control over each step:
 ```bash
 # 1. Generate tasks
 mcp-eval generate-tasks \
-  --server mcp_servers/healthcare/server.py \
-  --model gpt-4.1-2025-04-14 \
+  --servers mcp_servers/healthcare/server.py \
+  --model-config benchmarks/healthcare/eval_models/gpt-4.1-2025-04-14.json \
   --num-tasks 200 \
   --output data/healthcare/evaluation_tasks.jsonl
 
 # 2. Verify tasks work correctly
 mcp-eval verify-tasks \
-  --server mcp_servers/healthcare/server.py \
+  --servers mcp_servers/healthcare/server.py \
   --tasks-file data/healthcare/evaluation_tasks.jsonl \
   --output data/healthcare/evaluation_tasks_verified.jsonl
 
-# 3. Evaluate model performance
-mcp-eval evaluate \
-  --server mcp_servers/healthcare/server.py \
+# 3. Revalidate task descriptions based on execution data (optional but recommended)
+mcp-eval revalidate-tasks \
+  --verified-tasks-file data/healthcare/evaluation_tasks_verified.jsonl \
   --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
-  --tasks-file data/healthcare/evaluation_tasks_verified.jsonl \
+  --output data/healthcare/evaluation_tasks_final.jsonl
+
+# 4. Evaluate model performance
+mcp-eval evaluate \
+  --servers mcp_servers/healthcare/server.py \
+  --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
+  --tasks-file data/healthcare/evaluation_tasks_final.jsonl \
   --output benchmarks/healthcare/results/gpt4o_evaluation.json \
   --max-turns 30
 
-# 4. Analyze results and generate reports
+# 5. Analyze results and generate reports
 mcp-eval analyze \
   --predictions benchmarks/healthcare/results/gpt4o_evaluation.json \
-  --ground-truth data/healthcare/evaluation_tasks_verified.jsonl \
+  --ground-truth data/healthcare/evaluation_tasks_final.jsonl \
   --generate-report
 
-# 5. Optional: Run LLM judge evaluation
+# 6. Optional: Run LLM judge evaluation
 mcp-eval judge \
   --input-file benchmarks/healthcare/results/gpt4o_evaluation.json \
   --output-dir benchmarks/healthcare/results \
-  --model gpt-4o
+  --model-config benchmarks/healthcare/eval_models/gpt-4o.json
 
-# 6. Optional: Analyze LLM judgment results
+# 7. Optional: Analyze LLM judgment results
 mcp-eval judge-rubric \
   --trajectory-file benchmarks/healthcare/results/gpt4o_evaluation_trajectory.json \
   --completion-file benchmarks/healthcare/results/gpt4o_evaluation_completion.json \
   --output-dir benchmarks/healthcare/report
 ```
 
+**Note**: The revalidation step (step 3) analyzes the actual tool conversations from verified tasks and improves task descriptions to be more accurate and specific. This leads to higher-quality evaluation datasets and better task clarity for subsequent evaluations.
+
 ### Available Commands
 
 - `generate-tasks` - Generate evaluation tasks for MCP servers
 - `verify-tasks` - Verify tasks can be executed successfully  
+- `revalidate-tasks` - Improve task descriptions based on actual execution data
 - `evaluate` - Evaluate models using MCP servers and tasks
 - `analyze` - Analyze evaluation results and generate reports
 - `judge` - Run LLM-based evaluation of execution trajectories
