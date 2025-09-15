@@ -541,6 +541,13 @@ def parse_arguments():
         help="Run in non-interactive mode (automatically handle file conflicts)",
     )
     task_revalidate_parser.add_argument(
+        "--on-existing-file",
+        type=str,
+        choices=["overwrite", "append", "timestamp"],
+        default="timestamp",
+        help="Action if output file exists: overwrite, append, or timestamp (default)",
+    )
+    task_revalidate_parser.add_argument(
         "--prompt-file",
         type=str,
         default=None,

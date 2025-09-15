@@ -267,7 +267,13 @@ async def revalidate_tasks(args):
         args.verified_tasks_file, args.output, prefix="revalidated"
     )
     non_interactive = getattr(args, "non_interactive", False)
-    output_file, _ = handle_existing_file(output_file, non_interactive=non_interactive)
+    # Determine default action from CLI if provided
+    default_action = getattr(args, "on_existing_file", "timestamp")
+    output_file, append_mode = handle_existing_file(
+        output_file,
+        non_interactive=non_interactive,
+        default_action=default_action,
+    )
 
     # Limit number if requested
     num_tasks = getattr(args, "num_tasks", -1)
@@ -296,6 +302,31 @@ async def revalidate_tasks(args):
     # Track results
     revalidated_count = 0
     error_count = 0
+
+    # If appending, load existing IDs to avoid duplicates
+    existing_ids = set()
+    if append_mode and os.path.exists(output_file):
+        try:
+            existing_tasks = load_tasks_from_jsonl(output_file)
+            existing_ids = {t.id for t in existing_tasks if hasattr(t, "id") and t.id}
+            logger.info(f"Found {len(existing_ids)} existing revalidated tasks to skip")
+        except Exception:
+            existing_ids = set()
+
+    # Filter out already revalidated tasks when appending
+    if append_mode and existing_ids:
+        original_count = len(tasks_with_conversations)
+        tasks_with_conversations = [
+            task for task in tasks_with_conversations 
+            if not (hasattr(task, "id") and task.id and task.id in existing_ids)
+        ]
+        skipped_count = original_count - len(tasks_with_conversations)
+        if skipped_count > 0:
+            logger.info(f"Skipping {skipped_count} already revalidated tasks")
+
+    if not tasks_with_conversations:
+        logger.info("No tasks to revalidate (all tasks already processed)")
+        return
 
     logger.info(f"Starting revalidation of {len(tasks_with_conversations)} tasks")
 
