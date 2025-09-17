@@ -271,18 +271,26 @@ python -m mcpeval.cli.main judge-rubric \
 python -m mcpeval.cli.main judge-rubric \
     --trajectory-file path/to/trajectory_scores.json \
     --completion-file path/to/completion_scores.json \
-    --output path/to/analysis_results.json \
+    --output-dir path/to/output/directory \
     --verbose
+
+# With custom rubrics file for AI report generation
+python -m mcpeval.cli.main judge-rubric \
+    --combined-file path/to/combined_results.jsonl \
+    --output-dir path/to/output/directory \
+    --rubrics-file path/to/custom_rubrics.md
 ```
 
 ##### Arguments
 
 - `--trajectory-file`: Path to trajectory scores JSON file (required)
 - `--completion-file`: Path to completion scores JSON file (required)
+- `--combined-file`: Path to combined JSONL file containing both trajectory and completion data (alternative to separate files)
 - `--output-dir`, `-o`: Directory to save analysis results and AI report (default: same as input files)
 - `--verbose`, `-v`: Print detailed analysis information (optional)
 - `--generate-report`: Generate AI-powered performance report: 1=enabled (default), 0=disabled (analysis only)
 - `--report-model`: Model to use for AI report generation (default: gpt-4o)
+- `--rubrics-file`: Path to custom rubrics markdown file for AI report generation (default: uses built-in rubrics)
 
 ##### Example with Real Files
 
@@ -347,6 +355,53 @@ python -m mcpeval.cli.main judge-rubric \
   }
 ]
 ```
+
+#### Custom Rubrics Files
+
+The `--rubrics-file` option allows you to use custom evaluation rubrics for AI report generation. This is useful when you want to customize the scoring criteria or add domain-specific evaluation aspects.
+
+##### Rubrics File Format
+
+The rubrics file should be a markdown file that follows the same structure as the built-in `rubrics.md`. It should include:
+
+1. **Trajectory Evaluation Aspects** - Define scoring criteria for trajectory evaluation (planning, execution flow, tool selection, etc.)
+2. **Task Completion Evaluation Aspects** - Define scoring criteria for completion evaluation (requirement coverage, accuracy, completeness, usefulness)
+3. **Scoring Guidelines** - General principles and score interpretation
+
+##### Example Custom Rubrics File
+
+```markdown
+# Custom LLM Evaluation Rubrics
+
+## Trajectory Evaluation Aspects
+
+### 1. Planning (0.0 - 1.0)
+**Definition**: How well did the agent understand and decompose the task?
+
+**Scoring Criteria**:
+- **1.0 - Excellent**: Perfect task understanding with custom criteria...
+- **0.8-0.9 - Very Good**: Good understanding with minor gaps...
+[Continue with your custom criteria]
+
+### 2. Domain Expertise (0.0 - 1.0)
+**Definition**: How well did the agent demonstrate domain-specific knowledge?
+[Add your custom evaluation aspect]
+
+## Task Completion Evaluation Aspects
+[Define your custom completion criteria]
+```
+
+##### Usage with Custom Rubrics
+
+```bash
+# Use custom rubrics for report generation
+python -m mcpeval.cli.main judge-rubric \
+    --combined-file path/to/results.jsonl \
+    --rubrics-file path/to/my_custom_rubrics.md \
+    --output-dir path/to/output/
+```
+
+The AI-generated report will use your custom rubrics to interpret scores and provide recommendations based on your specific evaluation criteria.
 
 #### Output Format
 

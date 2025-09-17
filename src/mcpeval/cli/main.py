@@ -939,6 +939,12 @@ def parse_arguments():
         help="Model to use for AI report generation (default: gpt-4o)",
     )
 
+    llm_judge_analyze_parser.add_argument(
+        "--rubrics-file",
+        type=str,
+        help="Path to custom rubrics markdown file for AI report generation (default: uses built-in rubrics)",
+    )
+
     llm_judge_analyze_parser.set_defaults(func=llm_judger_analyzer)
 
     # Report Generation subcommand

@@ -21,13 +21,26 @@ except ImportError:
     OPENAI_AVAILABLE = False
 
 
-def load_rubrics_content() -> str:
-    """Load the rubrics.md content from the llm_judger directory."""
-    rubrics_path = Path(__file__).parent / "rubrics.md"
+def load_rubrics_content(rubrics_file: Optional[str] = None) -> str:
+    """Load the rubrics content from a file.
+    
+    Args:
+        rubrics_file: Path to custom rubrics file. If None, uses default rubrics.md
+        
+    Returns:
+        String content of the rubrics file
+    """
+    if rubrics_file:
+        rubrics_path = Path(rubrics_file)
+    else:
+        rubrics_path = Path(__file__).parent / "rubrics.md"
+    
     try:
         with open(rubrics_path, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
+        if rubrics_file:
+            raise FileNotFoundError(f"Custom rubrics file not found: {rubrics_file}")
         return "Rubrics documentation not available."
 
 
@@ -37,6 +50,7 @@ def generate_ai_report(
     patterns: Dict[str, Any],
     insights: List[str],
     model: str = "gpt-4o",
+    rubrics_file: Optional[str] = None,
 ) -> str:
     """Generate an AI-powered performance report using OpenAI models."""
     if not OPENAI_AVAILABLE:
@@ -45,7 +59,7 @@ def generate_ai_report(
         )
 
     # Load rubrics content
-    rubrics_content = load_rubrics_content()
+    rubrics_content = load_rubrics_content(rubrics_file)
 
     # Create OpenAI client
     client = OpenAI()
@@ -122,7 +136,7 @@ Focus on actionable insights for improving both the model being evaluated and th
 
 
 def generate_report_from_analysis_file(
-    analysis_file: str, model: str = "gpt-4o", output_file: Optional[str] = None
+    analysis_file: str, model: str = "gpt-4o", output_file: Optional[str] = None, rubrics_file: Optional[str] = None
 ) -> str:
     """Generate an AI report directly from an analysis JSON file."""
     if not OPENAI_AVAILABLE:
@@ -158,7 +172,7 @@ def generate_report_from_analysis_file(
         os.makedirs(output_dir, exist_ok=True)
 
     # Generate the report
-    report_content = generate_ai_report(stats, correlations, patterns, insights, model)
+    report_content = generate_ai_report(stats, correlations, patterns, insights, model, rubrics_file)
 
     # Save the report
     with open(output_file, "w", encoding="utf-8") as f:
