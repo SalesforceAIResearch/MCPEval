@@ -1,26 +1,26 @@
 #!/bin/bash
 
 # Define arguments
-DOMAIN="yfinance"
-MODEL="xlam_2_70b"
+DOMAIN="national_parks"
+MODEL="gpt-5"
 MAX_TURNS=30
 REPORT_MODEL="gpt-4.1-2025-04-14"
 JUDGE_MODEL="gpt-4o"
-SERVER="mcp_servers/${DOMAIN}/server.py"
+SERVERS="mcp-server-nationalparks^NPS_API_KEY=$NPS_API_KEY"
 MODEL_CONFIG="benchmarks/${DOMAIN}/eval_models/${MODEL}.json"
 TASKS_FILE="data/${DOMAIN}/evaluation_tasks_verified.jsonl"
-OUTPUT="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation.json"
+OUTPUT="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation.jsonl"
 PROMPT_FILE="benchmarks/${DOMAIN}/evaluation_prompt.json"
 EVAL_LOG="benchmarks/${DOMAIN}/logs/${MODEL}_task_evaluation.log"
 ANALYSIS_LOG="benchmarks/${DOMAIN}/logs/${MODEL}_task_evaluation.log"
 REPORT_OUTPUT="benchmarks/${DOMAIN}/report/${MODEL}_task_evaluation.md"
 RESULTS_DIR="benchmarks/${DOMAIN}/results"
-TRAJECTORY_FILE="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation_trajectory.json"
-COMPLETION_FILE="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation_completion.json"
+TRAJECTORY_FILE="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation_with_${JUDGE_MODEL}_trajectory.jsonl"
+COMPLETION_FILE="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation_with_${JUDGE_MODEL}_completion.jsonl"
 REPORT_DIR="benchmarks/${DOMAIN}/report"
 
-mcp-eval evaluate \
-    --server $SERVER \
+uv run mcp-eval evaluate \
+    --servers $SERVERS \
     --model-config $MODEL_CONFIG \
     --tasks-file $TASKS_FILE \
     --output $OUTPUT \
@@ -28,7 +28,7 @@ mcp-eval evaluate \
     --max-turns $MAX_TURNS
 
 echo "Analyzing ${DOMAIN} ${MODEL} results..."
-mcp-eval analyze \
+uv run mcp-eval analyze \
     --predictions $OUTPUT \
     --ground-truth $TASKS_FILE \
     --generate-report \
@@ -36,10 +36,10 @@ mcp-eval analyze \
     --report-output $REPORT_OUTPUT
 
 echo "Judging ${DOMAIN} ${MODEL}..."
-mcp-eval judge --input-file $OUTPUT --output-dir $RESULTS_DIR --model $JUDGE_MODEL
+uv run mcp-eval judge --input-file $OUTPUT --output-dir $RESULTS_DIR --model $JUDGE_MODEL
 
 echo "Judging rubric for ${DOMAIN} ${MODEL}..."
-mcp-eval judge-rubric \
+uv run mcp-eval judge-rubric \
     --trajectory-file $TRAJECTORY_FILE \
     --completion-file $COMPLETION_FILE \
     --output-dir $REPORT_DIR
