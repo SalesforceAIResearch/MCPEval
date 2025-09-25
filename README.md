@@ -48,6 +48,10 @@ to-end task generation and deep evaluation of LLM agents across diverse dimensio
 
 *MCPEval web interface providing intuitive access to all evaluation features*
 
+## News
+- Supporting GPT-5
+- Using model-config for using any model to generate and evaluate
+- A new [revalidation cli](src/mcpeval/cli/mcp_task_revalidator/README.md) is released for generating high-quality data
 
 ## Features
 
