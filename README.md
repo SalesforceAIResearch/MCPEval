@@ -211,10 +211,10 @@ The MCPEval CLI provides a comprehensive toolkit for managing MCP servers and ev
 ```bash
 # Automatically generate tasks, verify, evaluate, and analyze results
 mcp-eval auto \
-  --servers mcp_servers/healthcare/server.py \
-  --working-dir evaluation_results/healthcare_eval \
-  --task-model gpt-4.1-2025-04-14 \
-  --eval-model-configs benchmarks/healthcare/eval_models/gpt-4o.json \
+  --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt \
+  --working-dir evaluation_results/airbnb_eval \
+  --task-model gpt-4o-2024-11-20 \
+  --eval-model-configs benchmarks/airbnb/eval_models/gpt-4o.json \
   --num-tasks 50
 ```
 
@@ -225,48 +225,48 @@ For more control over each step:
 ```bash
 # 1. Generate tasks
 mcp-eval generate-tasks \
-  --servers mcp_servers/healthcare/server.py \
-  --model-config benchmarks/healthcare/eval_models/gpt-4.1-2025-04-14.json \
+  --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt \
+  --model-config benchmarks/airbnb/eval_models/gpt-4o.json \
   --num-tasks 200 \
-  --output data/healthcare/evaluation_tasks.jsonl
+  --output data/airbnb/evaluation_tasks.jsonl
 
 # 2. Verify tasks work correctly
 mcp-eval verify-tasks \
-  --servers mcp_servers/healthcare/server.py \
-  --tasks-file data/healthcare/evaluation_tasks.jsonl \
-  --output data/healthcare/evaluation_tasks_verified.jsonl
+  --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt \
+  --tasks-file data/airbnb/evaluation_tasks.jsonl \
+  --output data/airbnb/evaluation_tasks_verified.jsonl
 
 # 3. Revalidate task descriptions based on execution data (optional but recommended)
 mcp-eval revalidate-tasks \
-  --verified-tasks-file data/healthcare/evaluation_tasks_verified.jsonl \
-  --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
-  --output data/healthcare/evaluation_tasks_final.jsonl
+  --verified-tasks-file data/airbnb/evaluation_tasks_verified.jsonl \
+  --model-config benchmarks/airbnb/eval_models/gpt-4o.json \
+  --output data/airbnb/evaluation_tasks_final.jsonl
 
 # 4. Evaluate model performance
 mcp-eval evaluate \
-  --servers mcp_servers/healthcare/server.py \
-  --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
-  --tasks-file data/healthcare/evaluation_tasks_final.jsonl \
-  --output benchmarks/healthcare/results/gpt4o_evaluation.json \
+  --servers @openbnb/mcp-server-airbnb:--ignore-robots-txt \
+  --model-config benchmarks/airbnb/eval_models/gpt-4o.json \
+  --tasks-file data/airbnb/evaluation_tasks_final.jsonl \
+  --output benchmarks/airbnb/results/gpt4o_evaluation.json \
   --max-turns 30
 
 # 5. Analyze results and generate reports
 mcp-eval analyze \
-  --predictions benchmarks/healthcare/results/gpt4o_evaluation.json \
-  --ground-truth data/healthcare/evaluation_tasks_final.jsonl \
+  --predictions benchmarks/airbnb/results/gpt4o_evaluation.json \
+  --ground-truth data/airbnb/evaluation_tasks_final.jsonl \
   --generate-report
 
 # 6. Optional: Run LLM judge evaluation
 mcp-eval judge \
-  --input-file benchmarks/healthcare/results/gpt4o_evaluation.json \
-  --output-dir benchmarks/healthcare/results \
-  --model-config benchmarks/healthcare/eval_models/gpt-4o.json
+  --input-file benchmarks/airbnb/results/gpt4o_evaluation.json \
+  --output-dir benchmarks/airbnb/results \
+  --model-config benchmarks/airbnb/eval_models/gpt-4o.json
 
 # 7. Optional: Analyze LLM judgment results
 mcp-eval judge-rubric \
-  --trajectory-file benchmarks/healthcare/results/gpt4o_evaluation_trajectory.json \
-  --completion-file benchmarks/healthcare/results/gpt4o_evaluation_completion.json \
-  --output-dir benchmarks/healthcare/report
+  --trajectory-file benchmarks/airbnb/results/gpt4o_evaluation_trajectory.json \
+  --completion-file benchmarks/airbnb/results/gpt4o_evaluation_completion.json \
+  --output-dir benchmarks/airbnb/report
 ```
 
 **Note**: The revalidation step (step 3) analyzes the actual tool conversations from verified tasks and improves task descriptions to be more accurate and specific. This leads to higher-quality evaluation datasets and better task clarity for subsequent evaluations.
@@ -289,9 +289,9 @@ Models are configured using JSON files. Examples:
 
 ```json
 {
-  "model": "gpt-4o-mini-2024-07-18",
+  "model": "gpt-4o-2024-11-20",
   "temperature": 0.01,
-  "max_tokens": 16000
+  "max_tokens": 16384
 }
 ```
 
