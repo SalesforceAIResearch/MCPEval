@@ -762,6 +762,14 @@ def main(args):
     colored_print("🧠 LLM Judger Results Analyzer", Colors.BRIGHT_CYAN, bold=True)
     colored_print("=" * 50, Colors.CYAN)
 
+    # Validate rubrics file if provided
+    rubrics_file = getattr(args, "rubrics_file", None)
+    if rubrics_file and not os.path.exists(rubrics_file):
+        colored_print(f"❌ Rubrics file not found: {rubrics_file}", Colors.RED)
+        sys.exit(1)
+    elif rubrics_file:
+        colored_print(f"📄 Using custom rubrics file: {rubrics_file}", Colors.CYAN)
+
     # Check if we have a combined JSONL file or separate files
     combined_file = getattr(args, "combined_file", None)
     trajectory_file = getattr(args, "trajectory_file", None)
@@ -876,6 +884,7 @@ def main(args):
                     patterns,
                     insights,
                     getattr(args, "report_model", "gpt-4o"),
+                    rubrics_file,
                 )
 
                 # Save report

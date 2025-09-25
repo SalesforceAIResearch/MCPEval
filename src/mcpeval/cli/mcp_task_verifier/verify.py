@@ -5,9 +5,11 @@ Task Verifier CLI Tool
 This module provides functionality for verifying tasks against an MCP server.
 """
 import asyncio
+import json
 import os
 import logging
 import time
+from pathlib import Path
 
 from mcpeval.client.openai_client import OpenAIMCPClient
 from mcpeval.synthesis.task_verifier import LLMTaskVerifier
@@ -45,6 +47,7 @@ async def verify_task(
     server_args_list,
     server_envs=None,
     model="gpt-4o",
+    model_config=None,
     api_key=None,
     system_message=None,
     max_turns=10,
@@ -66,14 +69,26 @@ async def verify_task(
     """
     logger.info(f"Starting verification for task: {task.name}")
 
-    # Initialize OpenAI LLM for the evaluator
-    llm = OpenAIWrapper(model=model, api_key=api_key)
+    # Use model_config if provided, otherwise create default config
+    if model_config is None:
+        model_config = {
+            "model": model,
+            "temperature": 0.01,
+            "max_tokens": 16384
+        }
+    
+    # Initialize OpenAI LLM for the evaluator using the same pattern as TaskGenerator
+    llm = OpenAIWrapper(
+        api_key=api_key,
+        model_config=model_config
+    )
 
     # Initialize evaluator
     evaluator = LLMTaskVerifier(llm)
 
-    # Initialize OpenAI MCP client
-    client = OpenAIMCPClient(model=model, api_key=api_key)
+    # Initialize OpenAI MCP client using the model from config
+    final_model = model_config.get("model", model)
+    client = OpenAIMCPClient(model=final_model, api_key=api_key)
     logger.info("OpenAI MCP client created")
 
     try:
@@ -99,14 +114,10 @@ async def verify_task(
             logger.error("No valid tools found. Cannot verify task.")
             return False, None
 
-        # Initialize task generator with the tools from the server
+        # Initialize task generator with the tools from the server using the same pattern
         task_generator = TaskGenerator(
             tool_library=ToolLibrary(tools=tools_data),
-            model_provider="openai",
-            model_name=model,
-            max_tokens=4000,
-            model_temperature=0.2,
-            top_p=0.95,
+            model_config=model_config,
             api_key=api_key,
         )
 
@@ -127,8 +138,6 @@ async def verify_task(
             task=task,
             tools=tools_data,
             tool_name_to_session=tool_name_to_session,
-            temperature=0.2,
-            max_tokens=1000,
             max_turns=max_turns,  # Configurable max turns for complex tasks
             system_message=system_message,
         )
@@ -195,6 +204,31 @@ async def verify_task(
 
 async def verify_tasks(args):
     """Verify tasks from a JSONL file and save results."""
+    # Model configuration - load this first
+    model_config = {}
+
+    # Load model configuration from file if provided
+    if hasattr(args, "model_config") and args.model_config:
+        try:
+            config_path = Path(args.model_config)
+            if not config_path.exists():
+                logger.error(f"Model config file not found: {args.model_config}")
+                return
+
+            with open(config_path, "r") as f:
+                model_config = json.load(f)
+
+            logger.info(f"Loaded model configuration from {args.model_config}")
+        except Exception as e:
+            logger.error(f"Error loading model config file {args.model_config}: {e}")
+            return
+    
+    # Determine final model name - prioritize model_config, then fall back to CLI arg
+    final_model_name = model_config.get("model") if model_config else args.model
+    logger.info(
+        f"Using model: {final_model_name} (from {'config file' if model_config.get('model') else 'CLI argument'})"
+    )
+    
     # Load tasks from file
     all_tasks = load_tasks_from_jsonl(args.tasks_file)
 
@@ -284,7 +318,8 @@ async def verify_tasks(args):
                 server_paths=server_paths,
                 server_args_list=server_args_list,
                 server_envs=server_envs,
-                model=args.model,
+                model=final_model_name,
+                model_config=model_config,
                 api_key=getattr(args, "api_key", None),
                 system_message=system_message,
                 max_turns=getattr(args, "max_turns", 10),

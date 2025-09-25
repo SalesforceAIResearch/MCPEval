@@ -1,1 +1,1 @@
-mcp-eval generate-tasks --server @playwright/mcp --model gpt-4.1-2025-04-14 --num-tasks 600 --prompt-file benchmarks/playwright/data_generation/task_generation_prompt.json --output data/playwright/evaluation_tasks.jsonl 
+mcp-eval generate-tasks --server @playwright/mcp --model-config benchmarks/playwright/eval_models/gpt-4o.json --num-tasks 600 --prompt-file benchmarks/playwright/data_generation/task_generation_prompt.json --output data/playwright/evaluation_tasks.jsonl

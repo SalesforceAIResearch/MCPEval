@@ -2,7 +2,11 @@ from typing import Dict, List, Any, Optional, Union, Tuple
 import logging
 from ..commons.types import ToolCall, Task, ToolDefinition, ToolCallResult
 from .utils import extract_content_from_mcp_result
-from ..commons.prompts import task_verification_system_prompt
+from ..commons.prompts import (
+    task_verification_system_prompt,
+    task_revalidation_system_prompt,
+    task_revalidation_user_prompt,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +18,172 @@ class LLMTaskVerifier:
 
     def __init__(self, llm: Any):
         self.llm = llm
+
+    def revalidate_task_description(
+        self,
+        task: Task,
+        tools: Optional[List[ToolDefinition]] = None,
+        conversation: Optional[List[Dict[str, Any]]] = None,
+        tool_calls: Optional[List[ToolCall]] = None,
+        tool_call_results: Optional[
+            List[
+                Union[
+                    Tuple[ToolCall, Optional[ToolCallResult]],
+                    Tuple[ToolCall, Any],
+                    Any,
+                ]
+            ]
+        ] = None,
+        custom_prompts: Optional[Dict[str, str]] = None,
+    ) -> Task:
+        """
+        Revalidate and update a task's description so it faithfully reflects the
+        actual tool usage and conversation.
+
+        - Ensures concrete inputs used in tool calls are captured in description
+        - Optionally refines goal if needed to match achieved outcome
+        - Does not invent details beyond the observed interaction
+        """
+
+        # Use provided tools or fall back to task.tools
+        effective_tools = tools if tools is not None else (task.tools or [])
+
+        # Serialize conversation and tool calls/results for prompting
+        import json
+
+        def safe_json(obj: Any) -> str:
+            try:
+                return json.dumps(obj, ensure_ascii=False)
+            except Exception:
+                try:
+                    # Fallback: best-effort conversion via model_dump if pydantic
+                    if hasattr(obj, "model_dump"):
+                        return json.dumps(obj.model_dump(), ensure_ascii=False)
+                except Exception:
+                    pass
+                try:
+                    # Fallback: as dict if simple BaseModel
+                    if hasattr(obj, "dict"):
+                        return json.dumps(obj.dict(), ensure_ascii=False)
+                except Exception:
+                    pass
+                return str(obj)
+
+        # Flatten conversation messages if they are pydantic Message models
+        serialized_conversation = []
+        if conversation is None and task.conversation is not None:
+            # Convert pydantic models to plain dicts
+            for m in task.conversation:
+                if hasattr(m, "model_dump"):
+                    serialized_conversation.append(m.model_dump())
+                else:
+                    serialized_conversation.append(m)
+        elif conversation is not None:
+            serialized_conversation = conversation
+
+        # Serialize tool calls and results
+        serialized_tool_calls_and_results: List[Dict[str, Any]] = []
+        # Prefer explicit tool_calls + tool_call_results; otherwise use from task
+        calls = tool_calls if tool_calls is not None else (task.tool_calls or [])
+        call_results = (
+            tool_call_results
+            if tool_call_results is not None
+            else (task.tool_call_results or [])
+        )
+
+        # If only results are available as tuples, align them; otherwise list calls alone
+        if call_results:
+            for entry in call_results:
+                # entry may be (ToolCall, ToolCallResult) or Any
+                try:
+                    if isinstance(entry, tuple) and len(entry) == 2:
+                        tc, res = entry
+                        tc_dict = tc.model_dump() if hasattr(tc, "model_dump") else tc
+                        res_payload = (
+                            res.model_dump() if hasattr(res, "model_dump") else res
+                        )
+                        serialized_tool_calls_and_results.append(
+                            {"tool_call": tc_dict, "result": res_payload}
+                        )
+                    else:
+                        serialized_tool_calls_and_results.append({"raw": entry})
+                except Exception:
+                    serialized_tool_calls_and_results.append({"raw": str(entry)})
+        elif calls:
+            for tc in calls:
+                tc_dict = tc.model_dump() if hasattr(tc, "model_dump") else tc
+                serialized_tool_calls_and_results.append({"tool_call": tc_dict})
+
+        # Prepare prompt
+        task_for_prompt = {
+            "name": task.name,
+            "description": task.description,
+            "goal": task.goal,
+        }
+
+        formatted_tools = []
+        for t in effective_tools:
+            try:
+                formatted_tools.append(
+                    {
+                        "name": getattr(t, "name", ""),
+                        "description": getattr(t, "description", ""),
+                        "parameters": getattr(t, "inputSchema", {}),
+                    }
+                )
+            except Exception:
+                formatted_tools.append(str(t))
+
+        # Use custom prompts if provided, otherwise use defaults
+        system_prompt = custom_prompts.get("system", task_revalidation_system_prompt) if custom_prompts else task_revalidation_system_prompt
+        user_prompt_template = custom_prompts.get("user", task_revalidation_user_prompt) if custom_prompts else task_revalidation_user_prompt
+        
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": user_prompt_template.format(
+                    task=safe_json(task_for_prompt),
+                    formatted_tools=safe_json(formatted_tools),
+                    conversation=safe_json(serialized_conversation),
+                    tool_calls_and_results=safe_json(serialized_tool_calls_and_results),
+                ),
+            },
+        ]
+
+        response = self.llm.chat_completion(messages=messages)
+        raw = response["choices"][0]["message"]["content"]
+
+        # Parse strictly as JSON; if fails, keep original task
+        try:
+            updated = json.loads(raw)
+            name = updated.get("name", task.name)
+            description = updated.get("description", task.description)
+            goal = updated.get("goal", task.goal)
+            return Task(
+                id=task.id,
+                name=name,
+                description=description,
+                goal=goal,
+                tools=effective_tools,
+                tool_calls=task.tool_calls,
+                final_response=task.final_response,
+                conversation=task.conversation,
+                tool_call_results=task.tool_call_results,
+            )
+        except Exception:
+            # Fall back silently to original task if parsing fails
+            return Task(
+                id=task.id,
+                name=task.name,
+                description=task.description,
+                goal=task.goal,
+                tools=effective_tools,
+                tool_calls=task.tool_calls,
+                final_response=task.final_response,
+                conversation=task.conversation,
+                tool_call_results=task.tool_call_results,
+            )
 
     @staticmethod
     def request_task_updating_tool() -> Dict[str, Any]:

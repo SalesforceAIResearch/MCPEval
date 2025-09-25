@@ -88,6 +88,7 @@ Servers can be specified in several formats:
 |----------|------|---------|-------------|
 | `--output` | string | `verified_<input_filename>` | Output file path for verified tasks |
 | `--model` | string | `gpt-4o` | OpenAI model for verification |
+| `--model-config` | string | - | JSON file containing model configuration (takes priority over individual model parameters) |
 | `--num-tasks` | int | `-1` (all) | Number of tasks to verify |
 | `--max-turns` | int | `10` | Maximum conversation turns per task |
 | `--prompt-file` | string | - | JSON file containing system message |
@@ -108,7 +109,17 @@ mcp-eval verify-tasks \
   --output data/healthcare/evaluation_tasks_verified.jsonl
 ```
 
-#### 2. Verify Tasks with Custom Prompt
+#### 2. Verify Tasks with Model Configuration File
+
+```bash
+mcp-eval verify-tasks \
+  --servers mcp_servers/healthcare/server.py \
+  --tasks-file data/healthcare/evaluation_tasks.jsonl \
+  --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
+  --output data/healthcare/evaluation_tasks_verified.jsonl
+```
+
+#### 3. Verify Tasks with Custom Prompt
 
 ```bash
 mcp-eval verify-tasks \
@@ -119,7 +130,7 @@ mcp-eval verify-tasks \
   --output data/healthcare/evaluation_tasks_verified.jsonl
 ```
 
-#### 3. Verify External Server Tasks (e.g., Airbnb)
+#### 4. Verify External Server Tasks (e.g., Airbnb)
 
 ```bash
 mcp-eval verify-tasks \
@@ -197,6 +208,32 @@ You can find example verification prompt files in the benchmarks directory:
 - `benchmarks/sports/data_generation/task_verification_prompt.json`
 - `benchmarks/filesystem/task_verification_prompt.json`
 - `benchmarks/yfinance/data_generation/task_verification_prompt.json`
+
+## Model Configuration
+
+You can specify model settings using a JSON configuration file with the `--model-config` parameter:
+
+### Model Configuration File Format
+
+Create a JSON file with model settings:
+
+```json
+{
+  "model": "gpt-4.1-2025-04-14",
+  "temperature": 0.01,
+  "max_tokens": 16384
+}
+```
+
+**Important**: Model configuration files take priority over individual CLI parameters. If you specify `--model-config`, the individual `--model` parameter will be ignored.
+
+### Example Model Configuration Files
+
+You can find example model configuration files in the benchmarks directory:
+
+- `benchmarks/healthcare/eval_models/gpt-4o.json`
+- `benchmarks/national_parks/eval_models/gpt-4.1-mini.json`
+- `benchmarks/airbnb/eval_models/gpt-4o.json`
 
 ## Output Files
 

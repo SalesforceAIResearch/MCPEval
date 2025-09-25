@@ -47,6 +47,7 @@ class ColoredHelpFormatter(argparse.HelpFormatter):
         self.command_colors = {
             "generate-tasks": Colors.BRIGHT_YELLOW,
             "verify-tasks": Colors.BRIGHT_BLUE,
+            "revalidate-tasks": Colors.BRIGHT_CYAN,
             "convert-data": Colors.BRIGHT_MAGENTA,
             "split-data": Colors.BRIGHT_RED,
             "evaluate": Colors.BRIGHT_GREEN,
@@ -69,6 +70,7 @@ class ColoredHelpFormatter(argparse.HelpFormatter):
         emoji_map = {
             "generate-tasks": "🎯",
             "verify-tasks": "✅",
+            "revalidate-tasks": "🔄",
             "convert-data": "🔄",
             "split-data": "✂️",
             "evaluate": "📊",
@@ -175,6 +177,17 @@ def task_verifier(args):
     args.server_env = server_env_list[0]
 
     from mcpeval.cli.mcp_task_verifier.verify import main
+
+    main(args)
+
+
+def task_revalidator(args):
+    """Entry point for task revalidation subcommand."""
+    # Handle API key priority: CLI arg > environment variable
+    if not hasattr(args, "api_key") or args.api_key is None:
+        args.api_key = os.getenv("OPENAI_API_KEY")
+
+    from mcpeval.cli.mcp_task_revalidator.revalidate import main
 
     main(args)
 
@@ -415,6 +428,11 @@ def parse_arguments():
         default=0.95,
         help="Top-p sampling parameter (default: 0.95)",
     )
+    task_gen_parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to JSON file containing model configuration (takes priority over individual model parameters)",
+    )
     task_gen_parser.set_defaults(func=task_generator)
 
     # Task Verifier subcommand
@@ -454,6 +472,11 @@ def parse_arguments():
         help="OpenAI model to use for verification (default: gpt-4o)",
     )
     task_verify_parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to JSON file containing model configuration (takes priority over individual model parameters)",
+    )
+    task_verify_parser.add_argument(
         "--num-tasks",
         type=int,
         default=-1,
@@ -476,6 +499,61 @@ def parse_arguments():
         help="Run in non-interactive mode (automatically handle file conflicts)",
     )
     task_verify_parser.set_defaults(func=task_verifier)
+
+    # Task Revalidator subcommand
+    task_revalidate_parser = subparsers.add_parser(
+        "revalidate-tasks",
+        help="Revalidate task descriptions based on actual tool conversations",
+        parents=[common_parser],
+    )
+    task_revalidate_parser.add_argument(
+        "--verified-tasks-file",
+        type=str,
+        required=True,
+        help="Path to the JSONL file containing verified tasks with conversation data",
+    )
+    task_revalidate_parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Output file path for revalidated tasks (default: revalidated_<input_filename>)",
+    )
+    task_revalidate_parser.add_argument(
+        "--model",
+        type=str,
+        default="gpt-4o",
+        help="OpenAI model to use for revalidation (default: gpt-4o)",
+    )
+    task_revalidate_parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to JSON file containing model configuration (takes priority over individual model parameters)",
+    )
+    task_revalidate_parser.add_argument(
+        "--num-tasks",
+        type=int,
+        default=-1,
+        help="Number of tasks to revalidate (default: all tasks)",
+    )
+    task_revalidate_parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Run in non-interactive mode (automatically handle file conflicts)",
+    )
+    task_revalidate_parser.add_argument(
+        "--on-existing-file",
+        type=str,
+        choices=["overwrite", "append", "timestamp"],
+        default="timestamp",
+        help="Action if output file exists: overwrite, append, or timestamp (default)",
+    )
+    task_revalidate_parser.add_argument(
+        "--prompt-file",
+        type=str,
+        default=None,
+        help="Path to JSON file containing custom system prompt for revalidation",
+    )
+    task_revalidate_parser.set_defaults(func=task_revalidator)
 
     # Data Format Converter subcommand
     task_conv_parser = subparsers.add_parser(
@@ -861,6 +939,12 @@ def parse_arguments():
         help="Model to use for AI report generation (default: gpt-4o)",
     )
 
+    llm_judge_analyze_parser.add_argument(
+        "--rubrics-file",
+        type=str,
+        help="Path to custom rubrics markdown file for AI report generation (default: uses built-in rubrics)",
+    )
+
     llm_judge_analyze_parser.set_defaults(func=llm_judger_analyzer)
 
     # Report Generation subcommand
@@ -1034,6 +1118,7 @@ def main():
         command_colors = {
             "generate-tasks": Colors.BRIGHT_YELLOW,
             "verify-tasks": Colors.BRIGHT_BLUE,
+            "revalidate-tasks": Colors.BRIGHT_CYAN,
             "convert-data": Colors.BRIGHT_MAGENTA,
             "split-data": Colors.BRIGHT_RED,
             "evaluate": Colors.BRIGHT_GREEN,

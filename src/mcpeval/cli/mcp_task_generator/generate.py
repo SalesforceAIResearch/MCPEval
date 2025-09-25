@@ -31,10 +31,6 @@ async def generate_tasks(args):
     # Get API key if provided
     api_key = getattr(args, "api_key", None)
 
-    # Create MCP client
-    client = OpenAIMCPClient(model=args.model, api_key=api_key)
-    logger.info(f"OpenAI MCP client created with model {args.model}")
-
     # Load custom prompt messages if provided
     system_message = None
     user_message = None
@@ -58,6 +54,45 @@ async def generate_tasks(args):
         except Exception as e:
             logger.error(f"Error reading prompt file {args.prompt_file}: {e}")
             return
+
+    # Model configuration - load this first
+    model_config = {}
+
+    # Load model configuration from file if provided
+    if hasattr(args, "model_config") and args.model_config:
+        try:
+            config_path = Path(args.model_config)
+            if not config_path.exists():
+                logger.error(f"Model config file not found: {args.model_config}")
+                return
+
+            with open(config_path, "r") as f:
+                model_config = json.load(f)
+
+            logger.info(f"Loaded model configuration from {args.model_config}")
+        except Exception as e:
+            logger.error(f"Error loading model config file {args.model_config}: {e}")
+            return
+    else:
+        # Fallback to CLI arguments if no config file provided
+        model_config = {
+            "model": args.model,
+            "temperature": args.temperature,
+            "max_tokens": args.max_tokens,
+            "top_p": args.top_p,
+        }
+
+    logger.info(f"Model config: {model_config}")
+
+    # Determine final model name - prioritize model_config, then fall back to CLI arg
+    final_model_name = model_config.get("model") or args.model
+    logger.info(
+        f"Using model: {final_model_name} (from {'config file' if model_config.get('model') else 'CLI argument'})"
+    )
+
+    # Create MCP client with final model name
+    client = OpenAIMCPClient(model=final_model_name, api_key=api_key)
+    logger.info(f"OpenAI MCP client created with model {final_model_name}")
 
     try:
         # Convert single server to multi-server format if needed
@@ -93,17 +128,12 @@ async def generate_tasks(args):
         # Create output directory if it doesn't exist
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Initialize task generator
+        
         task_generator = TaskGenerator(
             tool_library=ToolLibrary(tools=tools_data),
-            model_provider="openai",
-            model_name=args.model,
-            model_temperature=args.temperature,
-            max_tokens=args.max_tokens,
-            top_p=args.top_p,
-            existing_tasks=[],
+            model_config=model_config,
             api_key=api_key,
+            existing_tasks=[],
         )
 
         # Load existing tasks from the main output file

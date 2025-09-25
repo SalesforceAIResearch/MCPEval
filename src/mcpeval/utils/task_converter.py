@@ -4,6 +4,7 @@ from typing import Dict, List, Any, Optional
 import os
 import hashlib
 import uuid
+from mcp.types import Tool as ToolDefinition
 
 
 def convert_to_xlam_format(
@@ -30,8 +31,30 @@ def convert_to_xlam_format(
     """
     # Extract key information
     description = task_data.get("description", "")
-    tools = task_data.get("tools", [])
+    raw_tools = task_data.get("tools", [])
     conversation = task_data.get("conversation", [])
+    
+    # Convert tools to OpenAI function call schema format
+    tools = []
+    for tool in raw_tools:
+        if hasattr(tool, 'to_openai_function_schema'):
+            # If it's a ToolDefinition object with the method
+            tools.append(tool.to_openai_function_schema())
+        elif isinstance(tool, dict) and 'name' in tool:
+            # If it's already a dict, try to create ToolDefinition and convert
+            try:
+                tool_def = ToolDefinition(
+                    name=tool.get('name', ''),
+                    description=tool.get('description', ''),
+                    inputSchema=tool.get('inputSchema', {})
+                )
+                tools.append(tool_def.to_openai_function_schema())
+            except Exception:
+                # If conversion fails, keep the original format
+                tools.append(tool)
+        else:
+            # Keep original format if we can't convert
+            tools.append(tool)
 
     # Generate a unique trajectory ID
     if index is not None:
