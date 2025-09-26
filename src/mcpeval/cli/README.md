@@ -22,11 +22,14 @@ mcp-eval <subcommand> [options]
 Available subcommands:
 - `generate-tasks` - Generate tasks for MCP servers
 - `verify-tasks` - Verify generated tasks against an MCP server
+- `revalidate-tasks` - Revalidate task descriptions based on actual tool conversations
 - `convert-data` - Convert data to different formats (e.g., XLAM)
+- `split-data` - Randomly split JSONL task file into train/valid/test sets
 - `evaluate` - Evaluate models using MCP servers and tasks
 - `analyze` - Analyze evaluation results against ground truth
 - `judge` - Evaluate execution results using LLM judges
 - `judge-rubric` - Analyze LLM judgment results and generate performance reports
+- `report-gen` - Generate AI-powered evaluation reports from analysis files
 - `auto` - Automatically run complete evaluation workflow (generate, verify, evaluate, analyze)
 
 ## Global Options
@@ -43,25 +46,29 @@ All subcommands support the following common options:
 Generate tasks for MCP servers using AI models:
 
 ```bash
-mcp-eval generate-tasks --server <server_script_path> [options]
+mcp-eval generate-tasks --servers <server_script_path> [options]
 ```
 
 #### Arguments
 
 **Required:**
 
-- `--server`: MCP server script path (e.g., `@openbnb/mcp-server-airbnb` or `mcp_servers/healthcare/server.py`)
+- `--servers`: Server paths to connect to (supports multiple servers). Format: `server_path[:args][^env_vars]` where args is comma-separated and env_vars is KEY=value,KEY2=value2. Examples:
+  - `@modelcontextprotocol/server-fetch`
+  - `@openbnb/mcp-server-airbnb:--ignore-robots-txt`
+  - `server1^API_KEY=key123`
+  - `server2:--flag1,--flag2^ENV_VAR=value1,ENV_VAR2=value2`
 
 **Optional:**
 
-- `--server-args`: Additional arguments to pass to the MCP server (space-separated)
 - `--output`: Output file path for generated tasks (default: `generated_tasks.jsonl`)
 - `--num-tasks`: Number of tasks to generate (default: 10)
-- `--existing-files`: List of existing files to load tasks from (space-separated)
+- `--existing-files`: List of existing files to load tasks from
 - `--prompt-file`: JSON file containing system and user messages (format: `{"system": "...", "user": "..."}`)
 - `--model`: Model to use for task generation (default: `gpt-4.1-2025-04-14`)
+- `--model-config`: Path to JSON file containing model configuration (takes priority over individual model parameters)
 - `--temperature`: Temperature for model generation (default: 0.2)
-- `--max-tokens`: Maximum number of tokens to generate (default: 2000)
+- `--max-tokens`: Maximum number of tokens to generate (default: 4000)
 - `--top-p`: Top-p sampling parameter (default: 0.95)
 
 #### Examples
@@ -70,7 +77,7 @@ mcp-eval generate-tasks --server <server_script_path> [options]
 
 ```bash
 mcp-eval generate-tasks \
-  --server mcp_servers/healthcare/server.py \
+  --servers mcp_servers/healthcare/server.py \
   --model gpt-4.1-2025-04-14 \
   --num-tasks 200 \
   --prompt-file benchmarks/healthcare/data_generation/task_generation_prompt.json \
@@ -81,10 +88,19 @@ mcp-eval generate-tasks \
 
 ```bash
 mcp-eval generate-tasks \
-  --server @openbnb/mcp-server-airbnb \
-  --server-args "--ignore-robots-txt" \
+  --servers "@openbnb/mcp-server-airbnb:--ignore-robots-txt" \
   --num-tasks 50 \
   --output data/airbnb_tasks.jsonl
+```
+
+3. Generate tasks with model configuration file:
+
+```bash
+mcp-eval generate-tasks \
+  --servers mcp_servers/healthcare/server.py \
+  --model-config eval_models/gpt-4o.json \
+  --num-tasks 50 \
+  --output data/healthcare_tasks.jsonl
 ```
 
 ### Verify Tasks
@@ -92,23 +108,25 @@ mcp-eval generate-tasks \
 Verify generated tasks against an MCP server to ensure they can be successfully executed:
 
 ```bash
-mcp-eval verify-tasks --server <server_script_path> --tasks-file <path_to_tasks_file> [options]
+mcp-eval verify-tasks --servers <server_script_path> --tasks-file <path_to_tasks_file> [options]
 ```
 
 #### Arguments
 
 **Required:**
 
-- `--server`: MCP server script path (e.g., `@openbnb/mcp-server-airbnb` or `mcp_servers/healthcare/server.py`)
+- `--servers`: Server paths to connect to (supports multiple servers). Format: `server_path[:args][^env_vars]` where args is comma-separated and env_vars is KEY=value,KEY2=value2
 - `--tasks-file`: Path to the JSONL file containing tasks to verify
 
 **Optional:**
 
-- `--server-args`: Additional arguments to pass to the MCP server (space-separated)
 - `--output`: Output file path for verified tasks (default: `verified_<input_filename>`)
-- `--model`: Model to use for verification (default: `gpt-4.1-2025-04-14`)
+- `--model`: Model to use for verification (default: `gpt-4o`)
+- `--model-config`: Path to JSON file containing model configuration (takes priority over individual model parameters)
 - `--num-tasks`: Number of tasks to verify (default: all tasks, use -1 for all)
+- `--max-turns`: Maximum number of turns for task verification (default: 10)
 - `--prompt-file`: JSON file containing system message for verification
+- `--non-interactive`: Run in non-interactive mode (automatically handle file conflicts)
 
 #### Examples
 
@@ -116,9 +134,9 @@ mcp-eval verify-tasks --server <server_script_path> --tasks-file <path_to_tasks_
 
 ```bash
 mcp-eval verify-tasks \
-  --server mcp_servers/healthcare/server.py \
+  --servers mcp_servers/healthcare/server.py \
   --tasks-file data/healthcare/evaluation_tasks.jsonl \
-  --model gpt-4.1-2025-04-14 \
+  --model gpt-4o \
   --output data/healthcare/evaluation_tasks_verified.jsonl \
   --prompt-file benchmarks/healthcare/data_generation/task_verification_prompt.json
 ```
@@ -127,10 +145,54 @@ mcp-eval verify-tasks \
 
 ```bash
 mcp-eval verify-tasks \
-  --server @openbnb/mcp-server-airbnb \
-  --server-args "--ignore-robots-txt" \
+  --servers "@openbnb/mcp-server-airbnb:--ignore-robots-txt" \
   --tasks-file data/airbnb_tasks.jsonl \
   --num-tasks 50
+```
+
+### Revalidate Tasks
+
+Revalidate task descriptions based on actual tool conversations to improve task quality:
+
+```bash
+mcp-eval revalidate-tasks --verified-tasks-file <path_to_verified_tasks_file> [options]
+```
+
+#### Arguments
+
+**Required:**
+
+- `--verified-tasks-file`: Path to the JSONL file containing verified tasks with conversation data
+
+**Optional:**
+
+- `--output`: Output file path for revalidated tasks (default: `revalidated_<input_filename>`)
+- `--model`: Model to use for revalidation (default: `gpt-4o`)
+- `--model-config`: Path to JSON file containing model configuration (takes priority over individual model parameters)
+- `--num-tasks`: Number of tasks to revalidate (default: all tasks, use -1 for all)
+- `--non-interactive`: Run in non-interactive mode (automatically handle file conflicts)
+- `--on-existing-file`: Action if output file exists: overwrite, append, or timestamp (default: timestamp)
+- `--prompt-file`: Path to JSON file containing custom system prompt for revalidation
+
+#### Examples
+
+1. Revalidate verified healthcare tasks:
+
+```bash
+mcp-eval revalidate-tasks \
+  --verified-tasks-file data/healthcare/evaluation_tasks_verified.jsonl \
+  --model gpt-4o \
+  --output data/healthcare/evaluation_tasks_revalidated.jsonl
+```
+
+2. Revalidate with custom prompt and non-interactive mode:
+
+```bash
+mcp-eval revalidate-tasks \
+  --verified-tasks-file data/tasks_verified.jsonl \
+  --prompt-file custom_revalidation_prompt.json \
+  --non-interactive \
+  --on-existing-file overwrite
 ```
 
 ### Convert Data
@@ -153,8 +215,8 @@ mcp-eval convert-data --input <input_file> --output <output_file> [options]
 - `--prefix`: Prefix for unique trajectory IDs (default: `task`)
 - `--split`: Dataset split (train, test, val) (default: `train`)
 - `--task-id`: Task ID to extract from evaluation results (only for single JSON file input)
-- `--instruction`: Default instruction to use if no specific task_instruction is provided (default: "You are a helpful assistant that can use tools to complete tasks.")
-- `--system-message`: System message to include in the conversation. Use "-1" to ignore system messages (default: `-1`)
+- `--system-message`: Default system message to use as task instruction and conversation system message (default: "You are a helpful assistant that can use tools to complete tasks.")
+- `--prompt-file`: JSON file containing system message (format: `{"system": "..."}`)
 
 #### Examples
 
@@ -167,14 +229,65 @@ mcp-eval convert-data \
   --prefix healthcare --split train
 ```
 
-2. Convert with custom instruction and system message:
+2. Convert with custom system message:
 
 ```bash
 mcp-eval convert-data \
   --input data/tasks.jsonl \
   --output data/converted.json \
-  --instruction "Complete the following task using the available tools" \
-  --system-message "You are an AI assistant."
+  --system-message "You are an AI assistant specialized in healthcare tasks."
+```
+
+3. Convert with prompt file:
+
+```bash
+mcp-eval convert-data \
+  --input data/tasks.jsonl \
+  --output data/converted.json \
+  --prompt-file evaluation_prompt.json
+```
+
+### Split Data
+
+Randomly split JSONL task file into train/valid/test sets:
+
+```bash
+mcp-eval split-data --input <input_file> [options]
+```
+
+#### Arguments
+
+**Required:**
+
+- `--input`: Input JSONL file path to split
+
+**Optional:**
+
+- `--output-dir`: Output directory for split files (default: current directory)
+- `--train-ratio`: Ratio of data for training set (default: 0.7)
+- `--valid-ratio`: Ratio of data for validation set (default: 0.15)
+- `--test-ratio`: Ratio of data for test set (default: 0.15)
+- `--seed`: Random seed for reproducible splits (default: 42)
+
+#### Examples
+
+1. Split a task file with default ratios:
+
+```bash
+mcp-eval split-data \
+  --input data/healthcare/evaluation_tasks_verified.jsonl \
+  --output-dir data/healthcare/splits
+```
+
+2. Split with custom ratios:
+
+```bash
+mcp-eval split-data \
+  --input data/tasks.jsonl \
+  --train-ratio 0.8 \
+  --valid-ratio 0.1 \
+  --test-ratio 0.1 \
+  --seed 123
 ```
 
 ### Evaluate Models
@@ -182,25 +295,26 @@ mcp-eval convert-data \
 Evaluate models using MCP servers and tasks:
 
 ```bash
-mcp-eval evaluate --server <server_script_path> --tasks-file <path_to_tasks_file> [options]
+mcp-eval evaluate --servers <server_script_path> --tasks-file <path_to_tasks_file> [options]
 ```
 
 #### Arguments
 
 **Required:**
 
-- `--server`: MCP server script path (e.g., `@openbnb/mcp-server-airbnb` or `mcp_servers/healthcare/server.py`)
+- `--servers`: Server paths to connect to (supports multiple servers). Format: `server_path[:args][^env_vars]` where args is comma-separated and env_vars is KEY=value,KEY2=value2
 - `--tasks-file`: Path to the JSONL file containing tasks for evaluation
 
 **Optional:**
 
-- `--server-args`: Additional arguments to pass to the MCP server (space-separated)
+- `--model`: Model to evaluate (default: `gpt-4o`)
 - `--model-config`: Path to JSON file containing model configuration (see Model Configuration Format below)
-- `--output`: Output file path for evaluation results (default: `evaluation_results.json`)
+- `--output`: Output file path for evaluation results (default: `evaluation_results.jsonl`)
 - `--num-tasks`: Number of tasks to evaluate (default: all tasks, use -1 for all)
 - `--max-turns`: Maximum number of turns for task execution (default: 30)
 - `--prompt-file`: JSON file containing system message (format: {"system": "..."})
 - `--force-rerun`: Force rerun all tasks even if already tested
+- `--client-type`: Type of client to use (default: openai) - "gateway" for XLAM, "openai" for OpenAI
 
 #### Model Configuration Format
 
@@ -241,7 +355,7 @@ For OpenAI's newer models:
 
 ```bash
 mcp-eval evaluate \
-  --server mcp_servers/healthcare/server.py \
+  --servers mcp_servers/healthcare/server.py \
   --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
   --tasks-file data/healthcare/evaluation_tasks_verified.jsonl \
   --output benchmarks/healthcare/results/gpt4o_mix_task_evaluation.json \
@@ -254,7 +368,7 @@ mcp-eval evaluate \
 ```bash
 # GPT-4o evaluation
 mcp-eval evaluate \
-  --server mcp_servers/sports/server.py \
+  --servers mcp_servers/sports/server.py \
   --model-config benchmarks/sports/eval_models/gpt-4o.json \
   --tasks-file data/sports/evaluation_tasks_verified.jsonl \
   --output benchmarks/sports/results/gpt4o_mix_task_evaluation.json \
@@ -263,7 +377,7 @@ mcp-eval evaluate \
 
 # GPT-4o-mini evaluation
 mcp-eval evaluate \
-  --server mcp_servers/sports/server.py \
+  --servers mcp_servers/sports/server.py \
   --model-config benchmarks/sports/eval_models/gpt-4o-mini.json \
   --tasks-file data/sports/evaluation_tasks_verified.jsonl \
   --output benchmarks/sports/results/gpt4o-mini_mix_task_evaluation.json \
@@ -305,9 +419,12 @@ mcp-eval analyze --predictions <predictions_file> --ground-truth <ground_truth_f
 
 **AI Report Generation:**
 - `--generate-report`: Generate AI-powered performance report using OpenAI models
-- `--report-model`: Model for AI report generation (default: `gpt-4.1-2025-04-14`)
+- `--report-model`: Model for AI report generation (default: `gpt-4o`)
 - `--report-output`: Path to save AI report (default: `<predictions>_ai_report.md`)
-- `--from-summary`: Generate report directly from an existing summary analysis JSON file
+
+**Chart Generation:**
+- `--include-charts`: Generate interactive charts and visualizations
+- `--chart-formats`: Chart output formats (choices: html, png, svg; default: html png)
 
 #### Examples
 
@@ -318,8 +435,19 @@ mcp-eval analyze \
   --predictions benchmarks/healthcare/results/gpt4o_mix_task_evaluation.json \
   --ground-truth data/healthcare/evaluation_tasks_verified.jsonl \
   --generate-report \
-  --report-model gpt-4.1-2025-04-14 \
+  --report-model gpt-4o \
   --report-output benchmarks/healthcare/results/gpt4o_healthcare_report.md
+```
+
+3. Analyze with charts and custom chart formats:
+
+```bash
+mcp-eval analyze \
+  --predictions evaluation_results.json \
+  --ground-truth verified_tasks.jsonl \
+  --include-charts \
+  --chart-formats html png svg \
+  --generate-report
 ```
 
 2. Custom scoring weights and thresholds:
@@ -342,15 +470,20 @@ mcp-eval judge --input-file <evaluation_file> --output-dir <output_directory> [o
 
 #### Arguments
 
-**Required:**
-
-- `--input-file`: Path to evaluation results JSON file
-- `--output-dir`: Directory to save judge results
-
 **Optional:**
 
-- `--model`: Model to use for judging (default: `gpt-4o`)
-- `--resume`: Resume from previous incomplete judging session
+- `--input-file`: Path to JSON evaluation file to judge
+- `--output-dir`: Directory to save judgment results (will create multiple files: combined, trajectory, completion)
+- `--ground-truth`: Path to ground truth JSONL/JSON file for comparison and analysis
+- `--model`: LLM model to use for judging (default: `gpt-4o`)
+- `--model-config`: Path to JSON file containing model configuration
+- `--max-samples`: Maximum number of samples to evaluate (default: all)
+- `--trajectory-only`: Only evaluate trajectory quality (skip task completion)
+- `--completion-only`: Only evaluate task completion (skip trajectory)
+- `--verbose`: Print detailed evaluation results
+- `--prompt-file`: Path to JSON file containing custom prompts (keys: "trajectory", "completion")
+- `--quiet`: Suppress progress output
+- `--resume`: Resume evaluation from existing results (skip already processed tasks)
 
 #### Examples
 
@@ -383,15 +516,19 @@ mcp-eval judge-rubric --trajectory-file <trajectory_file> --completion-file <com
 
 #### Arguments
 
-**Required:**
+**Input Options (either combined file or separate files):**
 
-- `--trajectory-file`: Path to trajectory judgment file (created by judge command)
-- `--completion-file`: Path to completion judgment file (created by judge command)
-- `--output-dir`: Directory to save analysis reports
+- `--combined-file`: Path to combined JSONL file containing both trajectory and completion data
+- `--trajectory-file`: Path to trajectory scores JSON/JSONL file
+- `--completion-file`: Path to completion scores JSON/JSONL file
 
 **Optional:**
 
-- `--report-model`: Model for report generation (default: `gpt-4.1-2025-04-14`)
+- `--output-dir`: Directory to save analysis results and AI report (default: same as input files)
+- `--verbose`: Print detailed analysis information
+- `--generate-report`: Generate AI-powered performance report: 1=enabled (default), 0=disabled (analysis only)
+- `--report-model`: Model for report generation (default: `gpt-4o`)
+- `--rubrics-file`: Path to custom rubrics markdown file for AI report generation (default: uses built-in rubrics)
 
 #### Examples
 
@@ -420,6 +557,57 @@ mcp-eval judge-rubric \
   --output-dir benchmarks/sports/report
 ```
 
+### Report Generation
+
+Generate AI-powered evaluation reports from analysis files:
+
+```bash
+mcp-eval report-gen [options]
+```
+
+#### Arguments
+
+**Input Files:**
+
+- `--tool-analysis-file`: Path to tool usage analysis JSON file (summary analysis format)
+- `--llm-judge-file`: Path to LLM judge analysis JSON file
+
+**Output Configuration:**
+
+- `--output-file`: Output file path for generated report (auto-generated if not specified)
+- `--model-name`: Name of the model being analyzed (extracted from filename if not specified)
+
+**Report Generation Options:**
+
+- `--model`: OpenAI model to use for report generation (default: `gpt-4o`)
+
+**Chart Options:**
+
+- `--include-charts`: Include charts in the report (default: enabled)
+- `--no-charts`: Disable chart generation
+- `--verbose`: Print detailed information
+
+#### Examples
+
+1. Generate report from analysis files:
+
+```bash
+mcp-eval report-gen \
+  --tool-analysis-file benchmarks/healthcare/results/gpt4o_summary_analysis.json \
+  --llm-judge-file benchmarks/healthcare/results/llm_judge_analysis.json \
+  --output-file benchmarks/healthcare/reports/comprehensive_report.md
+```
+
+2. Generate report with charts disabled:
+
+```bash
+mcp-eval report-gen \
+  --tool-analysis-file results/analysis.json \
+  --no-charts \
+  --model gpt-4o \
+  --verbose
+```
+
 ### Auto Workflow
 
 Automatically run the complete evaluation workflow including task generation, verification, model evaluation, and analysis. The auto command intelligently generates domain-specific prompts using GPT based on the server type (healthcare, travel, finance, etc.), or uses custom prompt files if provided:
@@ -432,7 +620,7 @@ mcp-eval auto --servers <server> --working-dir <work_dir> --task-model <model> -
 
 **Required:**
 
-- `--servers`: Server path to connect to (e.g., `mcp_servers/healthcare/server.py` or `@openbnb/mcp-server-airbnb`)
+- `--servers`: Server paths to connect to (supports multiple servers). Format: `server_path[:args][^env_vars]` where args is comma-separated and env_vars is KEY=value,KEY2=value2. Examples: `@modelcontextprotocol/server-fetch`, `@openbnb/mcp-server-airbnb:--ignore-robots-txt`, `server1^API_KEY=key123`
 - `--working-dir`: Working directory to create and use for all operations
 - `--task-model`: Model to use for task generation and verification (default: `gpt-4.1-2025-04-14`)
 - `--eval-model-configs`: Paths to model configuration JSON files for evaluation
@@ -481,7 +669,7 @@ mcp-eval auto \
 
 ```bash
 mcp-eval auto \
-  --servers @openbnb/mcp-server-airbnb \
+  --servers "@openbnb/mcp-server-airbnb:--ignore-robots-txt" \
   --working-dir evaluation_results/airbnb_eval \
   --task-model gpt-4.1-2025-04-14 \
   --eval-model-configs benchmarks/airbnb/eval_models/gpt-4o.json benchmarks/airbnb/eval_models/gpt-4o-mini.json \
@@ -716,7 +904,7 @@ For more control over each step, you can run the pipeline manually:
 ```bash
 # 1. Generate tasks for a server
 mcp-eval generate-tasks \
-  --server mcp_servers/healthcare/server.py \
+  --servers mcp_servers/healthcare/server.py \
   --model gpt-4.1-2025-04-14 \
   --num-tasks 200 \
   --prompt-file benchmarks/healthcare/data_generation/task_generation_prompt.json \
@@ -724,15 +912,15 @@ mcp-eval generate-tasks \
 
 # 2. Verify the generated tasks
 mcp-eval verify-tasks \
-  --server mcp_servers/healthcare/server.py \
+  --servers mcp_servers/healthcare/server.py \
   --tasks-file data/healthcare/evaluation_tasks.jsonl \
-  --model gpt-4.1-2025-04-14 \
+  --model gpt-4o \
   --output data/healthcare/evaluation_tasks_verified.jsonl \
   --prompt-file benchmarks/healthcare/data_generation/task_verification_prompt.json
 
 # 3. Evaluate models using the verified tasks
 mcp-eval evaluate \
-  --server mcp_servers/healthcare/server.py \
+  --servers mcp_servers/healthcare/server.py \
   --model-config benchmarks/healthcare/eval_models/gpt-4o.json \
   --tasks-file data/healthcare/evaluation_tasks_verified.jsonl \
   --output benchmarks/healthcare/results/gpt4o_mix_task_evaluation.json \
@@ -744,7 +932,7 @@ mcp-eval analyze \
   --predictions benchmarks/healthcare/results/gpt4o_mix_task_evaluation.json \
   --ground-truth data/healthcare/evaluation_tasks_verified.jsonl \
   --generate-report \
-  --report-model gpt-4.1-2025-04-14 \
+  --report-model gpt-4o \
   --report-output benchmarks/healthcare/results/gpt4o_healthcare_report.md
 
 # 5. Optional: Run LLM judge evaluation
@@ -774,7 +962,7 @@ For evaluating multiple models efficiently:
 ```bash
 # Run multiple evaluations in parallel
 mcp-eval evaluate \
-  --server mcp_servers/sports/server.py \
+  --servers mcp_servers/sports/server.py \
   --model-config benchmarks/sports/eval_models/gpt-4o.json \
   --tasks-file data/sports/evaluation_tasks_verified.jsonl \
   --output benchmarks/sports/results/gpt4o_mix_task_evaluation.json \
@@ -782,7 +970,7 @@ mcp-eval evaluate \
   --max-turns 30 &
 
 mcp-eval evaluate \
-  --server mcp_servers/sports/server.py \
+  --servers mcp_servers/sports/server.py \
   --model-config benchmarks/sports/eval_models/gpt-4o-mini.json \
   --tasks-file data/sports/evaluation_tasks_verified.jsonl \
   --output benchmarks/sports/results/gpt4o-mini_mix_task_evaluation.json \
@@ -790,7 +978,7 @@ mcp-eval evaluate \
   --max-turns 30 &
 
 mcp-eval evaluate \
-  --server mcp_servers/sports/server.py \
+  --servers mcp_servers/sports/server.py \
   --model-config benchmarks/sports/eval_models/gpt-4.1-mini.json \
   --tasks-file data/sports/evaluation_tasks_verified.jsonl \
   --output benchmarks/sports/results/gpt4.1-mini_mix_task_evaluation.json \
@@ -805,21 +993,21 @@ mcp-eval analyze \
   --predictions benchmarks/sports/results/gpt4o_mix_task_evaluation.json \
   --ground-truth data/sports/evaluation_tasks_verified.jsonl \
   --generate-report \
-  --report-model gpt-4.1-2025-04-14 \
+  --report-model gpt-4o \
   --report-output benchmarks/sports/results/gpt4o_sports_report.md &
 
 mcp-eval analyze \
   --predictions benchmarks/sports/results/gpt4o-mini_mix_task_evaluation.json \
   --ground-truth data/sports/evaluation_tasks_verified.jsonl \
   --generate-report \
-  --report-model gpt-4.1-2025-04-14 \
+  --report-model gpt-4o \
   --report-output benchmarks/sports/results/gpt4o-mini_sports_report.md &
 
 mcp-eval analyze \
   --predictions benchmarks/sports/results/gpt4.1-mini_mix_task_evaluation.json \
   --ground-truth data/sports/evaluation_tasks_verified.jsonl \
   --generate-report \
-  --report-model gpt-4.1-2025-04-14 \
+  --report-model gpt-4o \
   --report-output benchmarks/sports/results/gpt4.1-mini_sports_report.md &
 
 wait
@@ -852,13 +1040,20 @@ The CLI supports the following environment variables:
 
 ### Server Arguments
 
-For servers that require special arguments (especially those starting with `--`), pass them using `--server-args`:
+For servers that require special arguments (especially those starting with `--`), use the new server format:
 
 ```bash
 # Correct way to pass server arguments
 mcp-eval generate-tasks \
-  --server @openbnb/mcp-server-airbnb \
-  --server-args "--ignore-robots-txt" "--debug"
+  --servers "@openbnb/mcp-server-airbnb:--ignore-robots-txt,--debug"
+```
+
+For environment variables:
+
+```bash
+# Pass environment variables to the server
+mcp-eval generate-tasks \
+  --servers "mcp_servers/custom/server.py^API_KEY=your_key,DEBUG=true"
 ```
 
 ### Debugging
@@ -867,7 +1062,7 @@ Enable debug logging to troubleshoot issues:
 
 ```bash
 export MCP_EVAL_LOG_LEVEL=DEBUG
-mcp-eval generate-tasks --server mcp_servers/healthcare/server.py --num-tasks 1
+mcp-eval generate-tasks --servers mcp_servers/healthcare/server.py --num-tasks 1
 ```
 
 ## Support
