@@ -56,6 +56,9 @@ class ColoredHelpFormatter(argparse.HelpFormatter):
             "judge-rubric": Colors.BRIGHT_CYAN,
             "report-gen": Colors.BRIGHT_WHITE,
             "auto": Colors.BRIGHT_GREEN,
+            "simulate": Colors.BRIGHT_YELLOW,
+            "generate-scenarios": Colors.BRIGHT_CYAN,
+            "evaluate-multiturn": Colors.BRIGHT_MAGENTA,
         }
 
     def _format_action(self, action):
@@ -79,6 +82,9 @@ class ColoredHelpFormatter(argparse.HelpFormatter):
             "judge-rubric": "📋",
             "report-gen": "📄",
             "auto": "🚀",
+            "simulate": "🗣️",
+            "generate-scenarios": "🎭",
+            "evaluate-multiturn": "📝",
         }
 
         # Sort commands by length (longest first) to avoid partial matches
@@ -316,6 +322,67 @@ def llm_judger_analyzer(args):
 def auto_workflow(args):
     """Entry point for auto workflow subcommand."""
     from mcpeval.cli.auto.auto import main
+
+    main(args)
+
+
+def user_simulator(args):
+    """Entry point for user simulation subcommand."""
+    # Parse servers argument with environment variable support
+    server_paths, server_args_list, server_env_list = parse_servers_argument(args)
+
+    if len(server_paths) > 1:
+        colored_print(
+            f"✨ Connecting to {len(server_paths)} servers for multi-turn simulation",
+            Colors.BRIGHT_GREEN,
+        )
+        args.server_paths = server_paths
+        args.server_args_list = server_args_list
+        args.server_env_list = server_env_list
+    else:
+        colored_print(
+            f"🔗 Connecting to single server: {server_paths[0]}", Colors.BRIGHT_BLUE
+        )
+
+    args.server = server_paths[0]
+    args.server_args = server_args_list[0]
+    args.server_env = server_env_list[0]
+
+    from mcpeval.cli.user_simulation.simulate import main
+
+    main(args)
+
+
+def scenario_generator(args):
+    """Entry point for scenario generation subcommand."""
+    # Parse servers argument with environment variable support
+    if hasattr(args, "servers") and args.servers:
+        server_paths, server_args_list, server_env_list = parse_servers_argument(args)
+
+        if len(server_paths) > 1:
+            colored_print(
+                f"✨ Connecting to {len(server_paths)} servers for scenario generation",
+                Colors.BRIGHT_GREEN,
+            )
+            args.server_paths = server_paths
+            args.server_args_list = server_args_list
+            args.server_env_list = server_env_list
+        else:
+            colored_print(
+                f"🔗 Connecting to single server: {server_paths[0]}", Colors.BRIGHT_BLUE
+            )
+            args.server = server_paths[0]
+            args.server_args = server_args_list[0]
+            args.server_env = server_env_list[0]
+
+    from mcpeval.cli.user_simulation.generate_scenarios import main
+
+    main(args)
+
+
+def multiturn_evaluator(args):
+    """Entry point for multi-turn evaluation subcommand."""
+    from mcpeval.cli.multiturn_evaluator.evaluate import main
 
     main(args)
 
@@ -1005,6 +1072,179 @@ def parse_arguments():
 
     report_gen_parser.set_defaults(func=report_generator)
 
+    # ========================================================================
+    # User Simulation subcommands
+    # ========================================================================
+
+    # Simulate subcommand - run multi-turn conversations
+    simulate_parser = subparsers.add_parser(
+        "simulate",
+        help="Run multi-turn user simulation conversations",
+        parents=[common_parser],
+    )
+    simulate_parser.add_argument(
+        "--servers",
+        type=str,
+        nargs="+",
+        required=True,
+        help="Server paths to connect to. Format: server_path[:args][^env_vars]",
+    )
+    simulate_parser.add_argument(
+        "--simulator-model-config",
+        type=str,
+        required=True,
+        help="Path to JSON model config for the user simulator LLM",
+    )
+    simulate_parser.add_argument(
+        "--agent-model-config",
+        type=str,
+        required=True,
+        help="Path to JSON model config for the agent LLM under test",
+    )
+    simulate_parser.add_argument(
+        "--output",
+        type=str,
+        default="multiturn_results.jsonl",
+        help="Output file path for simulation results (default: multiturn_results.jsonl)",
+    )
+    simulate_parser.add_argument(
+        "--tasks-file",
+        type=str,
+        help="Path to JSONL file with tasks to convert to multi-turn scenarios",
+    )
+    simulate_parser.add_argument(
+        "--scenarios-file",
+        type=str,
+        help="Path to JSONL file with pre-generated scenarios",
+    )
+    simulate_parser.add_argument(
+        "--num-scenarios",
+        type=int,
+        default=-1,
+        help="Number of scenarios to simulate (default: all or 10 if generating from scratch)",
+    )
+    simulate_parser.add_argument(
+        "--max-turns",
+        type=int,
+        default=5,
+        help="Maximum number of conversation turns per scenario (default: 5)",
+    )
+    simulate_parser.add_argument(
+        "--max-agent-steps",
+        type=int,
+        default=10,
+        help="Maximum tool-call steps the agent can take per turn (default: 10)",
+    )
+    simulate_parser.add_argument(
+        "--scenario-type",
+        type=str,
+        choices=["standard", "missing_params", "missing_functions", "composite"],
+        default="standard",
+        help="Type of scenarios to generate (default: standard)",
+    )
+    simulate_parser.add_argument(
+        "--persona-file",
+        type=str,
+        help="Path to JSON file with custom persona definitions",
+    )
+    simulate_parser.set_defaults(func=user_simulator)
+
+    # Generate Scenarios subcommand
+    gen_scenarios_parser = subparsers.add_parser(
+        "generate-scenarios",
+        help="Generate multi-turn scenarios without running simulation",
+        parents=[common_parser],
+    )
+    gen_scenarios_parser.add_argument(
+        "--servers",
+        type=str,
+        nargs="+",
+        help="Server paths to connect to (required when generating from scratch)",
+    )
+    gen_scenarios_parser.add_argument(
+        "--tasks-file",
+        type=str,
+        help="Path to JSONL file with tasks to convert to scenarios",
+    )
+    gen_scenarios_parser.add_argument(
+        "--output",
+        type=str,
+        default="scenarios.jsonl",
+        help="Output file path for generated scenarios (default: scenarios.jsonl)",
+    )
+    gen_scenarios_parser.add_argument(
+        "--num-scenarios",
+        type=int,
+        default=-1,
+        help="Number of scenarios to generate (default: all tasks or 10)",
+    )
+    gen_scenarios_parser.add_argument(
+        "--max-turns",
+        type=int,
+        default=5,
+        help="Maximum turns per scenario (default: 5)",
+    )
+    gen_scenarios_parser.add_argument(
+        "--scenario-type",
+        type=str,
+        choices=["standard", "missing_params", "missing_functions", "composite"],
+        default="standard",
+        help="Type of scenarios to generate (default: standard)",
+    )
+    gen_scenarios_parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to JSON model config for scenario generation LLM",
+    )
+    gen_scenarios_parser.add_argument(
+        "--persona-file",
+        type=str,
+        help="Path to JSON file with custom persona definitions",
+    )
+    gen_scenarios_parser.set_defaults(func=scenario_generator)
+
+    # Evaluate Multi-Turn subcommand
+    eval_mt_parser = subparsers.add_parser(
+        "evaluate-multiturn",
+        help="Evaluate multi-turn conversation results using LLM judge",
+        parents=[common_parser],
+    )
+    eval_mt_parser.add_argument(
+        "--input",
+        type=str,
+        required=True,
+        help="Path to JSONL file with multi-turn conversation results",
+    )
+    eval_mt_parser.add_argument(
+        "--output",
+        type=str,
+        default="multiturn_evaluation.jsonl",
+        help="Output file path for evaluation results (default: multiturn_evaluation.jsonl)",
+    )
+    eval_mt_parser.add_argument(
+        "--model-config",
+        type=str,
+        help="Path to JSON model config for the judge LLM",
+    )
+    eval_mt_parser.add_argument(
+        "--model",
+        type=str,
+        default="gpt-4o",
+        help="Judge model to use (default: gpt-4o)",
+    )
+    eval_mt_parser.add_argument(
+        "--num-samples",
+        type=int,
+        default=-1,
+        help="Maximum number of conversations to evaluate (default: all)",
+    )
+    eval_mt_parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume evaluation from existing results",
+    )
+    eval_mt_parser.set_defaults(func=multiturn_evaluator)
+
     # Auto Workflow subcommand
     auto_parser = subparsers.add_parser(
         "auto",
@@ -1126,6 +1366,9 @@ def main():
             "judge": Colors.BRIGHT_MAGENTA,
             "judge-rubric": Colors.BRIGHT_CYAN,
             "auto": Colors.BRIGHT_GREEN,
+            "simulate": Colors.BRIGHT_YELLOW,
+            "generate-scenarios": Colors.BRIGHT_CYAN,
+            "evaluate-multiturn": Colors.BRIGHT_MAGENTA,
         }
         command_color = command_colors.get(args.command, Colors.BRIGHT_WHITE)
         colored_print(f"🚀 Executing: {args.command}", command_color, bold=True)
