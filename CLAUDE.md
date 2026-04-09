@@ -7,11 +7,13 @@ This project uses the Salesforce Research LLM Gateway proxy for all LLM calls (t
 ### Starting the gateway
 
 ```bash
-cd /Users/zhiweiliu/Documents/projects/enterprise_bench/enterprise-bench/sfrgateway
+cd sfrgateway
+# First time: copy .env.template to .env and fill in your API key
+cp .env.template .env  # then edit .env with your X_API_KEY
 PROXY_PORT=8008 uv run python server.py
 ```
 
-The `.env` file in that directory contains the `X_API_KEY` for the upstream gateway.
+The `.env` file in that directory contains the `X_API_KEY` for the upstream gateway. See `sfrgateway/README.md` for details.
 
 ### Model config files
 
