@@ -172,6 +172,71 @@ uv run mcp_clients/example_openai_client/client.py --servers @openbnb/mcp-server
 
 For more details on the OpenAI client usage, see the [OpenAI Client README](mcp_clients/example_openai_client/README.md).
 
+## Available MCP Servers
+
+MCPEval includes a diverse set of MCP servers spanning enterprise domains, public APIs, and computation utilities. Each server exposes tools that LLM agents are evaluated against.
+
+### Self-Contained Servers (No Credentials Required)
+
+These servers are fully deterministic with embedded data or pure computation — ideal for reproducible evaluation.
+
+| Server | Tools | Domain | Description |
+|--------|-------|--------|-------------|
+| [hr_management](mcp_servers/hr_management/) | 10 | Enterprise | Departments, employees, leave requests, performance reviews, org chart. Embedded SQLite with 70+ rows. |
+| [ecommerce](mcp_servers/ecommerce/) | 11 | Enterprise | Products, orders, customers, inventory, sales summaries. Embedded SQLite with 80+ rows. |
+| [datetime_tools](mcp_servers/datetime_tools/) | 7 | Utility | Timezone conversion, date difference, business days, holiday support (US/UK/DE/FR/JP). |
+| [unit_converter](mcp_servers/unit_converter/) | 6 | Utility | Length, weight, temperature, volume, speed, data size conversion with strict enum schemas. |
+| [special_calculator](mcp_servers/special_calculator/) | 4 | Demo | Basic arithmetic with special transformations (add+double, subtract+halve, etc.). |
+| [sqlite](mcp_servers/sqlite/) | 8 | Database | General-purpose SQLite operations — create tables, query, insert, with sample datasets. |
+| [filesystem](mcp_servers/filesystem/) | 14 | System | Local file operations (read, write, search, directory listing). npm: `@modelcontextprotocol/server-filesystem` |
+| [memory](mcp_servers/memory/) | 9 | Knowledge | Knowledge graph with entities, relations, and observations. npm: `@modelcontextprotocol/server-memory` |
+
+### Public API Servers (Free, No Credentials)
+
+| Server | Tools | Domain | Description |
+|--------|-------|--------|-------------|
+| [book](mcp_servers/book/) | 8 | Library | Open Library search — books by title/ISBN, authors, advanced search. |
+| [youtube](mcp_servers/youtube/) | 4 | Media | YouTube transcript extraction, search, and summarization. |
+| [healthcare](mcp_servers/healthcare/) | 5 | Medical | FDA drug lookup, PubMed search, clinical trials, ICD-10 codes. |
+| [sports](mcp_servers/sports/) | 4 | Sports | NBA, MLB, NFL teams, players, and game data via balldontlie.io. |
+
+### Servers Requiring API Keys
+
+| Server | Tools | Domain | Credentials |
+|--------|-------|--------|-------------|
+| [travel_assistant](mcp_servers/travel_assistant/) | 6 | Travel | Flights, hotels, restaurants, local events. Requires `SERPAPI_API_KEY`, `YELP_API_KEY`. |
+| [airbnb](mcp_servers/airbnb/) | 2 | Travel | Airbnb listing search and details. npm: `@openbnb/mcp-server-airbnb` |
+| [yfinance](mcp_servers/yfinance/) | 10 | Finance | Stock prices, financials, options, analyst recommendations via Yahoo Finance. |
+| [national_park](mcp_servers/national_park/) | 6 | Parks | U.S. National Parks info, alerts, campgrounds, events. Requires `NPS_API_KEY` (free). |
+| [crm_bench](mcp_servers/crm_bench/) | 11 | CRM | Salesforce CRM operations (stub implementation for benchmarking). |
+
+### Multi-Turn Simulation
+
+MCPEval supports multi-turn user simulation where a simulator LLM plays the user role and an agent LLM is tested:
+
+```bash
+# Generate scenarios from verified tasks
+mcp-eval generate-scenarios \
+  --servers mcp_servers/hr_management/server.py \
+  --output scenarios.jsonl \
+  --num-scenarios 5
+
+# Run multi-turn simulation
+mcp-eval simulate \
+  --servers mcp_servers/hr_management/server.py \
+  --simulator-model-config simulator_model.json \
+  --agent-model-config agent_model.json \
+  --scenarios-file scenarios.jsonl \
+  --output multiturn_results.jsonl
+
+# Evaluate conversations with LLM judge
+mcp-eval evaluate-multiturn \
+  --input multiturn_results.jsonl \
+  --output multiturn_evaluation.jsonl
+```
+
+The judge evaluates on 5 dimensions: clarification handling, context maintenance, tool usage efficiency, goal achievement, and response quality.
+
 
 ### Quick Development Setup
 ```bash
@@ -284,6 +349,9 @@ mcp-eval judge-rubric \
 - `analyze` - Analyze evaluation results and generate reports
 - `judge` - Run LLM-based evaluation of execution trajectories
 - `judge-rubric` - Analyze LLM judgment results
+- `generate-scenarios` - Generate multi-turn scenarios from tasks or servers
+- `simulate` - Run multi-turn user simulation conversations
+- `evaluate-multiturn` - Evaluate multi-turn conversations with LLM judge
 - `convert-data` - Convert data to different formats (e.g., XLAM)
 - `auto` - Complete automated evaluation workflow
 
