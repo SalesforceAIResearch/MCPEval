@@ -97,7 +97,7 @@ async def run_scenario_generation(args):
                     args.server_args_list,
                     getattr(args, "server_env_list", []),
                 )
-                tools = client.all_tools
+                tools = await client.get_all_tools()
                 for task in tasks:
                     if not task.tools:
                         task.tools = tools
@@ -140,7 +140,7 @@ async def run_scenario_generation(args):
                 server_env = getattr(args, "server_env", None)
                 await client.connect_to_server(args.server, server_args, server_env)
 
-            tools = client.all_tools
+            tools = await client.get_all_tools()
             num = args.num_scenarios if args.num_scenarios > 0 else 10
 
             scenarios = generator.generate_batch(

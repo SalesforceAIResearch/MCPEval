@@ -123,7 +123,7 @@ async def run_simulation(args):
         logger.info(f"Connected to {len(server_paths)} MCP servers")
 
         # Get available tools
-        tools = client.all_tools
+        tools = await client.get_all_tools()
         tool_name_to_session = client.tool_name_to_session
         logger.info(f"Available tools: {[t.name for t in tools]}")
 

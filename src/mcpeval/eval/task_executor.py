@@ -161,13 +161,14 @@ class LLMTaskExecutor:
                             )
 
                     # Add the assistant message to conversation history
-                    messages.append(
-                        {
-                            "role": "assistant",
-                            "content": assistant_message.get("content"),
-                            "tool_calls": assistant_message.get("tool_calls", []),
-                        }
-                    )
+                    # Only include tool_calls if non-empty (OpenAI API rejects empty arrays)
+                    assistant_msg = {
+                        "role": "assistant",
+                        "content": assistant_message.get("content"),
+                    }
+                    if assistant_message.get("tool_calls"):
+                        assistant_msg["tool_calls"] = assistant_message["tool_calls"]
+                    messages.append(assistant_msg)
 
                     # Check if the response contains tool calls
                     tool_calls = assistant_message.get("tool_calls", [])
