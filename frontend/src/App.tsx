@@ -22,6 +22,8 @@ import AutoWorkflow from './pages/AutoWorkflow';
 import DebugJobs from './pages/DebugJobs';
 import ReportGenerator from './pages/ReportGenerator';
 import Activities from './pages/Activities';
+import ConversationReplay from './pages/ConversationReplay';
+import ModelComparison from './pages/ModelComparison';
 import './App.css';
 
 const theme = createTheme({
@@ -109,6 +111,8 @@ function App() {
                 <Route path="/debug-jobs" element={<DebugJobs />} />
                 <Route path="/generate-report" element={<ReportGenerator />} />
                 <Route path="/activities" element={<Activities />} />
+                <Route path="/conversation-replay" element={<ConversationReplay />} />
+                <Route path="/model-comparison" element={<ModelComparison />} />
               </Routes>
             </Box>
           </Box>

@@ -29,6 +29,8 @@ import {
   AutoAwesome as AutoIcon,
   InsertChart as ReportIcon,
   History as ActivitiesIcon,
+  PlayCircleOutline as ReplayIcon,
+  CompareArrows as CompareIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 280;
@@ -183,6 +185,22 @@ const menuItems: MenuItem[] = [
     icon: <ReportIcon />,
     path: '/generate-report',
     description: 'Generate AI-powered evaluation reports',
+    category: 'analysis',
+  },
+  {
+    id: 'conversation-replay',
+    label: 'Conversation Replay',
+    icon: <ReplayIcon />,
+    path: '/conversation-replay',
+    description: 'Step through conversations turn-by-turn',
+    category: 'analysis',
+  },
+  {
+    id: 'model-comparison',
+    label: 'Model Comparison',
+    icon: <CompareIcon />,
+    path: '/model-comparison',
+    description: 'Compare models with statistical tests',
     category: 'analysis',
   },
   {
