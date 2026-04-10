@@ -394,6 +394,37 @@ def report_generator(args):
     main(args)
 
 
+def import_results(args):
+    """Entry point for import subcommand."""
+    from mcpeval.db.session import init_db, session_scope
+
+    init_db(args.db_path)
+
+    from mcpeval.db.operations import import_eval_results_jsonl
+
+    with session_scope(args.db_path) as session:
+        run = import_eval_results_jsonl(
+            session,
+            jsonl_path=args.from_file,
+            run_id=args.run_id or str(__import__("uuid").uuid4()),
+            model_name=args.model_name,
+            servers=args.servers or [],
+        )
+    colored_print(
+        f"Imported {run.num_tasks} results into run {run.id} "
+        f"({run.success_count} passed, {run.fail_count} failed)",
+        Colors.BRIGHT_GREEN,
+        bold=True,
+    )
+
+
+def compare_runs(args):
+    """Entry point for compare subcommand."""
+    from mcpeval.stats.comparison import run_comparison
+
+    run_comparison(args)
+
+
 def parse_arguments():
     """Parse command line arguments."""
     # Create a colorful description
@@ -1349,6 +1380,77 @@ def parse_arguments():
     )
 
     auto_parser.set_defaults(func=auto_workflow)
+
+    # Import subcommand — import existing JSONL results into the database
+    import_parser = subparsers.add_parser(
+        "import",
+        help="Import existing JSONL evaluation results into the database",
+    )
+    import_parser.add_argument(
+        "--from",
+        dest="from_file",
+        type=str,
+        required=True,
+        help="Path to JSONL file with evaluation results",
+    )
+    import_parser.add_argument(
+        "--model-name",
+        type=str,
+        required=True,
+        help="Name of the model that produced these results",
+    )
+    import_parser.add_argument(
+        "--servers",
+        type=str,
+        nargs="*",
+        default=[],
+        help="Server paths used in the evaluation",
+    )
+    import_parser.add_argument(
+        "--run-id",
+        type=str,
+        default=None,
+        help="Custom run ID (default: auto-generated UUID)",
+    )
+    import_parser.add_argument(
+        "--db-path",
+        type=str,
+        default=None,
+        help="Path to SQLite database (default: ~/.mcpeval/data.db)",
+    )
+    import_parser.set_defaults(func=import_results)
+
+    # Compare subcommand — statistical comparison of evaluation runs
+    compare_parser = subparsers.add_parser(
+        "compare",
+        help="Statistically compare two or more evaluation result files",
+    )
+    compare_parser.add_argument(
+        "--runs",
+        type=str,
+        nargs="+",
+        required=True,
+        help="Paths to two or more JSONL evaluation result files",
+    )
+    compare_parser.add_argument(
+        "--ground-truth",
+        type=str,
+        default=None,
+        help="Path to ground truth JSONL file (required for score-based comparison)",
+    )
+    compare_parser.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        help="Path to save comparison results JSON",
+    )
+    compare_parser.add_argument(
+        "--confidence",
+        type=float,
+        default=0.95,
+        help="Confidence level for bootstrap intervals (default: 0.95)",
+    )
+    compare_parser.set_defaults(func=compare_runs)
 
     return parser.parse_args()
 
