@@ -25,38 +25,9 @@ from mcpeval.commons.prompts import (
     multiturn_task_conversion_user_prompt,
 )
 from mcpeval.simulation.personas import DEFAULT_PERSONAS, get_random_persona
+from mcpeval.utils.structured_output import parse_llm_json, LLMJsonParseError
 
 logger = logging.getLogger(__name__)
-
-
-def _parse_json_response(text: str) -> Dict[str, Any]:
-    """Parse JSON from LLM response, handling common formatting issues."""
-    # Try direct parse
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    # Try extracting from markdown code blocks
-    import re
-
-    json_match = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.DOTALL)
-    if json_match:
-        try:
-            return json.loads(json_match.group(1))
-        except json.JSONDecodeError:
-            pass
-
-    # Try finding JSON object in the text
-    brace_start = text.find("{")
-    brace_end = text.rfind("}")
-    if brace_start != -1 and brace_end != -1:
-        try:
-            return json.loads(text[brace_start : brace_end + 1])
-        except json.JSONDecodeError:
-            pass
-
-    raise ValueError(f"Could not parse JSON from LLM response: {text[:500]}")
 
 
 class MultiTurnScenarioGenerator:
@@ -129,7 +100,7 @@ class MultiTurnScenarioGenerator:
             try:
                 response = self.llm.chat_completion(messages=messages)
                 content = response["choices"][0]["message"].get("content", "")
-                data = _parse_json_response(content)
+                data = parse_llm_json(content)
 
                 scenario = MultiTurnScenario(
                     name=data["name"],
@@ -208,7 +179,7 @@ class MultiTurnScenarioGenerator:
             try:
                 response = self.llm.chat_completion(messages=messages)
                 content = response["choices"][0]["message"].get("content", "")
-                data = _parse_json_response(content)
+                data = parse_llm_json(content)
 
                 scenario = MultiTurnScenario(
                     name=data.get("name", task.name),

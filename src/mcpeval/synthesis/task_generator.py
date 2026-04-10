@@ -14,6 +14,7 @@ from ..commons.prompts import (
     task_revision_user_prompt,
 )
 from .utils import append_task_to_jsonl, load_tasks_from_jsonl
+from ..utils.structured_output import parse_llm_json, LLMJsonParseError
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ class TaskGenerator:
         max_retries: int = 3,
         required_fields: Optional[List[str]] = None,
     ):
-        """Parse JSON from a string with retries and cleanup for malformed responses.
+        """Parse JSON from a string with retries via LLM for malformed responses.
 
         Args:
             raw_response: The string containing JSON to parse
@@ -88,165 +89,39 @@ class TaskGenerator:
         Returns:
             Parsed JSON data or None if parsing failed
         """
-        import re
-        
-        # Default required fields for task generation
         if required_fields is None:
             required_fields = ["name", "description", "goal"]
-        
-        task_data = None
-        retry_count = 0
+
         current_response = raw_response.strip()
-        last_error = None
 
-        while task_data is None and retry_count < max_retries:
+        for attempt in range(max_retries):
             try:
-                # Strategy 1: Direct JSON parsing
-                try:
-                    parsed_data = json.loads(current_response)
-                    # Validate required fields
-                    if self._validate_task_data(parsed_data, required_fields):
-                        task_data = parsed_data
-                        break
-                    else:
-                        last_error = f"Missing required fields: {[f for f in required_fields if f not in parsed_data]}"
-                except json.JSONDecodeError as e:
-                    last_error = f"JSON decode error: {str(e)}"
-
-                # Strategy 2: Extract JSON from markdown code blocks
-                if task_data is None:
-                    json_patterns = [
-                        r"```(?:json)?\s*([\s\S]*?)\s*```",  # Standard markdown
-                        r"```json\n([\s\S]*?)\n```",        # Explicit json blocks
-                        r"{[\s\S]*}",                       # Any JSON-like object
-                    ]
-                    
-                    for pattern in json_patterns:
-                        matches = re.findall(pattern, current_response)
-                        for match in matches:
-                            json_str = match.strip()
-                            try:
-                                parsed_data = json.loads(json_str)
-                                if self._validate_task_data(parsed_data, required_fields):
-                                    task_data = parsed_data
-                                    break
-                            except json.JSONDecodeError:
-                                continue
-                        if task_data:
-                            break
-
-                # Strategy 3: Clean up common JSON issues and retry
-                if task_data is None:
-                    cleaned_responses = self._clean_json_response(current_response)
-                    for cleaned in cleaned_responses:
-                        try:
-                            parsed_data = json.loads(cleaned)
-                            if self._validate_task_data(parsed_data, required_fields):
-                                task_data = parsed_data
-                                break
-                        except json.JSONDecodeError:
-                            continue
-                        if task_data:
-                            break
-
-                # Strategy 4: Retry with LLM if we have messages and haven't exhausted retries
-                if task_data is None and messages and retry_count < max_retries - 1:
-                    logger.warning(
-                        f"JSON parsing failed (attempt {retry_count + 1}/{max_retries}): {last_error}"
+                return parse_llm_json(current_response, required_fields=required_fields)
+            except LLMJsonParseError as e:
+                logger.warning(
+                    f"JSON parsing failed (attempt {attempt + 1}/{max_retries}): {e}"
+                )
+                # Retry with LLM if we have messages and haven't exhausted retries
+                if messages and attempt < max_retries - 1:
+                    retry_prompt = (
+                        f"The previous response couldn't be parsed as valid JSON.\n\n"
+                        f"Error: {e}\n\n"
+                        f"Please provide a valid JSON response with exactly these required fields: "
+                        f"{', '.join(required_fields)}\n\n"
+                        f"Return ONLY the JSON object, no additional text."
                     )
-                    logger.info(f"Problematic response: {current_response[:200]}...")
-
-                    # Create more specific retry prompt
-                    retry_prompt = self._create_retry_prompt(current_response, last_error, required_fields)
-                    
                     retry_messages = messages.copy()
                     retry_messages.append({"role": "assistant", "content": current_response})
                     retry_messages.append({"role": "user", "content": retry_prompt})
-
                     try:
                         response = self.llm.chat_completion(messages=retry_messages)
                         current_response = response["choices"][0]["message"]["content"].strip()
-                        logger.info(f"Retry {retry_count + 1} generated response length: {len(current_response)}")
-                    except Exception as e:
-                        logger.error(f"Error during LLM retry: {e}")
+                    except Exception as llm_err:
+                        logger.error(f"Error during LLM retry: {llm_err}")
                         break
 
-                retry_count += 1
-
-            except Exception as e:
-                logger.error(f"Unexpected error during JSON parsing: {e}")
-                last_error = str(e)
-                retry_count += 1
-
-        if task_data is None:
-            logger.error(f"Failed to parse JSON after {retry_count} attempts. Last error: {last_error}")
-
-        return task_data
-
-    def _validate_task_data(self, data: Dict[str, Any], required_fields: List[str]) -> bool:
-        """Validate that the parsed JSON contains all required fields."""
-        if not isinstance(data, dict):
-            return False
-        
-        for field in required_fields:
-            if field not in data or not data[field]:
-                return False
-        
-        return True
-
-    def _clean_json_response(self, response: str) -> List[str]:
-        """Apply various cleaning strategies to fix common JSON issues."""
-        import re
-        
-        cleaned_versions = []
-        
-        # Strategy 1: Remove comments and fix trailing commas
-        cleaned = re.sub(r"//.*?$", "", response, flags=re.MULTILINE)  # Remove // comments
-        cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)  # Remove /* */ comments
-        cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)  # Remove trailing commas
-        cleaned_versions.append(cleaned)
-        
-        # Strategy 2: Extract the first complete JSON object
-        json_start = response.find("{")
-        if json_start != -1:
-            brace_count = 0
-            for i, char in enumerate(response[json_start:], json_start):
-                if char == "{":
-                    brace_count += 1
-                elif char == "}":
-                    brace_count -= 1
-                    if brace_count == 0:
-                        potential_json = response[json_start:i+1]
-                        cleaned_versions.append(potential_json)
-                        break
-        
-        # Strategy 3: Fix common quote issues
-        quote_fixed = re.sub(r"'([^']*)':", r'"\1":', response)  # Single to double quotes for keys
-        quote_fixed = re.sub(r":\s*'([^']*)'", r': "\1"', quote_fixed)  # Single to double quotes for values
-        cleaned_versions.append(quote_fixed)
-        
-        return cleaned_versions
-
-    def _create_retry_prompt(self, failed_response: str, error: str, required_fields: List[str]) -> str:
-        """Create a specific retry prompt based on the failure."""
-        return f"""The previous response couldn't be parsed as valid JSON. 
-
-Error: {error}
-
-Please provide a valid JSON response with exactly these required fields: {', '.join(required_fields)}
-
-Requirements:
-1. Must be valid JSON (no comments, no trailing commas)
-2. Must contain all required fields: {', '.join(required_fields)}
-3. Each field must have a non-empty value
-4. Return ONLY the JSON object, no additional text
-
-Example format:
-{{
-    "name": "Task name here",
-    "description": "Detailed task description here", 
-    "goal": "Clear goal statement here"
-}}"""
+        logger.error(f"Failed to parse JSON after {max_retries} attempts")
+        return None
 
     def generate_task_from_tools(
         self,

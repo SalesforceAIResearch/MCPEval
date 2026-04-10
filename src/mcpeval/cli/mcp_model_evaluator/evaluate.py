@@ -79,6 +79,7 @@ async def evaluate_performance(
     output_file: Optional[str] = None,
     max_turns: int = 30,
     prompt_file: Optional[str] = None,
+    concurrency: int = 1,
 ):
     """
     Evaluate model performance on tasks using OpenAI client with multiple servers.
@@ -93,6 +94,7 @@ async def evaluate_performance(
         output_file: Path to output file
         max_turns: Maximum number of turns for task execution
         prompt_file: Optional path to JSON file containing system message
+        concurrency: Number of tasks to evaluate concurrently (default: 1)
     """
     try:
         # Load system message from prompt file if provided
@@ -151,27 +153,33 @@ async def evaluate_performance(
 
         results = existing_results.copy() if existing_results else []
 
-        logger.info(f"Starting evaluation of {len(tasks)} tasks")
+        # Filter tasks to only those that need evaluation
+        pending_tasks = [
+            (i, task) for i, task in enumerate(tasks)
+            if task.id not in already_tested_task_ids
+        ]
+        skipped = len(tasks) - len(pending_tasks)
+        if skipped:
+            logger.info(f"Skipping {skipped} already tested tasks")
 
-        for i, task in enumerate(tasks):
-            task_number = i + 1
-            # Skip tasks that have already been tested
-            if task.id in already_tested_task_ids:
-                logger.info(
-                    f"Skipping task {task_number}/{len(tasks)}: {task.id} (already tested)"
-                )
-                continue
+        total_tasks = len(tasks)
+        logger.info(
+            f"Starting evaluation of {len(pending_tasks)} tasks"
+            + (f" with concurrency={concurrency}" if concurrency > 1 else "")
+        )
 
-            # Log start of evaluation
-            logger.info(f"Starting evaluation for task {task_number}/{len(tasks)}")
+        # Lock for thread-safe file writing and results list
+        file_lock = asyncio.Lock()
+
+        async def _evaluate_single_task(task_index: int, task: Task) -> Dict[str, Any]:
+            """Evaluate a single task and return the result."""
+            task_number = task_index + 1
+            logger.info(f"Starting evaluation for task {task_number}/{total_tasks}")
             start_time = time.time()
 
             try:
-                # Use the existing OpenAIWrapper from llms.py with same config as client
                 wrapped_llm = OpenAIWrapper(model=model_name, model_config=model_config)
                 executor = LLMTaskExecutor(wrapped_llm)
-
-                # Create tool_name_to_session mapping
                 tool_name_to_session = client.tool_name_to_session
 
                 success, result = await executor.execute_task(
@@ -215,7 +223,6 @@ async def evaluate_performance(
                     else:
                         conversation.append({"str_representation": str(msg)})
 
-                # Create result object
                 evaluation_result = {
                     "task_id": task.id,
                     "success": success,
@@ -232,56 +239,26 @@ async def evaluate_performance(
                     "client_type": "openai",
                 }
 
-                results.append(evaluation_result)
-
-                # Log completion with timing
                 elapsed = time.time() - start_time
-                logger.info(f"Task evaluation completed in {elapsed:.2f} seconds")
-
-                # Append result to file
-                if output_file:
-                    try:
-                        save_evaluation_results_to_jsonl(
-                            [evaluation_result], output_file, append=True
-                        )
-                    except Exception as save_error:
-                        logger.error(f"Error saving result: {save_error}")
-
                 logger.info(
-                    f"Successfully completed task {task_number}/{len(tasks)}: {task.name}"
+                    f"Successfully completed task {task_number}/{total_tasks}: "
+                    f"{task.name} in {elapsed:.2f}s"
                 )
+                return evaluation_result
+
             except Exception as task_error:
                 elapsed = time.time() - start_time
                 logger.error(
-                    f"Error executing task {task_number}/{len(tasks)} after {elapsed:.2f} seconds: {str(task_error)}",
+                    f"Error executing task {task_number}/{total_tasks} after {elapsed:.2f}s: {task_error}",
                     exc_info=True,
                 )
-
-                # Check if this is an API key related error
-                error_message = str(task_error)
-                if "OPENAI_API_KEY" in error_message or "api" in error_message.lower():
-                    logger.error(
-                        "This appears to be an API key related error. Please ensure your OpenAI API key is properly set (OPENAI_API_KEY)."
-                    )
-
-                # Try to capture any partial execution data if the executor was created
-                partial_tool_calls = []
-                partial_conversation = []
-                try:
-                    if "executor" in locals():
-                        # Try to get any partial results from the executor
-                        # This is best effort - if it fails, we'll just use empty lists
-                        pass
-                except:
-                    pass
-
-                error_result = {
+                return {
                     "task_id": task.id,
                     "success": False,
                     "error": str(task_error),
-                    "tool_calls": partial_tool_calls,  # Include any partial tool calls
+                    "tool_calls": [],
                     "final_response": f"Error occurred during task execution: {task_error}",
-                    "conversation": partial_conversation,  # Include any partial conversation
+                    "conversation": [],
                     "task": {
                         "id": task.id,
                         "name": task.name,
@@ -291,16 +268,26 @@ async def evaluate_performance(
                     "model": model_name,
                     "client_type": "openai",
                 }
-                results.append(error_result)
 
-                # Append error result to file
+        async def _run_and_save(task_index: int, task: Task, semaphore: asyncio.Semaphore):
+            """Run a task with semaphore and save result."""
+            async with semaphore:
+                evaluation_result = await _evaluate_single_task(task_index, task)
+            async with file_lock:
+                results.append(evaluation_result)
                 if output_file:
                     try:
                         save_evaluation_results_to_jsonl(
-                            [error_result], output_file, append=True
+                            [evaluation_result], output_file, append=True
                         )
                     except Exception as save_error:
                         logger.error(f"Error saving result: {save_error}")
+            return evaluation_result
+
+        # Run tasks with concurrency control
+        semaphore = asyncio.Semaphore(max(1, concurrency))
+        coros = [_run_and_save(idx, task, semaphore) for idx, task in pending_tasks]
+        await asyncio.gather(*coros)
 
         # Compute overall statistics
         successful_tasks = sum(1 for r in results if r.get("success", False))
@@ -308,9 +295,10 @@ async def evaluate_performance(
         logger.info(
             f"Task evaluation complete. Successfully completed: {successful_tasks}, Failed: {failed_tasks}"
         )
-        logger.info(
-            f"Overall success rate: {successful_tasks}/{len(results)} ({successful_tasks/len(results)*100:.2f}%)"
-        )
+        if results:
+            logger.info(
+                f"Overall success rate: {successful_tasks}/{len(results)} ({successful_tasks/len(results)*100:.2f}%)"
+            )
         if output_file:
             logger.info(f"Results saved to {output_file}")
 
@@ -431,6 +419,7 @@ async def run_evaluation(args):
                 if hasattr(args, "prompt_file") and args.prompt_file
                 else None
             ),
+            concurrency=getattr(args, "concurrency", 1),
         )
 
         logger.info(f"Evaluation complete. Results saved to {args.output}")

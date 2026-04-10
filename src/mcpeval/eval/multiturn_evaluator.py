@@ -15,6 +15,7 @@ from mcpeval.commons.prompts import (
     multiturn_evaluation_system_prompt,
     multiturn_evaluation_user_prompt,
 )
+from mcpeval.utils.structured_output import parse_llm_json, LLMJsonParseError
 
 logger = logging.getLogger(__name__)
 
@@ -66,29 +67,7 @@ def _format_tool_calls_summary(turns: List[Dict[str, Any]]) -> str:
 
 def _parse_eval_response(text: str) -> Dict[str, Any]:
     """Parse evaluation JSON from LLM response."""
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    import re
-
-    json_match = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.DOTALL)
-    if json_match:
-        try:
-            return json.loads(json_match.group(1))
-        except json.JSONDecodeError:
-            pass
-
-    brace_start = text.find("{")
-    brace_end = text.rfind("}")
-    if brace_start != -1 and brace_end != -1:
-        try:
-            return json.loads(text[brace_start : brace_end + 1])
-        except json.JSONDecodeError:
-            pass
-
-    raise ValueError(f"Could not parse evaluation JSON: {text[:500]}")
+    return parse_llm_json(text)
 
 
 class MultiTurnEvaluator:

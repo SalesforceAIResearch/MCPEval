@@ -47,6 +47,7 @@ from pydantic import BaseModel, Field, model_validator
 from dotenv import load_dotenv
 
 from mcpeval.models.llms import OpenAIWrapper
+from mcpeval.utils.structured_output import parse_llm_json
 
 # Load environment variables
 load_dotenv()
@@ -297,9 +298,7 @@ class MultiAspectLLMJudger:
                 messages, **{**self.chat_kwargs, **chat_kwargs}
             )
             content = response["choices"][0]["message"]["content"]
-            # Clean the JSON response
-            cleaned_content = clean_json_response(content)
-            raw_response = json.loads(cleaned_content)
+            raw_response = parse_llm_json(content)
 
             # Extract scores
             trajectory_scores = {
@@ -368,9 +367,7 @@ class MultiAspectLLMJudger:
                 messages, **{**self.chat_kwargs, **chat_kwargs}
             )
             content = response["choices"][0]["message"]["content"]
-            # Clean the JSON response
-            cleaned_content = clean_json_response(content)
-            raw_response = json.loads(cleaned_content)
+            raw_response = parse_llm_json(content)
 
             # Extract scores
             task_completion_scores = {
@@ -407,17 +404,3 @@ class MultiAspectLLMJudger:
             )
 
 
-def clean_json_response(content: str) -> str:
-    """Clean JSON response by removing markdown code blocks if present."""
-    content = content.strip()
-
-    # Remove markdown code blocks
-    if content.startswith("```json"):
-        content = content[7:]  # Remove ```json
-    elif content.startswith("```"):
-        content = content[3:]  # Remove ```
-
-    if content.endswith("```"):
-        content = content[:-3]  # Remove trailing ```
-
-    return content.strip()

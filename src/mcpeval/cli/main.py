@@ -775,6 +775,12 @@ def parse_arguments():
         type=str,
         help='Path to JSON file containing model configuration (e.g., {"api_key": "...", "base_url": "...", "temperature": 0.1})',
     )
+    eval_parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        help="Number of tasks to evaluate concurrently (default: 1, sequential)",
+    )
     eval_parser.set_defaults(func=model_evaluator)
 
     # Analyzer subcommand
@@ -950,6 +956,12 @@ def parse_arguments():
         "--resume",
         action="store_true",
         help="Resume evaluation from existing results (skip already processed tasks)",
+    )
+    llm_judge_parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        help="Number of tasks to judge concurrently (default: 1, sequential)",
     )
 
     llm_judge_parser.set_defaults(func=llm_judger)

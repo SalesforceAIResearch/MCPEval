@@ -56,6 +56,6 @@
 - 🔲 Saving any existing model config as a config file and support load it again
 
 ## Issues
-- Evluating multiple models does not working
-- Analyze feature does not support not generating AI report
-- Judge Rubrics select not generate report
+- ✅ Evaluating multiple models does not work (fixed: eval output extension .json→.jsonl in auto workflow)
+- ✅ Analyze feature does not support not generating AI report (fixed: backend now supports generate_report param)
+- ✅ Judge Rubrics select not generate report (fixed: backend now passes generate_report and report_model to CLI)

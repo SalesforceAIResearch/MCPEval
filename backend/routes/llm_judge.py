@@ -84,6 +84,8 @@ def create_llm_judge_routes(config, job_manager):
             completion_file = data.get('completion_file', None)
             output_dir = data.get('output_dir', None)
             api_key = data.get('api_key', None)
+            generate_report = data.get('generate_report', 1)
+            report_model = data.get('report_model', 'gpt-4o')
             
             # Validate required fields
             if not trajectory_file:
@@ -122,21 +124,25 @@ def create_llm_judge_routes(config, job_manager):
                 '--output-dir', output_dir
             ])
             
+            # Add report generation parameters
+            cmd_parts.extend(['--generate-report', str(generate_report)])
+            cmd_parts.extend(['--report-model', report_model])
+
             # Add optional parameters
             if api_key:
                 cmd_parts.extend(['--api-key', api_key])
-            
+
             # Convert to shell command string
             command = ' '.join([f'"{part}"' if ' ' in part else part for part in cmd_parts])
-            
+
             # Run command asynchronously
             result = job_manager.run_job_async(job_id, command)
             result['job_id'] = job_id
             result['output_dir'] = str(full_output_dir)
-            
+
             return jsonify(result)
-            
+
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
-    return llm_judge_bp 
+    return llm_judge_bp

@@ -138,15 +138,20 @@ def create_analysis_routes(config, job_manager):
             })
             
             # Build command string
-            cmd = ' '.join([
+            generate_report = data.get('generate_report', True)
+            cmd_parts = [
                 'mcp-eval', 'analyze',
                 '--predictions', f'"{results_full_path}"',
                 '--ground-truth', f'"{ground_truth_full_path}"',
-                '--generate-report',
-                '--report-model', validated_data['model'],
-                '--report-output', f'"{paths["report_file"]}"',
                 '--analysis-output', f'"{paths["summary_file"]}"'
-            ])
+            ]
+            if generate_report:
+                cmd_parts.extend([
+                    '--generate-report',
+                    '--report-model', validated_data['model'],
+                    '--report-output', f'"{paths["report_file"]}"'
+                ])
+            cmd = ' '.join(cmd_parts)
             
             # Run analysis in background
             result = job_manager.run_job_async(job_id, cmd)
@@ -228,17 +233,22 @@ def create_analysis_routes(config, job_manager):
             
             # Build command string for comprehensive analysis
             # Single command to generate summary, report, and charts all at once
-            cmd = ' '.join([
+            generate_report = data.get('generate_report', True)
+            cmd_parts = [
                 'mcp-eval', 'analyze',
                 '--predictions', f'"{results_full_path}"',
                 '--ground-truth', f'"{ground_truth_full_path}"',
-                '--generate-report',
-                '--include-charts',
-                '--report-model', validated_data['model'],
-                '--report-output', f'"{paths["report_file"]}"',
-                '--analysis-output', f'"{paths["summary_file"]}"',
-                '--chart-formats', 'html', 'png', 'svg'
-            ])
+                '--analysis-output', f'"{paths["summary_file"]}"'
+            ]
+            if generate_report:
+                cmd_parts.extend([
+                    '--generate-report',
+                    '--include-charts',
+                    '--report-model', validated_data['model'],
+                    '--report-output', f'"{paths["report_file"]}"',
+                    '--chart-formats', 'html', 'png', 'svg'
+                ])
+            cmd = ' '.join(cmd_parts)
             
             # Run analysis in background
             result = job_manager.run_job_async(job_id, cmd)

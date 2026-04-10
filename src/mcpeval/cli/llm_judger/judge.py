@@ -11,6 +11,8 @@ import logging
 import os
 import sys
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -425,20 +427,24 @@ def judge_evaluation_file(args) -> None:
                 }
             )
 
-    logger.info(f"Starting evaluation of {len(evaluation_data)} records")
+    concurrency = getattr(args, "concurrency", 1)
+    logger.info(
+        f"Starting evaluation of {len(evaluation_data)} records"
+        + (f" with concurrency={concurrency}" if concurrency > 1 else "")
+    )
 
-    for i, record in enumerate(evaluation_data, 1):
+    # Thread lock for file writes and shared list mutations
+    write_lock = threading.Lock()
+
+    def _judge_single_record(i: int, record: Dict[str, Any]) -> Dict[str, Any]:
+        """Judge a single record (may run in a thread)."""
         task_id = record.get("task_id", f"sample_{i}")
-
-        # Log start of evaluation
-        logger.info(f"Starting evaluation for record {i}/{len(evaluation_data)}")
         start_time = time.time()
 
         task = record.get("task", {})
         execution_trajectory = record.get("conversation", [])
         final_response = record.get("final_response", "")
 
-        # If final_response is empty, try to extract it from conversation
         if not final_response and execution_trajectory:
             final_response = extract_final_response(execution_trajectory)
 
@@ -446,21 +452,12 @@ def judge_evaluation_file(args) -> None:
             f"\n🔄 [{i}/{len(evaluation_data)}] Evaluating: {task_id}", Colors.WHITE
         )
 
-        if verbose:
-            task_name = task.get("name", "Unknown Task")
-            colored_print(f"   Task: {task_name}", Colors.DIM)
-            colored_print(f"   Success: {record.get('success', 'Unknown')}", Colors.DIM)
-            colored_print(
-                f"   Tool calls: {len(record.get('tool_calls', []))}", Colors.DIM
-            )
-
         result = {
             "task_id": task_id,
             "task_name": task.get("name", ""),
             "original_success": record.get("success", None),
         }
 
-        # Get ground truth data if available
         ground_truth_data = ground_truth_map.get(task_id)
         ground_truth_response = None
         ground_truth_conversation = None
@@ -469,41 +466,26 @@ def judge_evaluation_file(args) -> None:
             ground_truth_response = ground_truth_data.get("final_response", "")
             ground_truth_conversation = ground_truth_data.get("conversation", [])
 
-            if verbose:
-                colored_print(f"   ✓ Ground truth data found", Colors.GREEN)
-
         try:
-            # Evaluate trajectory if requested
             if not completion_only:
-                # Use ground truth conversation if available, otherwise use prediction conversation
                 trajectory_to_evaluate = (
                     ground_truth_conversation
                     if ground_truth_conversation
                     else execution_trajectory
                 )
-
-                trajectory_result = judger.evaluate_trajectory(
+                traj_result = judger.evaluate_trajectory(
                     task=task, execution_trajectory=trajectory_to_evaluate
                 )
-
                 result.update(
                     {
-                        "trajectory_score": trajectory_result.overall_score,
-                        "trajectory_scores": trajectory_result.scores.model_dump(),
-                        "trajectory_comments": trajectory_result.comments,
+                        "trajectory_score": traj_result.overall_score,
+                        "trajectory_scores": traj_result.scores.model_dump(),
+                        "trajectory_comments": traj_result.comments,
                         "used_ground_truth_trajectory": bool(ground_truth_conversation),
                     }
                 )
 
-                if verbose:
-                    colored_print(
-                        f"   Trajectory Score: {trajectory_result.overall_score:.3f}",
-                        Colors.GREEN,
-                    )
-
-            # Evaluate task completion if requested
             if not trajectory_only:
-                # Use ground truth response if available, otherwise use prediction response
                 response_to_evaluate = (
                     ground_truth_response if ground_truth_response else final_response
                 )
@@ -512,8 +494,7 @@ def judge_evaluation_file(args) -> None:
                     if ground_truth_conversation
                     else execution_trajectory
                 )
-
-                completion_result = judger.evaluate_task_completion(
+                comp_result = judger.evaluate_task_completion(
                     task=task,
                     final_response=response_to_evaluate,
                     execution_trajectory=trajectory_for_context,
@@ -524,63 +505,24 @@ def judge_evaluation_file(args) -> None:
                         else None
                     ),
                 )
-
                 result.update(
                     {
-                        "completion_score": completion_result.overall_score,
-                        "completion_scores": completion_result.scores.model_dump(),
-                        "completion_comments": completion_result.comments,
+                        "completion_score": comp_result.overall_score,
+                        "completion_scores": comp_result.scores.model_dump(),
+                        "completion_comments": comp_result.comments,
                         "used_ground_truth_response": bool(ground_truth_response),
                     }
                 )
 
-                if verbose:
-                    colored_print(
-                        f"   Completion Score: {completion_result.overall_score:.3f}",
-                        Colors.BLUE,
-                    )
-
-            results.append(result)
-
-            # Log completion with timing
             elapsed = time.time() - start_time
-            logger.info(f"Record evaluation completed in {elapsed:.2f} seconds")
             logger.info(
-                f"Successfully evaluated record {i}/{len(evaluation_data)}: {task_id}"
+                f"Evaluated record {i}/{len(evaluation_data)}: {task_id} in {elapsed:.2f}s"
             )
-
-            # Save to combined file
-            if output_files["combined"]:
-                save_result_to_jsonl(result, output_files["combined"])
-
-            # Save to separate files
-            if "trajectory_score" in result and output_files["trajectory"]:
-                trajectory_result = {
-                    k: v
-                    for k, v in result.items()
-                    if not k.startswith("completion_")
-                    or k in ["task_id", "task_name", "original_success"]
-                }
-                trajectory_results.append(trajectory_result)
-                save_result_to_jsonl(trajectory_result, output_files["trajectory"])
-
-            if "completion_score" in result and output_files["completion"]:
-                completion_result = {
-                    k: v
-                    for k, v in result.items()
-                    if not k.startswith("trajectory_")
-                    or k in ["task_id", "task_name", "original_success"]
-                }
-                completion_results.append(completion_result)
-                save_result_to_jsonl(completion_result, output_files["completion"])
 
         except Exception as e:
             elapsed = time.time() - start_time
             colored_print(f"   ❌ Error evaluating {task_id}: {e}", Colors.RED)
-            logger.error(
-                f"Error evaluating record {i}/{len(evaluation_data)} after {elapsed:.2f} seconds: {str(e)}",
-                exc_info=True,
-            )
+            logger.error(f"Error evaluating record {i} after {elapsed:.2f}s: {e}", exc_info=True)
             result.update(
                 {
                     "error": str(e),
@@ -588,20 +530,47 @@ def judge_evaluation_file(args) -> None:
                     "completion_score": 0.0 if not trajectory_only else None,
                 }
             )
-            results.append(result)
 
-            # Save error result
+        # Thread-safe writes
+        with write_lock:
+            results.append(result)
             if output_files["combined"]:
                 save_result_to_jsonl(result, output_files["combined"])
+            if "trajectory_score" in result and output_files["trajectory"]:
+                traj_only = {
+                    k: v for k, v in result.items()
+                    if not k.startswith("completion_")
+                    or k in ["task_id", "task_name", "original_success"]
+                }
+                trajectory_results.append(traj_only)
+                save_result_to_jsonl(traj_only, output_files["trajectory"])
+            if "completion_score" in result and output_files["completion"]:
+                comp_only = {
+                    k: v for k, v in result.items()
+                    if not k.startswith("trajectory_")
+                    or k in ["task_id", "task_name", "original_success"]
+                }
+                completion_results.append(comp_only)
+                save_result_to_jsonl(comp_only, output_files["completion"])
 
-            # Save error to separate files
-            if output_files["trajectory"]:
-                trajectory_results.append(result)
-                save_result_to_jsonl(result, output_files["trajectory"])
+        return result
 
-            if output_files["completion"]:
-                completion_results.append(result)
-                save_result_to_jsonl(result, output_files["completion"])
+    if concurrency <= 1:
+        # Sequential execution (original behavior)
+        for i, record in enumerate(evaluation_data, 1):
+            _judge_single_record(i, record)
+    else:
+        # Parallel execution
+        with ThreadPoolExecutor(max_workers=concurrency) as executor:
+            futures = {
+                executor.submit(_judge_single_record, i, record): i
+                for i, record in enumerate(evaluation_data, 1)
+            }
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    logger.error(f"Unexpected error in judge worker: {e}")
 
     # Calculate summary statistics
     successful_evaluations = sum(1 for r in results if not r.get("error"))

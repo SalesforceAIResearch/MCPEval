@@ -354,9 +354,9 @@ class AutoWorkflowOrchestrator:
                 bold=True,
             )
 
-            # Create evaluation output file
+            # Create evaluation output file (JSONL format)
             eval_output = self.results_dir / self._get_output_filename(
-                f"{model_name}_evaluation"
+                f"{model_name}_evaluation", ".jsonl"
             )
 
             cmd = ["mcp-eval", "evaluate", "--servers"]
