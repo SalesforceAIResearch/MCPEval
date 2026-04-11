@@ -16,7 +16,7 @@ class TestCountTokens:
         assert count_tokens("") == 0
 
     def test_none_like_empty(self):
-        assert count_tokens("") == 0
+        assert count_tokens(None) == 0
 
     def test_simple_text(self):
         tokens = count_tokens("Hello, world!")

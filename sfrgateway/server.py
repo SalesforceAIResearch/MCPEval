@@ -24,7 +24,10 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 load_dotenv()
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# TLS verification: disable only when explicitly opted in for development
+TLS_VERIFY = os.environ.get("SFR_TLS_VERIFY", "true").lower() not in ("0", "false", "no")
+if not TLS_VERIFY:
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 GATEWAY_BASE_URL = os.environ.get(
     "SFR_GATEWAY_BASE_URL",
@@ -56,7 +59,7 @@ def list_models():
     """Return the list of models available on the gateway."""
     url = f"{GATEWAY_BASE_URL}/v1/models"
     try:
-        resp = requests.get(url, headers=_gateway_headers(), verify=False, timeout=30)
+        resp = requests.get(url, headers=_gateway_headers(), verify=TLS_VERIFY, timeout=30)
         resp.raise_for_status()
         return JSONResponse(content=resp.json())
     except requests.exceptions.RequestException as e:
@@ -78,7 +81,7 @@ async def chat_completions(request: Request):
         if stream:
             def _stream_generator():
                 with requests.post(
-                    url, headers=headers, json=body, stream=True, verify=False, timeout=120
+                    url, headers=headers, json=body, stream=True, verify=TLS_VERIFY, timeout=120
                 ) as resp:
                     resp.raise_for_status()
                     for line in resp.iter_lines():
@@ -87,7 +90,7 @@ async def chat_completions(request: Request):
 
             return StreamingResponse(_stream_generator(), media_type="text/event-stream")
 
-        resp = requests.post(url, headers=headers, json=body, verify=False, timeout=120)
+        resp = requests.post(url, headers=headers, json=body, verify=TLS_VERIFY, timeout=120)
         resp.raise_for_status()
         return JSONResponse(content=resp.json())
 

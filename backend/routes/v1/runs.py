@@ -204,12 +204,22 @@ def create_runs_routes(db_path=None):
 
         Body: {"run_paths": ["path1.jsonl", "path2.jsonl"], "confidence": 0.95}
         """
+        import os
+
         data = request.get_json(force=True)
         run_paths = data.get("run_paths", [])
         if len(run_paths) < 2:
             return jsonify({"error": "At least 2 run paths required"}), 400
 
+        # Restrict to working directory to prevent path traversal
+        cwd = os.path.abspath(os.getcwd())
+        for p in run_paths:
+            abs_path = os.path.abspath(p)
+            if not abs_path.startswith(cwd + os.sep) and abs_path != cwd:
+                return jsonify({"error": f"Path not allowed: {p}"}), 403
+
         from mcpeval.stats.comparison import compare_results
+
         confidence = data.get("confidence", 0.95)
 
         try:

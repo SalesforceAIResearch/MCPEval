@@ -2,6 +2,7 @@
 
 import json
 import os
+import shlex
 import tempfile
 from pathlib import Path
 
@@ -54,24 +55,22 @@ def create_simulation_routes(config, job_manager):
                 cmd_parts.extend(['--servers'] + server_specs)
 
             cmd_parts.extend([
-                '--simulator-model-config', sim_config_file.name,
-                '--agent-model-config', agent_config_file.name,
-                '--output', f'"{output}"',
+                '--simulator-model-config', shlex.quote(sim_config_file.name),
+                '--agent-model-config', shlex.quote(agent_config_file.name),
+                '--output', shlex.quote(output),
                 '--max-turns', str(max_turns),
                 '--max-agent-steps', str(max_agent_steps),
-                '--scenario-type', scenario_type,
+                '--scenario-type', shlex.quote(scenario_type),
             ])
 
             if scenarios_file:
-                cmd_parts.extend(['--scenarios-file', f'"{scenarios_file}"'])
+                cmd_parts.extend(['--scenarios-file', shlex.quote(scenarios_file)])
             if tasks_file:
-                cmd_parts.extend(['--tasks-file', f'"{tasks_file}"'])
+                cmd_parts.extend(['--tasks-file', shlex.quote(tasks_file)])
             if num_scenarios > 0:
                 cmd_parts.extend(['--num-scenarios', str(num_scenarios)])
 
             cmd = ' '.join(cmd_parts)
-            # Cleanup temp files after command
-            cmd += f' ; rm -f {sim_config_file.name} {agent_config_file.name}'
 
             job_id = job_manager.create_job(
                 "Multi-Turn Simulation",
@@ -107,13 +106,13 @@ def create_simulation_routes(config, job_manager):
                     cmd_parts.extend(['--servers'] + server_specs)
 
             cmd_parts.extend([
-                '--output', f'"{output}"',
+                '--output', shlex.quote(output),
                 '--max-turns', str(max_turns),
-                '--scenario-type', scenario_type,
+                '--scenario-type', shlex.quote(scenario_type),
             ])
 
             if tasks_file:
-                cmd_parts.extend(['--tasks-file', f'"{tasks_file}"'])
+                cmd_parts.extend(['--tasks-file', shlex.quote(tasks_file)])
             if num_scenarios > 0:
                 cmd_parts.extend(['--num-scenarios', str(num_scenarios)])
 
@@ -122,10 +121,9 @@ def create_simulation_routes(config, job_manager):
                 config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
                 json.dump(model_config, config_file, indent=2)
                 config_file.close()
-                cmd_parts.extend(['--model-config', config_file.name])
-                cmd = ' '.join(cmd_parts) + f' ; rm -f {config_file.name}'
-            else:
-                cmd = ' '.join(cmd_parts)
+                cmd_parts.extend(['--model-config', shlex.quote(config_file.name)])
+
+            cmd = ' '.join(cmd_parts)
 
             job_id = job_manager.create_job(
                 "Scenario Generation",
@@ -157,9 +155,9 @@ def create_simulation_routes(config, job_manager):
 
             cmd_parts = [
                 'mcp-eval', 'evaluate-multiturn',
-                '--input', f'"{input_file}"',
-                '--output', f'"{output}"',
-                '--model', model,
+                '--input', shlex.quote(input_file),
+                '--output', shlex.quote(output),
+                '--model', shlex.quote(model),
             ]
 
             if num_samples > 0:
@@ -171,10 +169,9 @@ def create_simulation_routes(config, job_manager):
                 config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
                 json.dump(model_config, config_file, indent=2)
                 config_file.close()
-                cmd_parts.extend(['--model-config', config_file.name])
-                cmd = ' '.join(cmd_parts) + f' ; rm -f {config_file.name}'
-            else:
-                cmd = ' '.join(cmd_parts)
+                cmd_parts.extend(['--model-config', shlex.quote(config_file.name)])
+
+            cmd = ' '.join(cmd_parts)
 
             job_id = job_manager.create_job(
                 "Multi-Turn Evaluation",

@@ -189,8 +189,8 @@ def _try_cleaned_parse(text: str) -> Optional[Dict[str, Any]]:
     if result is not None:
         return result
 
-    # Try fixing single quotes -> double quotes
-    quote_fixed = re.sub(r"'([^']*)':", r'"\1":', text)
+    # Try fixing single quotes -> double quotes (apply to already-cleaned text)
+    quote_fixed = re.sub(r"'([^']*)':", r'"\1":', cleaned)
     quote_fixed = re.sub(r":\s*'([^']*)'", r': "\1"', quote_fixed)
     return _try_brace_match(quote_fixed)
 

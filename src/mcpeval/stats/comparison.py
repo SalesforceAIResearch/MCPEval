@@ -71,11 +71,11 @@ def mcnemar_test(successes_a: np.ndarray, successes_b: np.ndarray) -> Dict[str, 
     if b + c == 0:
         return {"statistic": 0.0, "p_value": 1.0, "significant": False, "b": b, "c": c}
 
-    from scipy.stats import binom_test  # type: ignore
+    from scipy.stats import binomtest  # type: ignore
 
     # Use exact binomial test (small-sample safe)
     try:
-        p_value = float(binom_test(b, b + c, 0.5))
+        p_value = float(binomtest(b, b + c, 0.5).pvalue)
     except Exception:
         # Fallback chi-squared approximation
         stat = (abs(b - c) - 1) ** 2 / (b + c) if b + c > 0 else 0

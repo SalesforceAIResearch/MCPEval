@@ -1435,12 +1435,6 @@ def parse_arguments():
         help="Paths to two or more JSONL evaluation result files",
     )
     compare_parser.add_argument(
-        "--ground-truth",
-        type=str,
-        default=None,
-        help="Path to ground truth JSONL file (required for score-based comparison)",
-    )
-    compare_parser.add_argument(
         "--output",
         type=str,
         default=None,
