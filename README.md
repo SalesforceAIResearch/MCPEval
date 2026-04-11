@@ -49,18 +49,22 @@ to-end task generation and deep evaluation of LLM agents across diverse dimensio
 *MCPEval web interface providing intuitive access to all evaluation features*
 
 ## News
+- **v1.1.0** — Multi-turn simulation web UI, conversation replay viewer, model comparison dashboard with statistical testing, SQLite persistence & v1 REST API, SFRGateway proxy, CI pipeline, and comprehensive test suite
 - Supporting GPT-5
 - Using model-config for using any model to generate and evaluate
 - A new [revalidation cli](src/mcpeval/cli/mcp_task_revalidator/README.md) is released for generating high-quality data
 
 ## Features
 
-- 🚀 **Automated End-to-End Evaluation**
-- 🔧 **MCP Protocol Integration**
-- 📊 **Comprehensive Analysis & Insights**
-- 💻 **User-Friendly Web-based Interface**
-- ⚡  **Advanced CLI Commands**
-- 🔬 **Research & Development Support**
+- 🚀 **Automated End-to-End Evaluation** — Single-command pipeline from task generation to analysis with parallel execution
+- 🔧 **MCP Protocol Integration** — 15+ built-in MCP servers spanning enterprise, utility, and public API domains
+- 📊 **Comprehensive Analysis & Insights** — Statistical model comparison with bootstrap confidence intervals and paired tests
+- 💻 **User-Friendly Web Interface** — Conversation replay viewer, model comparison dashboard, and multi-turn simulation UI
+- ⚡ **Advanced CLI Commands** — Generate, verify, evaluate, simulate, and judge with flexible model configuration
+- 🗄️ **SQLite Persistence & REST API** — Durable storage for evaluation runs with a v1 leaderboard and runs API
+- 🔬 **Multi-Turn Simulation** — LLM-as-user simulation with scenario generation, persona support, and 5-dimension LLM judging
+- 🌐 **SFRGateway Proxy** — Self-contained LLM inference via the Salesforce Research gateway (no direct API keys needed)
+- ✅ **CI & Test Suite** — GitHub Actions pipeline with unit and integration tests
 
 ## Citation
 If you find our system or paper useful, please cite
@@ -124,6 +128,18 @@ OR export the key in your terminal:
 export OPENAI_API_KEY=YOUR_OPENAI_API_KEY_HERE
 ```
 
+### SFRGateway Proxy (Optional)
+
+For self-contained LLM inference without managing API keys directly, use the bundled [SFRGateway](sfrgateway/) proxy:
+
+```bash
+cd sfrgateway
+cp .env.template .env   # edit .env with your X_API_KEY
+PROXY_PORT=8008 uv run python server.py
+```
+
+Then point model configs at `http://localhost:8008/v1` with `"api_key": "dummy"`. See [sfrgateway/README.md](sfrgateway/README.md) for details.
+
 ## Usage
 
 ### Web Interface (Recommended for New Users)
@@ -147,6 +163,9 @@ After running the setup script:
 3. **Access the web application:**
    - Open `http://localhost:22359` in your browser
    - Use the intuitive interface to generate tasks, run evaluations, and view results
+   - **Conversation Replay** — Browse and inspect multi-turn conversations turn by turn
+   - **Model Comparison** — Side-by-side model comparison with statistical significance testing
+   - **Multi-Turn Simulation** — Generate scenarios, run user simulations, and evaluate conversations from the UI
    - Real-time progress tracking for all operations
 
 **Note:** The frontend automatically proxies API requests to the backend server (port 22358). No additional configuration is needed.

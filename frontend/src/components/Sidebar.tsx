@@ -31,6 +31,7 @@ import {
   History as ActivitiesIcon,
   PlayCircleOutline as ReplayIcon,
   CompareArrows as CompareIcon,
+  Forum as SimulationIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 280;
@@ -145,6 +146,14 @@ const menuItems: MenuItem[] = [
     icon: <AutoIcon />,
     path: '/auto-workflow',
     description: 'Complete automated evaluation pipeline',
+    category: 'evaluation',
+  },
+  {
+    id: 'multi-turn-simulation',
+    label: 'Multi-Turn Simulation',
+    icon: <SimulationIcon />,
+    path: '/multi-turn-simulation',
+    description: 'Run multi-turn user simulations',
     category: 'evaluation',
   },
   {

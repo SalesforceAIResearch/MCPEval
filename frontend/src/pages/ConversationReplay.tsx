@@ -58,6 +58,37 @@ interface TaskResult {
     goal?: string;
   };
   error?: string;
+  // Multi-turn specific
+  scenario_name?: string;
+  persona?: any;
+  num_turns?: number;
+}
+
+/**
+ * Normalize a raw parsed record into TaskResult format.
+ * Handles both single-turn eval results (conversation, task_id, success)
+ * and multi-turn simulation results (full_conversation, scenario_id, overall_success).
+ */
+function normalizeResult(raw: any): TaskResult | null {
+  const conversation = raw.conversation || raw.full_conversation;
+  if (!conversation || conversation.length === 0) return null;
+
+  return {
+    task_id: raw.task_id || raw.scenario_id || '',
+    success: raw.success ?? raw.overall_success ?? false,
+    tool_calls: raw.tool_calls || raw.all_tool_calls || [],
+    final_response: raw.final_response || '',
+    conversation,
+    task: raw.task || (raw.scenario_name ? {
+      name: raw.scenario_name,
+      description: raw.persona?.description || raw.scenario_type || '',
+      goal: raw.persona?.goal || '',
+    } : undefined),
+    error: raw.error,
+    scenario_name: raw.scenario_name,
+    persona: raw.persona,
+    num_turns: raw.num_turns,
+  };
 }
 
 const ConversationReplay: React.FC = () => {
@@ -71,7 +102,7 @@ const ConversationReplay: React.FC = () => {
 
   // Fetch available files
   useEffect(() => {
-    fetch('/api/files?directory=workspace')
+    fetch('/api/files')
       .then(res => res.json())
       .then(data => {
         const jsonlFiles = (data.files || [])
@@ -89,20 +120,23 @@ const ConversationReplay: React.FC = () => {
     try {
       const res = await fetch(`/api/file-content/${encodeURIComponent(resultsFile)}`);
       if (!res.ok) throw new Error('Failed to load file');
-      const text = await res.text();
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      const text = json.content || '';
 
-      // Parse JSONL
+      // Parse JSONL (or JSON array)
       const lines = text.trim().split('\n').filter(Boolean);
-      const parsed = lines.map(line => JSON.parse(line));
-      const withConversation = parsed.filter(
-        (r: any) => r.conversation && r.conversation.length > 0
-      );
+      const parsed = lines.map((line: string) => JSON.parse(line));
+      // Normalize single-turn and multi-turn formats
+      const normalized = parsed
+        .map(normalizeResult)
+        .filter((r: TaskResult | null): r is TaskResult => r !== null);
 
-      if (withConversation.length === 0) {
+      if (normalized.length === 0) {
         setError('No conversations found in this file.');
         setResults([]);
       } else {
-        setResults(withConversation);
+        setResults(normalized);
         setSelectedIndex(0);
         setExpandedTurn(0);
       }

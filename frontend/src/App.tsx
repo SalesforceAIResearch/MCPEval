@@ -24,6 +24,7 @@ import ReportGenerator from './pages/ReportGenerator';
 import Activities from './pages/Activities';
 import ConversationReplay from './pages/ConversationReplay';
 import ModelComparison from './pages/ModelComparison';
+import MultiTurnSimulation from './pages/MultiTurnSimulation';
 import './App.css';
 
 const theme = createTheme({
@@ -113,6 +114,7 @@ function App() {
                 <Route path="/activities" element={<Activities />} />
                 <Route path="/conversation-replay" element={<ConversationReplay />} />
                 <Route path="/model-comparison" element={<ModelComparison />} />
+                <Route path="/multi-turn-simulation" element={<MultiTurnSimulation />} />
               </Routes>
             </Box>
           </Box>

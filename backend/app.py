@@ -24,6 +24,7 @@ from routes.auto import create_auto_routes
 from routes.report_generation import create_report_generation_routes
 from routes.analysis import create_analysis_routes
 from routes.llm_judge import create_llm_judge_routes
+from routes.simulation import create_simulation_routes
 from routes.v1 import create_v1_routes
 
 
@@ -53,6 +54,7 @@ def create_app(config_path=None):
     app.register_blueprint(create_report_generation_routes(config, job_manager))
     app.register_blueprint(create_analysis_routes(config, job_manager))
     app.register_blueprint(create_llm_judge_routes(config, job_manager))
+    app.register_blueprint(create_simulation_routes(config, job_manager))
 
     # Register v1 resource-oriented API routes (backed by database)
     db_path = config.get('database', {}).get('path')
