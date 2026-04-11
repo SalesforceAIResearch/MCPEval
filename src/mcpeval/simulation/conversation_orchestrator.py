@@ -153,7 +153,6 @@ class ConversationOrchestrator:
             # 6. Extract agent messages added in this turn
             # (everything after the user message we added)
             agent_messages = []
-            found_user = False
             for msg in reversed(messages):
                 if msg.get("role") == "user" and msg.get("content") == user_text:
                     break

@@ -120,7 +120,7 @@ class TaskGenerator:
                         ].strip()
                     except Exception as llm_err:
                         logger.error(f"Error during LLM retry: {llm_err}")
-                        break
+                        continue
 
         logger.error(f"Failed to parse JSON after {max_retries} attempts")
         return None

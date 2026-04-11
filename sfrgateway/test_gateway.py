@@ -142,7 +142,7 @@ def main():
         print("  export X_API_KEY=<your-api-key>")
         return
 
-    print(f"API Key: {api_key[:8]}...{api_key[-4:]}")
+    print(f"API Key: {'*' * 8} (set, length={len(api_key)})")
     print(f"Gateway: {os.environ.get('SFR_GATEWAY_BASE_URL', 'https://gateway.salesforceresearch.ai/openai/process')}")
     print()
 

@@ -220,15 +220,13 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
             message = response.choices[0].message
 
             # Add assistant message to conversation
-            conversation.append(
-                {
-                    "role": "assistant",
-                    "content": message.content,
-                    "tool_calls": (
-                        message.tool_calls if hasattr(message, "tool_calls") else None
-                    ),
-                }
-            )
+            assistant_msg = {
+                "role": "assistant",
+                "content": message.content,
+            }
+            if hasattr(message, "tool_calls") and message.tool_calls:
+                assistant_msg["tool_calls"] = message.tool_calls
+            conversation.append(assistant_msg)
 
             # Check if there are tool calls to execute
             if hasattr(message, "tool_calls") and message.tool_calls:

@@ -10,9 +10,49 @@ from flask import Blueprint, jsonify, request
 from .task_utils import build_server_specs, validate_servers
 
 
+def _write_temp_config(data: dict, tmpdir: str, name: str) -> str:
+    """Write a model config dict to a temp JSON file inside tmpdir.
+
+    Returns the path to the created file.
+    """
+    path = os.path.join(tmpdir, name)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+    return path
+
+
+def _quote_server_specs(specs: list) -> list:
+    """Shell-quote each server spec string."""
+    return [shlex.quote(s) for s in specs]
+
+
 def create_simulation_routes(config, job_manager):
     """Create simulation route handlers."""
     simulation_bp = Blueprint('simulation', __name__)
+
+    def _run_job_with_cleanup(job_id, cmd, tmpdir):
+        """Run a job and clean up the temp directory when it finishes."""
+        import threading
+
+        def _task():
+            try:
+                if job_id in job_manager.job_metadata:
+                    job_manager.job_metadata[job_id]['command'] = cmd
+                job_manager.job_logs.setdefault(job_id, []).append(f"Executing command: {cmd}")
+                result = job_manager.run_cli_command(cmd, job_id)
+                job_manager.job_progress[job_id].update(result)
+            except Exception as e:
+                job_manager.job_progress[job_id]['status'] = 'failed'
+                job_manager.job_logs.setdefault(job_id, []).append(f"Job execution error: {str(e)}")
+            finally:
+                # Clean up temp config files
+                import shutil
+                shutil.rmtree(tmpdir, ignore_errors=True)
+
+        job_manager.job_progress[job_id] = {'status': 'running', 'progress': 0}
+        job_manager.job_logs[job_id] = []
+        threading.Thread(target=_task, daemon=True).start()
+        return {'job_id': job_id, 'status': 'started'}
 
     @simulation_bp.route('/api/simulate', methods=['POST'])
     def run_simulation():
@@ -38,25 +78,21 @@ def create_simulation_routes(config, job_manager):
             max_agent_steps = data.get('max_agent_steps', 10)
             scenario_type = data.get('scenario_type', 'standard')
 
-            # Write temp model config files
-            sim_config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-            json.dump(simulator_model, sim_config_file, indent=2)
-            sim_config_file.close()
-
-            agent_config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-            json.dump(agent_model, agent_config_file, indent=2)
-            agent_config_file.close()
+            # Write temp model config files into a per-job temp directory
+            tmpdir = tempfile.mkdtemp(prefix='mcpeval_sim_')
+            sim_config_path = _write_temp_config(simulator_model, tmpdir, 'simulator.json')
+            agent_config_path = _write_temp_config(agent_model, tmpdir, 'agent.json')
 
             # Build CLI command
             cmd_parts = ['mcp-eval', 'simulate']
 
             server_specs = build_server_specs(servers)
             if server_specs:
-                cmd_parts.extend(['--servers'] + server_specs)
+                cmd_parts.extend(['--servers'] + _quote_server_specs(server_specs))
 
             cmd_parts.extend([
-                '--simulator-model-config', shlex.quote(sim_config_file.name),
-                '--agent-model-config', shlex.quote(agent_config_file.name),
+                '--simulator-model-config', shlex.quote(sim_config_path),
+                '--agent-model-config', shlex.quote(agent_config_path),
                 '--output', shlex.quote(output),
                 '--max-turns', str(max_turns),
                 '--max-agent-steps', str(max_agent_steps),
@@ -77,7 +113,7 @@ def create_simulation_routes(config, job_manager):
                 f"Simulate {num_scenarios if num_scenarios > 0 else 'all'} scenarios",
                 "simulate",
             )
-            result = job_manager.run_job_async(job_id, cmd)
+            result = _run_job_with_cleanup(job_id, cmd, tmpdir)
             result['job_id'] = job_id
             return jsonify(result)
 
@@ -103,7 +139,7 @@ def create_simulation_routes(config, job_manager):
             if servers:
                 server_specs = build_server_specs(servers)
                 if server_specs:
-                    cmd_parts.extend(['--servers'] + server_specs)
+                    cmd_parts.extend(['--servers'] + _quote_server_specs(server_specs))
 
             cmd_parts.extend([
                 '--output', shlex.quote(output),
@@ -117,11 +153,10 @@ def create_simulation_routes(config, job_manager):
                 cmd_parts.extend(['--num-scenarios', str(num_scenarios)])
 
             # Model config
+            tmpdir = tempfile.mkdtemp(prefix='mcpeval_gen_')
             if model_config:
-                config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-                json.dump(model_config, config_file, indent=2)
-                config_file.close()
-                cmd_parts.extend(['--model-config', shlex.quote(config_file.name)])
+                config_path = _write_temp_config(model_config, tmpdir, 'model.json')
+                cmd_parts.extend(['--model-config', shlex.quote(config_path)])
 
             cmd = ' '.join(cmd_parts)
 
@@ -130,7 +165,7 @@ def create_simulation_routes(config, job_manager):
                 f"Generate {num_scenarios if num_scenarios > 0 else ''} scenarios",
                 "generate-scenarios",
             )
-            result = job_manager.run_job_async(job_id, cmd)
+            result = _run_job_with_cleanup(job_id, cmd, tmpdir)
             result['job_id'] = job_id
             return jsonify(result)
 
@@ -165,11 +200,10 @@ def create_simulation_routes(config, job_manager):
             if resume:
                 cmd_parts.append('--resume')
 
+            tmpdir = tempfile.mkdtemp(prefix='mcpeval_eval_')
             if model_config:
-                config_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-                json.dump(model_config, config_file, indent=2)
-                config_file.close()
-                cmd_parts.extend(['--model-config', shlex.quote(config_file.name)])
+                config_path = _write_temp_config(model_config, tmpdir, 'model.json')
+                cmd_parts.extend(['--model-config', shlex.quote(config_path)])
 
             cmd = ' '.join(cmd_parts)
 
@@ -178,7 +212,7 @@ def create_simulation_routes(config, job_manager):
                 f"Evaluate conversations from {input_file}",
                 "evaluate-multiturn",
             )
-            result = job_manager.run_job_async(job_id, cmd)
+            result = _run_job_with_cleanup(job_id, cmd, tmpdir)
             result['job_id'] = job_id
             return jsonify(result)
 
