@@ -24,6 +24,8 @@ from routes.auto import create_auto_routes
 from routes.report_generation import create_report_generation_routes
 from routes.analysis import create_analysis_routes
 from routes.llm_judge import create_llm_judge_routes
+from routes.simulation import create_simulation_routes
+from routes.v1 import create_v1_routes
 
 
 def create_app(config_path=None):
@@ -52,7 +54,13 @@ def create_app(config_path=None):
     app.register_blueprint(create_report_generation_routes(config, job_manager))
     app.register_blueprint(create_analysis_routes(config, job_manager))
     app.register_blueprint(create_llm_judge_routes(config, job_manager))
-    
+    app.register_blueprint(create_simulation_routes(config, job_manager))
+
+    # Register v1 resource-oriented API routes (backed by database)
+    db_path = config.get('database', {}).get('path')
+    for bp in create_v1_routes(db_path):
+        app.register_blueprint(bp)
+
     # Root endpoint
     @app.route('/')
     def root():
@@ -104,6 +112,16 @@ def create_app(config_path=None):
                 'reports': {
                     'generate': '/api/generate-report',
                     'detect_files': '/api/detect-analysis-files'
+                },
+                'v1': {
+                    'runs': 'GET/POST /api/v1/runs',
+                    'run_detail': 'GET /api/v1/runs/{id}',
+                    'results': 'GET/POST /api/v1/runs/{id}/results',
+                    'scores': 'GET/POST /api/v1/runs/{id}/scores',
+                    'judge_scores': 'GET /api/v1/runs/{id}/judge-scores',
+                    'complete': 'POST /api/v1/runs/{id}/complete',
+                    'compare': 'POST /api/v1/runs/compare',
+                    'leaderboard': 'GET /api/v1/leaderboard'
                 }
             }
         })

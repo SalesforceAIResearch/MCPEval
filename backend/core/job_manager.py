@@ -100,7 +100,9 @@ class JobManager:
                     if line:
                         stderr_lines.append(line)
                         if job_id:
-                            self.job_logs[job_id].append(f"Error: {line}")
+                            # Don't prefix every stderr line with "Error:" —
+                            # Python logging and progress output goes to stderr too.
+                            self.job_logs[job_id].append(line)
                 
                 process.stderr.close()
             

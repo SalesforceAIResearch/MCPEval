@@ -1,12 +1,13 @@
-from typing import Dict, List, Any, Optional, Union, Tuple
 import logging
-from ..commons.types import ToolCall, Task, ToolDefinition, ToolCallResult
-from .utils import extract_content_from_mcp_result
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from ..commons.prompts import (
-    task_verification_system_prompt,
     task_revalidation_system_prompt,
     task_revalidation_user_prompt,
+    task_verification_system_prompt,
 )
+from ..commons.types import Task, ToolCall, ToolCallResult, ToolDefinition
+from .utils import extract_content_from_mcp_result
 
 logger = logging.getLogger(__name__)
 
@@ -135,9 +136,17 @@ class LLMTaskVerifier:
                 formatted_tools.append(str(t))
 
         # Use custom prompts if provided, otherwise use defaults
-        system_prompt = custom_prompts.get("system", task_revalidation_system_prompt) if custom_prompts else task_revalidation_system_prompt
-        user_prompt_template = custom_prompts.get("user", task_revalidation_user_prompt) if custom_prompts else task_revalidation_user_prompt
-        
+        system_prompt = (
+            custom_prompts.get("system", task_revalidation_system_prompt)
+            if custom_prompts
+            else task_revalidation_system_prompt
+        )
+        user_prompt_template = (
+            custom_prompts.get("user", task_revalidation_user_prompt)
+            if custom_prompts
+            else task_revalidation_user_prompt
+        )
+
         messages = [
             {"role": "system", "content": system_prompt},
             {

@@ -8,7 +8,7 @@ This module provides AI-powered report generation functionality for LLM judger r
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from mcpeval.utils.cli import Colors, colored_print
 
@@ -23,10 +23,10 @@ except ImportError:
 
 def load_rubrics_content(rubrics_file: Optional[str] = None) -> str:
     """Load the rubrics content from a file.
-    
+
     Args:
         rubrics_file: Path to custom rubrics file. If None, uses default rubrics.md
-        
+
     Returns:
         String content of the rubrics file
     """
@@ -34,7 +34,7 @@ def load_rubrics_content(rubrics_file: Optional[str] = None) -> str:
         rubrics_path = Path(rubrics_file)
     else:
         rubrics_path = Path(__file__).parent / "rubrics.md"
-    
+
     try:
         with open(rubrics_path, "r", encoding="utf-8") as f:
             return f.read()
@@ -136,7 +136,10 @@ Focus on actionable insights for improving both the model being evaluated and th
 
 
 def generate_report_from_analysis_file(
-    analysis_file: str, model: str = "gpt-4o", output_file: Optional[str] = None, rubrics_file: Optional[str] = None
+    analysis_file: str,
+    model: str = "gpt-4o",
+    output_file: Optional[str] = None,
+    rubrics_file: Optional[str] = None,
 ) -> str:
     """Generate an AI report directly from an analysis JSON file."""
     if not OPENAI_AVAILABLE:
@@ -172,7 +175,9 @@ def generate_report_from_analysis_file(
         os.makedirs(output_dir, exist_ok=True)
 
     # Generate the report
-    report_content = generate_ai_report(stats, correlations, patterns, insights, model, rubrics_file)
+    report_content = generate_ai_report(
+        stats, correlations, patterns, insights, model, rubrics_file
+    )
 
     # Save the report
     with open(output_file, "w", encoding="utf-8") as f:

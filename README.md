@@ -49,18 +49,22 @@ to-end task generation and deep evaluation of LLM agents across diverse dimensio
 *MCPEval web interface providing intuitive access to all evaluation features*
 
 ## News
+- **v1.1.0** — Multi-turn simulation web UI, conversation replay viewer, model comparison dashboard with statistical testing, SQLite persistence & v1 REST API, SFRGateway proxy, CI pipeline, and comprehensive test suite
 - Supporting GPT-5
 - Using model-config for using any model to generate and evaluate
 - A new [revalidation cli](src/mcpeval/cli/mcp_task_revalidator/README.md) is released for generating high-quality data
 
 ## Features
 
-- 🚀 **Automated End-to-End Evaluation**
-- 🔧 **MCP Protocol Integration**
-- 📊 **Comprehensive Analysis & Insights**
-- 💻 **User-Friendly Web-based Interface**
-- ⚡  **Advanced CLI Commands**
-- 🔬 **Research & Development Support**
+- 🚀 **Automated End-to-End Evaluation** — Single-command pipeline from task generation to analysis with parallel execution
+- 🔧 **MCP Protocol Integration** — 15+ built-in MCP servers spanning enterprise, utility, and public API domains
+- 📊 **Comprehensive Analysis & Insights** — Statistical model comparison with bootstrap confidence intervals and paired tests
+- 💻 **User-Friendly Web Interface** — Conversation replay viewer, model comparison dashboard, and multi-turn simulation UI
+- ⚡ **Advanced CLI Commands** — Generate, verify, evaluate, simulate, and judge with flexible model configuration
+- 🗄️ **SQLite Persistence & REST API** — Durable storage for evaluation runs with a v1 leaderboard and runs API
+- 🔬 **Multi-Turn Simulation** — LLM-as-user simulation with scenario generation, persona support, and 5-dimension LLM judging
+- 🌐 **SFRGateway Proxy** — Self-contained LLM inference via the Salesforce Research gateway (no direct API keys needed)
+- ✅ **CI & Test Suite** — GitHub Actions pipeline with unit and integration tests
 
 ## Citation
 If you find our system or paper useful, please cite
@@ -124,6 +128,18 @@ OR export the key in your terminal:
 export OPENAI_API_KEY=YOUR_OPENAI_API_KEY_HERE
 ```
 
+### SFRGateway Proxy (Optional)
+
+For self-contained LLM inference without managing API keys directly, use the bundled [SFRGateway](sfrgateway/) proxy:
+
+```bash
+cd sfrgateway
+cp .env.template .env   # edit .env with your X_API_KEY
+PROXY_PORT=8008 uv run python server.py
+```
+
+Then point model configs at `http://localhost:8008/v1` with `"api_key": "dummy"`. See [sfrgateway/README.md](sfrgateway/README.md) for details.
+
 ## Usage
 
 ### Web Interface (Recommended for New Users)
@@ -147,6 +163,9 @@ After running the setup script:
 3. **Access the web application:**
    - Open `http://localhost:22359` in your browser
    - Use the intuitive interface to generate tasks, run evaluations, and view results
+   - **Conversation Replay** — Browse and inspect multi-turn conversations turn by turn
+   - **Model Comparison** — Side-by-side model comparison with statistical significance testing
+   - **Multi-Turn Simulation** — Generate scenarios, run user simulations, and evaluate conversations from the UI
    - Real-time progress tracking for all operations
 
 **Note:** The frontend automatically proxies API requests to the backend server (port 22358). No additional configuration is needed.
@@ -171,6 +190,71 @@ uv run mcp_clients/example_openai_client/client.py --servers @openbnb/mcp-server
 ```
 
 For more details on the OpenAI client usage, see the [OpenAI Client README](mcp_clients/example_openai_client/README.md).
+
+## Available MCP Servers
+
+MCPEval includes a diverse set of MCP servers spanning enterprise domains, public APIs, and computation utilities. Each server exposes tools that LLM agents are evaluated against.
+
+### Self-Contained Servers (No Credentials Required)
+
+These servers are fully deterministic with embedded data or pure computation — ideal for reproducible evaluation.
+
+| Server | Tools | Domain | Description |
+|--------|-------|--------|-------------|
+| [hr_management](mcp_servers/hr_management/) | 10 | Enterprise | Departments, employees, leave requests, performance reviews, org chart. Embedded SQLite with 70+ rows. |
+| [ecommerce](mcp_servers/ecommerce/) | 11 | Enterprise | Products, orders, customers, inventory, sales summaries. Embedded SQLite with 80+ rows. |
+| [datetime_tools](mcp_servers/datetime_tools/) | 7 | Utility | Timezone conversion, date difference, business days, holiday support (US/UK/DE/FR/JP). |
+| [unit_converter](mcp_servers/unit_converter/) | 6 | Utility | Length, weight, temperature, volume, speed, data size conversion with strict enum schemas. |
+| [special_calculator](mcp_servers/special_calculator/) | 4 | Demo | Basic arithmetic with special transformations (add+double, subtract+halve, etc.). |
+| [sqlite](mcp_servers/sqlite/) | 8 | Database | General-purpose SQLite operations — create tables, query, insert, with sample datasets. |
+| [filesystem](mcp_servers/filesystem/) | 14 | System | Local file operations (read, write, search, directory listing). npm: `@modelcontextprotocol/server-filesystem` |
+| [memory](mcp_servers/memory/) | 9 | Knowledge | Knowledge graph with entities, relations, and observations. npm: `@modelcontextprotocol/server-memory` |
+
+### Public API Servers (Free, No Credentials)
+
+| Server | Tools | Domain | Description |
+|--------|-------|--------|-------------|
+| [book](mcp_servers/book/) | 8 | Library | Open Library search — books by title/ISBN, authors, advanced search. |
+| [youtube](mcp_servers/youtube/) | 4 | Media | YouTube transcript extraction, search, and summarization. |
+| [healthcare](mcp_servers/healthcare/) | 5 | Medical | FDA drug lookup, PubMed search, clinical trials, ICD-10 codes. |
+| [sports](mcp_servers/sports/) | 4 | Sports | NBA, MLB, NFL teams, players, and game data via balldontlie.io. |
+
+### Servers Requiring API Keys
+
+| Server | Tools | Domain | Credentials |
+|--------|-------|--------|-------------|
+| [travel_assistant](mcp_servers/travel_assistant/) | 6 | Travel | Flights, hotels, restaurants, local events. Requires `SERPAPI_API_KEY`, `YELP_API_KEY`. |
+| [airbnb](mcp_servers/airbnb/) | 2 | Travel | Airbnb listing search and details. npm: `@openbnb/mcp-server-airbnb` |
+| [yfinance](mcp_servers/yfinance/) | 10 | Finance | Stock prices, financials, options, analyst recommendations via Yahoo Finance. |
+| [national_park](mcp_servers/national_park/) | 6 | Parks | U.S. National Parks info, alerts, campgrounds, events. Requires `NPS_API_KEY` (free). |
+| [crm_bench](mcp_servers/crm_bench/) | 11 | CRM | Salesforce CRM operations (stub implementation for benchmarking). |
+
+### Multi-Turn Simulation
+
+MCPEval supports multi-turn user simulation where a simulator LLM plays the user role and an agent LLM is tested:
+
+```bash
+# Generate scenarios from verified tasks
+mcp-eval generate-scenarios \
+  --servers mcp_servers/hr_management/server.py \
+  --output scenarios.jsonl \
+  --num-scenarios 5
+
+# Run multi-turn simulation
+mcp-eval simulate \
+  --servers mcp_servers/hr_management/server.py \
+  --simulator-model-config simulator_model.json \
+  --agent-model-config agent_model.json \
+  --scenarios-file scenarios.jsonl \
+  --output multiturn_results.jsonl
+
+# Evaluate conversations with LLM judge
+mcp-eval evaluate-multiturn \
+  --input multiturn_results.jsonl \
+  --output multiturn_evaluation.jsonl
+```
+
+The judge evaluates on 5 dimensions: clarification handling, context maintenance, tool usage efficiency, goal achievement, and response quality.
 
 
 ### Quick Development Setup
@@ -284,6 +368,9 @@ mcp-eval judge-rubric \
 - `analyze` - Analyze evaluation results and generate reports
 - `judge` - Run LLM-based evaluation of execution trajectories
 - `judge-rubric` - Analyze LLM judgment results
+- `generate-scenarios` - Generate multi-turn scenarios from tasks or servers
+- `simulate` - Run multi-turn user simulation conversations
+- `evaluate-multiturn` - Evaluate multi-turn conversations with LLM judge
 - `convert-data` - Convert data to different formats (e.g., XLAM)
 - `auto` - Complete automated evaluation workflow
 

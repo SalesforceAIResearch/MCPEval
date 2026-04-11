@@ -8,8 +8,9 @@ evaluation task conversations.
 
 import json
 import logging
-from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import tiktoken
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def get_tokenizer(model_name: str = "gpt-4") -> tiktoken.Encoding:
         return tiktoken.encoding_for_model("gpt-4")
 
 
-def count_tokens(text: str, model_name: str = "gpt-4") -> int:
+def count_tokens(text: Optional[str], model_name: str = "gpt-4") -> int:
     """Count tokens in a text string using the appropriate tokenizer."""
     if not text:
         return 0

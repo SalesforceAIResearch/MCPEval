@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-import json
-from typing import Dict, List, Any, Optional
-import os
 import hashlib
+import json
+import os
 import uuid
+from typing import Any, Dict, List, Optional
+
 from mcp.types import Tool as ToolDefinition
 
 
@@ -33,20 +34,20 @@ def convert_to_xlam_format(
     description = task_data.get("description", "")
     raw_tools = task_data.get("tools", [])
     conversation = task_data.get("conversation", [])
-    
+
     # Convert tools to OpenAI function call schema format
     tools = []
     for tool in raw_tools:
-        if hasattr(tool, 'to_openai_function_schema'):
+        if hasattr(tool, "to_openai_function_schema"):
             # If it's a ToolDefinition object with the method
             tools.append(tool.to_openai_function_schema())
-        elif isinstance(tool, dict) and 'name' in tool:
+        elif isinstance(tool, dict) and "name" in tool:
             # If it's already a dict, try to create ToolDefinition and convert
             try:
                 tool_def = ToolDefinition(
-                    name=tool.get('name', ''),
-                    description=tool.get('description', ''),
-                    inputSchema=tool.get('inputSchema', {})
+                    name=tool.get("name", ""),
+                    description=tool.get("description", ""),
+                    inputSchema=tool.get("inputSchema", {}),
                 )
                 tools.append(tool_def.to_openai_function_schema())
             except Exception:

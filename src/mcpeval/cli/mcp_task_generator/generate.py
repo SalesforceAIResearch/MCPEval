@@ -5,18 +5,19 @@ Task Generator CLI Tool
 This module provides functionality for connecting to MCP servers and generating tasks.
 """
 import asyncio
+import json
+import logging
 import os
 import sys
-import logging
 import time
-import json
 from pathlib import Path
 
-from mcpeval.client.openai_client import OpenAIMCPClient
-from mcpeval.synthesis.task_generator import TaskGenerator
-from mcpeval.commons.types import ToolLibrary
-from mcpeval.utils.cli import print_task, setup_colored_logging
 from dotenv import load_dotenv
+
+from mcpeval.client.openai_client import OpenAIMCPClient
+from mcpeval.commons.types import ToolLibrary
+from mcpeval.synthesis.task_generator import TaskGenerator
+from mcpeval.utils.cli import print_task, setup_colored_logging
 
 # Load environment variables
 load_dotenv()
@@ -128,7 +129,7 @@ async def generate_tasks(args):
         # Create output directory if it doesn't exist
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         task_generator = TaskGenerator(
             tool_library=ToolLibrary(tools=tools_data),
             model_config=model_config,

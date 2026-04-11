@@ -29,6 +29,9 @@ import {
   AutoAwesome as AutoIcon,
   InsertChart as ReportIcon,
   History as ActivitiesIcon,
+  PlayCircleOutline as ReplayIcon,
+  CompareArrows as CompareIcon,
+  Forum as SimulationIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 280;
@@ -146,6 +149,14 @@ const menuItems: MenuItem[] = [
     category: 'evaluation',
   },
   {
+    id: 'multi-turn-simulation',
+    label: 'Multi-Turn Simulation',
+    icon: <SimulationIcon />,
+    path: '/multi-turn-simulation',
+    description: 'Run multi-turn user simulations',
+    category: 'evaluation',
+  },
+  {
     id: 'analyze',
     label: 'Analyze Results',
     icon: <AnalyzeIcon />,
@@ -183,6 +194,22 @@ const menuItems: MenuItem[] = [
     icon: <ReportIcon />,
     path: '/generate-report',
     description: 'Generate AI-powered evaluation reports',
+    category: 'analysis',
+  },
+  {
+    id: 'conversation-replay',
+    label: 'Conversation Replay',
+    icon: <ReplayIcon />,
+    path: '/conversation-replay',
+    description: 'Step through conversations turn-by-turn',
+    category: 'analysis',
+  },
+  {
+    id: 'model-comparison',
+    label: 'Model Comparison',
+    icon: <CompareIcon />,
+    path: '/model-comparison',
+    description: 'Compare models with statistical tests',
     category: 'analysis',
   },
   {

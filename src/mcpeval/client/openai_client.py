@@ -1,10 +1,12 @@
-from .mcp_clients import MCPClientStdio
-from openai import OpenAI
+import asyncio
 import json
 import logging
-import sys
-import asyncio
 import os
+import sys
+
+from openai import OpenAI
+
+from .mcp_clients import MCPClientStdio
 
 # Set up logging
 logger = logging.getLogger(__name__)

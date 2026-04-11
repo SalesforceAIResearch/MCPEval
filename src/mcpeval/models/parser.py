@@ -1,11 +1,12 @@
 import ast
+import base64
 import json
 import re
 from collections import Counter
-import base64
-from datetime import datetime, date, time
+from datetime import date, datetime, time
 from decimal import Decimal
 from enum import Enum
+
 import numpy as np
 
 

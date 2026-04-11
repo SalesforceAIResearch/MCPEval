@@ -1,7 +1,8 @@
-from openai import OpenAI
-import os
-from typing import Dict, List, Any, Optional
 import logging
+import os
+from typing import Any, Dict, List, Optional
+
+from openai import OpenAI
 
 # from mcpeval.synthesis.scenarios import Scenario, ScenarioLibrary, ScenarioNameDescFormat  # TODO: scenarios module not implemented yet
 
@@ -57,5 +58,3 @@ class LLMGenerator:
             return completion.choices[0].message.content
         else:
             raise ValueError(f"Unsupported model provider: {self.model_provider}")
-
-

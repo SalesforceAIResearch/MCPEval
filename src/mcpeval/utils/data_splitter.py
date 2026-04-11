@@ -5,10 +5,10 @@ This module provides utilities for splitting JSONL files into train/valid/test s
 """
 
 import json
-import random
 import os
+import random
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 from .cli import Colors, colored_print
 

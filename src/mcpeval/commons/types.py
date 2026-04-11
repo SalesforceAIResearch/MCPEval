@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional, Any, Dict, Tuple, Union
-from mcp.types import Tool as ToolDefinition
 import uuid
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from mcp.types import Tool as ToolDefinition
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # Add the method to convert ToolDefinition to OpenAI function schema
@@ -110,6 +111,76 @@ def format_tools_for_prompt(tools: List[ToolDefinition]) -> str:
         tool_descriptions.append(tool_str)
 
     return "\n\n".join(tool_descriptions)
+
+
+class Persona(BaseModel):
+    """A user persona for the user simulator."""
+
+    id: str = Field(
+        default_factory=lambda: str(uuid.uuid4()),
+        description="Unique identifier for the persona",
+    )
+    name: str = Field(..., description="Persona name, e.g. 'Busy Project Manager'")
+    description: str = Field(..., description="Persona background and traits")
+    communication_style: Optional[str] = Field(
+        None, description="How this persona communicates (e.g. terse, verbose, simple)"
+    )
+    expertise_level: Optional[str] = Field(
+        None, description="novice/intermediate/expert"
+    )
+
+
+class TurnResult(BaseModel):
+    """Result of a single conversation turn in a multi-turn interaction."""
+
+    model_config = ConfigDict(extra="allow")
+
+    turn_number: int = Field(..., description="1-indexed turn number")
+    user_message: Dict[str, Any] = Field(
+        ..., description="The user message for this turn"
+    )
+    agent_messages: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="All agent messages in this turn, including tool calls and responses",
+    )
+    tool_calls_in_turn: List[ToolCall] = Field(default_factory=list)
+    agent_final_response: Optional[str] = None
+
+
+class MultiTurnScenario(BaseModel):
+    """A multi-turn conversation scenario for evaluation."""
+
+    id: str = Field(
+        default_factory=lambda: str(uuid.uuid4()),
+        description="Unique identifier for the scenario",
+    )
+    name: str = Field(..., description="Scenario name")
+    description: str = Field(..., description="Detailed scenario description")
+    goal: str = Field(
+        ..., description="What the user wants to accomplish across multiple turns"
+    )
+    persona: Optional[Persona] = Field(
+        None, description="User persona for the simulator"
+    )
+    tools: Optional[List[ToolDefinition]] = Field(
+        None, description="List of tools available in this scenario"
+    )
+    scenario_type: str = Field(
+        default="standard",
+        description="standard/missing_params/missing_functions/composite",
+    )
+    max_turns: int = Field(
+        default=5, description="Maximum number of conversation turns"
+    )
+    initial_context: Optional[str] = Field(
+        None, description="Additional context hint for the user simulator"
+    )
+    # Populated after execution:
+    turns: Optional[List[TurnResult]] = None
+    full_conversation: Optional[List[Dict[str, Any]]] = None
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class Task(BaseModel):

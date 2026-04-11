@@ -3,6 +3,7 @@
 Main entry point for the auto module.
 """
 import sys
+
 from .auto import main
 
 if __name__ == "__main__":

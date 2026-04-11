@@ -5,21 +5,21 @@ This module contains the core analysis and evaluation logic.
 """
 
 import json
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
-from collections import Counter, defaultdict
 import sys
+from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from mcpeval.metrics.static_tool_eval import StaticToolEvaluator
 from mcpeval.commons.types import ToolCall
+from mcpeval.metrics.static_tool_eval import StaticToolEvaluator
 from mcpeval.utils.cli import (
-    load_jsonl,
-    load_json,
-    extract_tool_calls_from_prediction,
     extract_tool_calls_from_ground_truth,
+    extract_tool_calls_from_prediction,
+    load_json,
+    load_jsonl,
 )
 
 

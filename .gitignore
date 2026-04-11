@@ -292,6 +292,17 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# Generated evaluation data
+eval_phase1/
+eval_phase2/
+eval_phase3/
+demo_simulation/
+*.jsonl
+!mcp_servers/**/*.jsonl
+
+# MCP server embedded databases
+mcp_servers/**/data.db
+
 # working directory
 benchmarks/filesystem/working/
 benchmarks/**/results/

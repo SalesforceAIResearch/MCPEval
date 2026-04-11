@@ -8,21 +8,22 @@ what actually happened during task execution.
 """
 import asyncio
 import json
-import os
 import logging
+import os
 import time
 from pathlib import Path
 
-from mcpeval.synthesis.task_verifier import LLMTaskVerifier
+from dotenv import load_dotenv
+
 from mcpeval.models.llms import OpenAIWrapper
+from mcpeval.synthesis.task_verifier import LLMTaskVerifier
 from mcpeval.synthesis.utils import load_tasks_from_jsonl
 from mcpeval.utils.cli import (
-    handle_existing_file,
     generate_output_filename,
+    handle_existing_file,
     save_tasks_to_jsonl,
     setup_colored_logging,
 )
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -36,7 +37,7 @@ async def revalidate_tasks(args):
     """Revalidate task descriptions based on their actual tool conversations."""
     # Model configuration - load this first
     model_config = {}
-    
+
     # Load custom prompt if provided
     custom_prompts = None
     if hasattr(args, "prompt_file") and args.prompt_file:
@@ -45,10 +46,10 @@ async def revalidate_tasks(args):
             if not prompt_path.exists():
                 logger.error(f"Prompt file not found: {args.prompt_file}")
                 return
-            
+
             with open(prompt_path, "r") as f:
                 custom_prompts = json.load(f)
-            
+
             logger.info(f"Loaded custom prompts from {args.prompt_file}")
         except Exception as e:
             logger.error(f"Error loading prompt file: {e}")
@@ -69,28 +70,35 @@ async def revalidate_tasks(args):
         except Exception as e:
             logger.error(f"Error loading model config file {args.model_config}: {e}")
             return
-    
+
     # Determine final model name - prioritize model_config, then fall back to CLI arg
     final_model_name = model_config.get("model") if model_config else args.model
     logger.info(
         f"Using model: {final_model_name} (from {'config file' if model_config.get('model') else 'CLI argument'})"
     )
-    
+
     # Load tasks from verified file
     all_tasks = load_tasks_from_jsonl(args.verified_tasks_file)
 
     # Filter tasks that have conversation/tool_calls data
     tasks_with_conversations = [
-        task for task in all_tasks 
-        if hasattr(task, 'conversation') and task.conversation and 
-           hasattr(task, 'tool_calls') and task.tool_calls
+        task
+        for task in all_tasks
+        if hasattr(task, "conversation")
+        and task.conversation
+        and hasattr(task, "tool_calls")
+        and task.tool_calls
     ]
 
     if not tasks_with_conversations:
-        logger.error("No tasks with conversation and tool_calls data found. Cannot revalidate.")
+        logger.error(
+            "No tasks with conversation and tool_calls data found. Cannot revalidate."
+        )
         return
 
-    logger.info(f"Found {len(tasks_with_conversations)} tasks with conversation data out of {len(all_tasks)} total tasks")
+    logger.info(
+        f"Found {len(tasks_with_conversations)} tasks with conversation data out of {len(all_tasks)} total tasks"
+    )
 
     # Setup output files
     output_file = generate_output_filename(
@@ -118,12 +126,11 @@ async def revalidate_tasks(args):
         model_config = {
             "model": final_model_name,
             "temperature": 0.01,
-            "max_tokens": 16384
+            "max_tokens": 16384,
         }
-    
+
     llm = OpenAIWrapper(
-        api_key=getattr(args, "api_key", None),
-        model_config=model_config
+        api_key=getattr(args, "api_key", None), model_config=model_config
     )
 
     # Initialize evaluator
@@ -147,7 +154,8 @@ async def revalidate_tasks(args):
     if append_mode and existing_ids:
         original_count = len(tasks_with_conversations)
         tasks_with_conversations = [
-            task for task in tasks_with_conversations 
+            task
+            for task in tasks_with_conversations
             if not (hasattr(task, "id") and task.id and task.id in existing_ids)
         ]
         skipped_count = original_count - len(tasks_with_conversations)
@@ -165,7 +173,9 @@ async def revalidate_tasks(args):
         task_number = i + 1
         try:
             # Log start of revalidation
-            logger.info(f"Starting revalidation for task {task_number}/{len(tasks_with_conversations)}: {task.name}")
+            logger.info(
+                f"Starting revalidation for task {task_number}/{len(tasks_with_conversations)}: {task.name}"
+            )
             start_time = time.time()
 
             # Revalidate the task using LLMTaskVerifier
@@ -196,7 +206,9 @@ async def revalidate_tasks(args):
             # Save the revalidated task
             save_tasks_to_jsonl(revalidated_task, output_file, append=True)
             revalidated_count += 1
-            logger.info(f"Successfully revalidated task {task_number}/{len(tasks_with_conversations)}: {task.name}")
+            logger.info(
+                f"Successfully revalidated task {task_number}/{len(tasks_with_conversations)}: {task.name}"
+            )
 
             await asyncio.sleep(0.5)  # Rate limiting
 

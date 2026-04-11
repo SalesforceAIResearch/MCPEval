@@ -1,9 +1,12 @@
 from .types import (
     Message,
-    Tool,
-    ToolCall,
+    MultiTurnScenario,
     OneStepChatBasedSample,
     OneStepToolBasedSample,
+    Persona,
+    Tool,
+    ToolCall,
+    TurnResult,
 )
 
 __all__ = [
@@ -12,4 +15,7 @@ __all__ = [
     "ToolCall",
     "OneStepChatBasedSample",
     "OneStepToolBasedSample",
+    "Persona",
+    "TurnResult",
+    "MultiTurnScenario",
 ]

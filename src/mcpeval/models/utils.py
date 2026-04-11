@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 def prepare_chat_prompt(sample: Dict[str, Any]) -> Dict[str, Any]:

@@ -9,21 +9,22 @@ specifically for analyzing trajectory and completion score files.
 import json
 import logging
 import os
-import sys
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
-from collections import defaultdict, Counter
 import statistics
+import sys
+from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-from mcpeval.utils.cli import Colors, colored_print, setup_colored_logging, load_json
 from dotenv import load_dotenv
+
+from mcpeval.utils.cli import Colors, colored_print, load_json, setup_colored_logging
 
 # Import AI report generation functions
 from .report_generator import (
+    OPENAI_AVAILABLE,
     generate_ai_report,
     generate_report_from_analysis_file,
     save_ai_report,
-    OPENAI_AVAILABLE,
 )
 
 # Load environment variables

@@ -7,11 +7,11 @@ to avoid code duplication.
 """
 import json
 import logging
-import sys
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from mcpeval.commons.types import Task, ToolCall
 

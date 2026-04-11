@@ -1,6 +1,7 @@
 """
 Unified OpenAI MCP client that supports both stdio and HTTP transports.
 """
+
 import json
 import logging
 from typing import Any, Dict, List, Optional
@@ -35,16 +36,16 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
             top_p: Top-p sampling parameter
         """
         super().__init__()
-        
+
         # Initialize OpenAI client
         client_kwargs = {}
         if api_key:
             client_kwargs["api_key"] = api_key
         if base_url:
             client_kwargs["base_url"] = base_url
-            
+
         self.openai_client = OpenAI(**client_kwargs)
-        
+
         # Model configuration
         self.model = model
         self.temperature = temperature
@@ -55,7 +56,7 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
         """Get available tools from all connected MCP servers (cached after first call)."""
         if not hasattr(self, "_cached_tools"):
             all_tools = await self.get_all_tools()
-            
+
             # Convert MCP tools to OpenAI function format
             openai_tools = []
             for tool in all_tools:
@@ -66,7 +67,7 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
                         "description": tool.description or f"Tool: {tool.name}",
                     },
                 }
-                
+
                 # Add parameters if available
                 if hasattr(tool, "inputSchema") and tool.inputSchema:
                     openai_tool["function"]["parameters"] = tool.inputSchema
@@ -76,19 +77,19 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
                         "type": "object",
                         "properties": {},
                     }
-                
+
                 openai_tools.append(openai_tool)
-            
+
             self._cached_tools = openai_tools
             logger.info(f"Cached {len(openai_tools)} tools from MCP servers")
-        
+
         return self._cached_tools
 
     async def chat_completion(
         self,
         messages: List[Dict[str, str]],
         tools: Optional[List[Dict]] = None,
-        **kwargs
+        **kwargs,
     ):
         """Create a chat completion with optional tool calling.
 
@@ -131,36 +132,40 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
             List of tool call results
         """
         results = []
-        
+
         for tool_call in tool_calls:
             try:
                 # Parse tool call
                 tool_name = tool_call.function.name
                 arguments_str = tool_call.function.arguments
-                
+
                 # Parse arguments
                 try:
                     arguments = json.loads(arguments_str)
                 except json.JSONDecodeError:
-                    logger.error(f"Failed to parse arguments for tool {tool_name}: {arguments_str}")
-                    results.append({
-                        "tool_call_id": tool_call.id,
-                        "role": "tool",
-                        "content": f"Error: Invalid JSON arguments: {arguments_str}",
-                    })
+                    logger.error(
+                        f"Failed to parse arguments for tool {tool_name}: {arguments_str}"
+                    )
+                    results.append(
+                        {
+                            "tool_call_id": tool_call.id,
+                            "role": "tool",
+                            "content": f"Error: Invalid JSON arguments: {arguments_str}",
+                        }
+                    )
                     continue
 
                 # Execute the tool call
                 logger.info(f"Executing tool: {tool_name} with arguments: {arguments}")
                 result = await self.call_tool(tool_name, arguments)
-                
+
                 # Format result for OpenAI
-                if hasattr(result, 'content'):
+                if hasattr(result, "content"):
                     # MCP result object
                     if isinstance(result.content, list):
                         content_parts = []
                         for content_item in result.content:
-                            if hasattr(content_item, 'text'):
+                            if hasattr(content_item, "text"):
                                 content_parts.append(content_item.text)
                             else:
                                 content_parts.append(str(content_item))
@@ -171,29 +176,30 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
                     # Direct result
                     content = str(result)
 
-                results.append({
-                    "tool_call_id": tool_call.id,
-                    "role": "tool",
-                    "content": content,
-                })
-                
+                results.append(
+                    {
+                        "tool_call_id": tool_call.id,
+                        "role": "tool",
+                        "content": content,
+                    }
+                )
+
                 logger.info(f"Tool {tool_name} executed successfully")
 
             except Exception as e:
                 logger.error(f"Error executing tool {tool_call.function.name}: {e}")
-                results.append({
-                    "tool_call_id": tool_call.id,
-                    "role": "tool",
-                    "content": f"Error executing tool: {str(e)}",
-                })
+                results.append(
+                    {
+                        "tool_call_id": tool_call.id,
+                        "role": "tool",
+                        "content": f"Error executing tool: {str(e)}",
+                    }
+                )
 
         return results
 
     async def chat_with_tools(
-        self,
-        messages: List[Dict[str, str]],
-        max_turns: int = 10,
-        **kwargs
+        self, messages: List[Dict[str, str]], max_turns: int = 10, **kwargs
     ) -> Dict[str, Any]:
         """Have a conversation with tool calling support.
 
@@ -212,22 +218,24 @@ class UnifiedOpenAIMCPClient(UnifiedMCPClient):
             # Get response from OpenAI
             response = await self.chat_completion(conversation, **kwargs)
             message = response.choices[0].message
-            
+
             # Add assistant message to conversation
-            conversation.append({
+            assistant_msg = {
                 "role": "assistant",
                 "content": message.content,
-                "tool_calls": message.tool_calls if hasattr(message, 'tool_calls') else None,
-            })
+            }
+            if hasattr(message, "tool_calls") and message.tool_calls:
+                assistant_msg["tool_calls"] = message.tool_calls
+            conversation.append(assistant_msg)
 
             # Check if there are tool calls to execute
-            if hasattr(message, 'tool_calls') and message.tool_calls:
+            if hasattr(message, "tool_calls") and message.tool_calls:
                 # Execute tool calls
                 tool_results = await self.execute_tool_calls(message.tool_calls)
-                
+
                 # Add tool results to conversation
                 conversation.extend(tool_results)
-                
+
                 turn_count += 1
             else:
                 # No more tool calls, conversation is complete

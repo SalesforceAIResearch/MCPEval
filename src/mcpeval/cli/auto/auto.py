@@ -14,21 +14,22 @@ This module provides functionality for automatically running the complete evalua
 The auto feature creates a dedicated working directory and orchestrates all steps.
 Each run is identified by a unique task ID for easy tracking and organization.
 """
-import os
-import sys
+import argparse
 import json
 import logging
-import argparse
-import subprocess
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+import os
 import shutil
+import subprocess
+import sys
 import time
 import uuid
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from dotenv import load_dotenv
 
 from mcpeval.utils.cli import Colors, colored_print, setup_colored_logging
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -354,9 +355,9 @@ class AutoWorkflowOrchestrator:
                 bold=True,
             )
 
-            # Create evaluation output file
+            # Create evaluation output file (JSONL format)
             eval_output = self.results_dir / self._get_output_filename(
-                f"{model_name}_evaluation"
+                f"{model_name}_evaluation", ".jsonl"
             )
 
             cmd = ["mcp-eval", "evaluate", "--servers"]
