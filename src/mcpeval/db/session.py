@@ -1,12 +1,12 @@
 """Database engine and session management."""
 
-import os
 import logging
-from pathlib import Path
+import os
 from contextlib import contextmanager
+from pathlib import Path
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from mcpeval.db.models import Base
 

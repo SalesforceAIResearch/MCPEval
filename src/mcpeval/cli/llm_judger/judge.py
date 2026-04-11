@@ -10,11 +10,13 @@ import json
 import logging
 import os
 import sys
-import time
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
+from dotenv import load_dotenv
 
 from mcpeval.metrics.llm_multi_aspect_eval import (
     MultiAspectLLMJudger,
@@ -22,11 +24,10 @@ from mcpeval.metrics.llm_multi_aspect_eval import (
 from mcpeval.utils.cli import (
     Colors,
     colored_print,
-    setup_colored_logging,
-    load_jsonl,
     load_json,
+    load_jsonl,
+    setup_colored_logging,
 )
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -522,7 +523,9 @@ def judge_evaluation_file(args) -> None:
         except Exception as e:
             elapsed = time.time() - start_time
             colored_print(f"   ❌ Error evaluating {task_id}: {e}", Colors.RED)
-            logger.error(f"Error evaluating record {i} after {elapsed:.2f}s: {e}", exc_info=True)
+            logger.error(
+                f"Error evaluating record {i} after {elapsed:.2f}s: {e}", exc_info=True
+            )
             result.update(
                 {
                     "error": str(e),
@@ -538,7 +541,8 @@ def judge_evaluation_file(args) -> None:
                 save_result_to_jsonl(result, output_files["combined"])
             if "trajectory_score" in result and output_files["trajectory"]:
                 traj_only = {
-                    k: v for k, v in result.items()
+                    k: v
+                    for k, v in result.items()
                     if not k.startswith("completion_")
                     or k in ["task_id", "task_name", "original_success"]
                 }
@@ -546,7 +550,8 @@ def judge_evaluation_file(args) -> None:
                 save_result_to_jsonl(traj_only, output_files["trajectory"])
             if "completion_score" in result and output_files["completion"]:
                 comp_only = {
-                    k: v for k, v in result.items()
+                    k: v
+                    for k, v in result.items()
                     if not k.startswith("trajectory_")
                     or k in ["task_id", "task_name", "original_success"]
                 }

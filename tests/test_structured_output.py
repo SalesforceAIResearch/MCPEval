@@ -1,17 +1,16 @@
 """Tests for the unified LLM JSON parsing utility."""
 
 import pytest
-
 from pydantic import BaseModel
 
 from mcpeval.utils.structured_output import (
+    LLMJsonParseError,
     parse_llm_json,
     parse_llm_json_model,
-    LLMJsonParseError,
 )
 
-
 # -- Pydantic model for validation tests --
+
 
 class SampleModel(BaseModel):
     name: str
@@ -19,6 +18,7 @@ class SampleModel(BaseModel):
 
 
 # -- Direct parsing --
+
 
 class TestDirectParse:
     def test_clean_json(self):
@@ -48,6 +48,7 @@ class TestDirectParse:
 
 # -- Markdown extraction --
 
+
 class TestMarkdownExtract:
     def test_json_code_block(self):
         text = 'Here is the result:\n```json\n{"tool": "search", "query": "test"}\n```'
@@ -60,15 +61,13 @@ class TestMarkdownExtract:
         assert result == {"x": 99}
 
     def test_multiple_code_blocks_returns_first_valid(self):
-        text = (
-            "```json\nnot valid json\n```\n"
-            "```json\n{\"good\": true}\n```"
-        )
+        text = "```json\nnot valid json\n```\n" '```json\n{"good": true}\n```'
         result = parse_llm_json(text)
         assert result == {"good": True}
 
 
 # -- Brace matching --
+
 
 class TestBraceMatch:
     def test_json_embedded_in_text(self):
@@ -94,6 +93,7 @@ class TestBraceMatch:
 
 # -- Cleaned parse (trailing commas, comments, single quotes) --
 
+
 class TestCleanedParse:
     def test_trailing_comma(self):
         text = '{"a": 1, "b": 2,}'
@@ -113,6 +113,7 @@ class TestCleanedParse:
 
 
 # -- Validation (required_fields and pydantic_model) --
+
 
 class TestValidation:
     def test_required_fields_present(self):
@@ -153,6 +154,7 @@ class TestValidation:
 
 # -- parse_llm_json_model --
 
+
 class TestParseLLMJsonModel:
     def test_returns_model_instance(self):
         obj = parse_llm_json_model('{"name": "test", "value": 10}', SampleModel)
@@ -166,6 +168,7 @@ class TestParseLLMJsonModel:
 
 
 # -- LLMJsonParseError attributes --
+
 
 class TestLLMJsonParseError:
     def test_stores_raw_response(self):

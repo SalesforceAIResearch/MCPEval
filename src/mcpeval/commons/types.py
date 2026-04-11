@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional, Any, Dict, Tuple, Union
-from mcp.types import Tool as ToolDefinition
 import uuid
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from mcp.types import Tool as ToolDefinition
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # Add the method to convert ToolDefinition to OpenAI function schema
@@ -168,7 +169,9 @@ class MultiTurnScenario(BaseModel):
         default="standard",
         description="standard/missing_params/missing_functions/composite",
     )
-    max_turns: int = Field(default=5, description="Maximum number of conversation turns")
+    max_turns: int = Field(
+        default=5, description="Maximum number of conversation turns"
+    )
     initial_context: Optional[str] = Field(
         None, description="Additional context hint for the user simulator"
     )

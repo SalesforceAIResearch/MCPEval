@@ -7,9 +7,10 @@ subcommands like task generation, task verification, model evaluation, etc.
 """
 import argparse
 import logging
-import sys
 import os
+import sys
 from importlib import import_module
+
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -19,8 +20,8 @@ load_dotenv()
 from mcpeval.utils.cli import (
     Colors,
     colored_print,
-    setup_colored_logging,
     parse_servers_argument,
+    setup_colored_logging,
 )
 
 
@@ -200,9 +201,10 @@ def task_revalidator(args):
 
 def data_converter(args):
     """Entry point for data format conversion subcommand."""
-    from mcpeval.utils.task_converter import process_jsonl_file, process_file
     import json
     import os
+
+    from mcpeval.utils.task_converter import process_file, process_jsonl_file
 
     # Create output directory if it doesn't exist
     output_dir = os.path.dirname(args.output)

@@ -7,16 +7,8 @@ single-turn tasks into multi-turn scenarios.
 
 import json
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from mcpeval.models.llms import OpenAIWrapper
-from mcpeval.commons.types import (
-    Task,
-    Persona,
-    MultiTurnScenario,
-    ToolDefinition,
-    format_tools_for_prompt,
-)
 from mcpeval.commons.prompts import (
     SCENARIO_TYPE_INSTRUCTIONS,
     multiturn_scenario_generation_system_prompt,
@@ -24,8 +16,16 @@ from mcpeval.commons.prompts import (
     multiturn_task_conversion_system_prompt,
     multiturn_task_conversion_user_prompt,
 )
+from mcpeval.commons.types import (
+    MultiTurnScenario,
+    Persona,
+    Task,
+    ToolDefinition,
+    format_tools_for_prompt,
+)
+from mcpeval.models.llms import OpenAIWrapper
 from mcpeval.simulation.personas import DEFAULT_PERSONAS, get_random_persona
-from mcpeval.utils.structured_output import parse_llm_json, LLMJsonParseError
+from mcpeval.utils.structured_output import LLMJsonParseError, parse_llm_json
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,9 @@ class MultiTurnScenarioGenerator:
             persona_pool: Pool of personas to assign. Uses defaults if None.
         """
         self.llm = llm
-        self.persona_pool = persona_pool if persona_pool is not None else DEFAULT_PERSONAS
+        self.persona_pool = (
+            persona_pool if persona_pool is not None else DEFAULT_PERSONAS
+        )
 
     def generate_scenario(
         self,
@@ -198,9 +200,7 @@ class MultiTurnScenarioGenerator:
                 return scenario
 
             except Exception as e:
-                logger.warning(
-                    f"Attempt {attempt + 1}/3 failed to convert task: {e}"
-                )
+                logger.warning(f"Attempt {attempt + 1}/3 failed to convert task: {e}")
                 if attempt == 2:
                     raise ValueError(
                         f"Failed to convert task '{task.name}' after 3 attempts: {e}"
@@ -245,7 +245,9 @@ class MultiTurnScenarioGenerator:
                     f"Generated scenario {i + 1}/{num_scenarios}: {scenario.name}"
                 )
             except Exception as e:
-                logger.error(f"Failed to generate scenario {i + 1}/{num_scenarios}: {e}")
+                logger.error(
+                    f"Failed to generate scenario {i + 1}/{num_scenarios}: {e}"
+                )
 
         return scenarios
 

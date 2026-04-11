@@ -8,14 +8,14 @@ and response quality.
 
 import json
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from mcpeval.models.llms import OpenAIWrapper
 from mcpeval.commons.prompts import (
     multiturn_evaluation_system_prompt,
     multiturn_evaluation_user_prompt,
 )
-from mcpeval.utils.structured_output import parse_llm_json, LLMJsonParseError
+from mcpeval.models.llms import OpenAIWrapper
+from mcpeval.utils.structured_output import LLMJsonParseError, parse_llm_json
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +167,9 @@ class MultiTurnEvaluator:
                     f"Attempt {attempt + 1}/3 failed to evaluate conversation: {e}"
                 )
                 if attempt == 2:
-                    logger.error(f"Failed to evaluate '{scenario_name}' after 3 attempts")
+                    logger.error(
+                        f"Failed to evaluate '{scenario_name}' after 3 attempts"
+                    )
                     return {
                         "scenario_id": conversation_result.get("scenario_id"),
                         "scenario_name": scenario_name,
@@ -189,9 +191,7 @@ class MultiTurnEvaluator:
         """
         evaluations = []
         for i, result in enumerate(conversation_results):
-            logger.info(
-                f"Evaluating conversation {i + 1}/{len(conversation_results)}"
-            )
+            logger.info(f"Evaluating conversation {i + 1}/{len(conversation_results)}")
             eval_result = self.evaluate_conversation(result)
             evaluations.append(eval_result)
 

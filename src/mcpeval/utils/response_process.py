@@ -6,7 +6,7 @@ This module provides helper functions for processing different types of response
 conversations, and tool call results from LLM interactions.
 """
 import logging
-from typing import List, Any, Optional, Union, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 from mcpeval.commons.types import Message, ToolCall, ToolCallResult
 

@@ -2,24 +2,25 @@
 Chart generator for MCP evaluation results visualization.
 """
 
-import plotly.graph_objects as go
-import plotly.express as px
-from typing import Dict, Any, List, Tuple, Optional
 import os
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import plotly.express as px
+import plotly.graph_objects as go
 
 from .chart_templates import (
-    get_radar_template,
-    get_bar_template,
-    get_horizontal_bar_template,
-    get_donut_template,
-    get_line_template,
-    get_stacked_bar_template,
+    EXTENDED_COLORS,
+    MCP_COLORS,
     apply_theme,
+    get_bar_template,
+    get_donut_template,
+    get_horizontal_bar_template,
+    get_line_template,
+    get_radar_template,
+    get_stacked_bar_template,
     get_success_failure_colors,
     get_tool_colors,
-    MCP_COLORS,
-    EXTENDED_COLORS,
 )
 
 

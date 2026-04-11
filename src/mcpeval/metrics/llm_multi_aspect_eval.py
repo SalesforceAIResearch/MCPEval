@@ -37,14 +37,14 @@ Returned JSON schema requested from the judge LLM (default):
 ```
 """
 
-from dataclasses import dataclass, field
 import json
 import logging
 import os
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, model_validator
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field, model_validator
 
 from mcpeval.models.llms import OpenAIWrapper
 from mcpeval.utils.structured_output import parse_llm_json
@@ -402,5 +402,3 @@ class MultiAspectLLMJudger:
                 comments=f"Error: {exc}",
                 raw_response={},
             )
-
-

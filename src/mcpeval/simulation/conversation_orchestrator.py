@@ -5,19 +5,19 @@ Drives the turn-by-turn loop between a UserSimulator and an agent (LLMTaskExecut
 producing multi-turn conversation data for evaluation.
 """
 
-import time
 import logging
-from typing import Dict, List, Any, Optional
+import time
+from typing import Any, Dict, List, Optional
 
-from mcpeval.models.llms import OpenAIWrapper
-from mcpeval.eval.task_executor import LLMTaskExecutor
 from mcpeval.commons.types import (
+    MultiTurnScenario,
     Task,
     ToolCall,
-    TurnResult,
-    MultiTurnScenario,
     ToolDefinition,
+    TurnResult,
 )
+from mcpeval.eval.task_executor import LLMTaskExecutor
+from mcpeval.models.llms import OpenAIWrapper
 from mcpeval.simulation.user_simulator import UserSimulator
 
 logger = logging.getLogger(__name__)
@@ -191,7 +191,10 @@ class ConversationOrchestrator:
                 serialized_tool_calls.append(tc.__dict__)
             else:
                 serialized_tool_calls.append(
-                    {"tool_name": str(tc.tool_name), "tool_parameters": tc.tool_parameters}
+                    {
+                        "tool_name": str(tc.tool_name),
+                        "tool_parameters": tc.tool_parameters,
+                    }
                 )
 
         # Serialize turn results
@@ -213,9 +216,7 @@ class ConversationOrchestrator:
             "scenario_id": scenario.id,
             "scenario_name": scenario.name,
             "scenario_type": scenario.scenario_type,
-            "persona": (
-                scenario.persona.model_dump() if scenario.persona else None
-            ),
+            "persona": (scenario.persona.model_dump() if scenario.persona else None),
             "num_turns": len(turns),
             "turns": serialized_turns,
             "full_conversation": messages,

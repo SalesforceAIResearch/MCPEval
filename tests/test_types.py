@@ -7,13 +7,13 @@ import pytest
 
 from mcpeval.commons.types import (
     Message,
-    ToolCall,
-    ToolParameter,
-    ToolCallResult,
-    Persona,
-    TurnResult,
     MultiTurnScenario,
+    Persona,
     Task,
+    ToolCall,
+    ToolCallResult,
+    ToolParameter,
+    TurnResult,
 )
 
 
@@ -70,9 +70,7 @@ class TestMessage:
 
 class TestToolParameter:
     def test_required_fields(self):
-        tp = ToolParameter(
-            name="query", type="string", description="Search query"
-        )
+        tp = ToolParameter(name="query", type="string", description="Search query")
         assert tp.required is True
         assert tp.enum is None
 

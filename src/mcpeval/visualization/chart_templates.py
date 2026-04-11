@@ -2,10 +2,10 @@
 Chart templates and styling configuration for MCP evaluation visualization.
 """
 
-import plotly.graph_objects as go
-import plotly.express as px
-from typing import Dict, Any
+from typing import Any, Dict
 
+import plotly.express as px
+import plotly.graph_objects as go
 
 # Color palette for consistent theming
 MCP_COLORS = {

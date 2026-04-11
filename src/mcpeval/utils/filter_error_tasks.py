@@ -7,12 +7,12 @@ conversations with error messages, particularly "Error executing tool" messages
 or other error information.
 """
 
-import json
 import argparse
+import json
 import re
-from pathlib import Path
-from typing import Dict, List, Any, Set
 import sys
+from pathlib import Path
+from typing import Any, Dict, List, Set
 
 
 def contains_error_patterns(text: str) -> bool:

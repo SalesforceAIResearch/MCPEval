@@ -5,8 +5,8 @@ Provides built-in default personas and utilities for loading custom personas fro
 """
 
 import json
-import random
 import logging
+import random
 from typing import List, Optional
 
 from mcpeval.commons.types import Persona

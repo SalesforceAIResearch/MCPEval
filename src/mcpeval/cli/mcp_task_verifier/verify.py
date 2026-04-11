@@ -6,23 +6,25 @@ This module provides functionality for verifying tasks against an MCP server.
 """
 import asyncio
 import json
-import os
 import logging
+import os
 import time
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from mcpeval.client.openai_client import OpenAIMCPClient
-from mcpeval.synthesis.task_verifier import LLMTaskVerifier
 from mcpeval.models.llms import OpenAIWrapper
-from mcpeval.synthesis.utils import load_tasks_from_jsonl
 from mcpeval.synthesis.task_generator import TaskGenerator
+from mcpeval.synthesis.task_verifier import LLMTaskVerifier
 from mcpeval.synthesis.tools import ToolLibrary
+from mcpeval.synthesis.utils import load_tasks_from_jsonl
 from mcpeval.utils.cli import (
+    generate_output_filename,
+    handle_existing_file,
     load_prompt_from_file,
     print_task,
     print_tool_calls,
-    handle_existing_file,
-    generate_output_filename,
     save_tasks_to_jsonl,
     setup_colored_logging,
 )
@@ -31,7 +33,6 @@ from mcpeval.utils.response_process import (
     process_final_response,
     process_tool_call_results,
 )
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -71,17 +72,10 @@ async def verify_task(
 
     # Use model_config if provided, otherwise create default config
     if model_config is None:
-        model_config = {
-            "model": model,
-            "temperature": 0.01,
-            "max_tokens": 16384
-        }
-    
+        model_config = {"model": model, "temperature": 0.01, "max_tokens": 16384}
+
     # Initialize OpenAI LLM for the evaluator using the same pattern as TaskGenerator
-    llm = OpenAIWrapper(
-        api_key=api_key,
-        model_config=model_config
-    )
+    llm = OpenAIWrapper(api_key=api_key, model_config=model_config)
 
     # Initialize evaluator
     evaluator = LLMTaskVerifier(llm)
@@ -222,13 +216,13 @@ async def verify_tasks(args):
         except Exception as e:
             logger.error(f"Error loading model config file {args.model_config}: {e}")
             return
-    
+
     # Determine final model name - prioritize model_config, then fall back to CLI arg
     final_model_name = model_config.get("model") if model_config else args.model
     logger.info(
         f"Using model: {final_model_name} (from {'config file' if model_config.get('model') else 'CLI argument'})"
     )
-    
+
     # Load tasks from file
     all_tasks = load_tasks_from_jsonl(args.tasks_file)
 

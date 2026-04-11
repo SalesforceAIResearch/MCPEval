@@ -1,7 +1,8 @@
-from typing import Dict, List, Any, Optional, Union, Tuple
 import logging
-from ..commons.types import ToolCall, Task, ToolDefinition
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from ..commons.prompts import task_executor_system_prompt
+from ..commons.types import Task, ToolCall, ToolDefinition
 
 logger = logging.getLogger(__name__)
 

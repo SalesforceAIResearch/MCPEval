@@ -102,7 +102,11 @@ class TestEvaluateTaskFlexible:
 
     def test_substring_match(self):
         """Flexible matching should match substrings."""
-        gt = [ToolCall(tool_name="search", tool_parameters={"query": "python programming"})]
+        gt = [
+            ToolCall(
+                tool_name="search", tool_parameters={"query": "python programming"}
+            )
+        ]
         pred = [ToolCall(tool_name="search", tool_parameters={"query": "python"})]
         result = StaticToolEvaluator.evaluate_flexible(gt, pred, task_id="t12")
         assert result.param_match_score > 0.0
@@ -115,8 +119,10 @@ class TestCustomWeights:
         """Custom weights should affect overall score calculation."""
         weights = {"name": 0.8, "params": 0.1, "order": 0.1}
         result = StaticToolEvaluator.evaluate_exact(
-            sample_tool_calls, sample_tool_calls,
-            task_id="t20", weights=weights,
+            sample_tool_calls,
+            sample_tool_calls,
+            task_id="t20",
+            weights=weights,
         )
         assert result.overall_score == pytest.approx(1.0)
         assert result.weights == weights
@@ -125,8 +131,10 @@ class TestCustomWeights:
         """Weights not summing to 1.0 should fall back to defaults."""
         weights = {"name": 0.5, "params": 0.5, "order": 0.5}
         result = StaticToolEvaluator.evaluate_exact(
-            sample_tool_calls, sample_tool_calls,
-            task_id="t21", weights=weights,
+            sample_tool_calls,
+            sample_tool_calls,
+            task_id="t21",
+            weights=weights,
         )
         # Should use default weights since sum is 1.5
         assert result.weights == {"name": 0.4, "params": 0.4, "order": 0.2}
@@ -136,22 +144,29 @@ class TestLCS:
     """Test longest common subsequence calculation."""
 
     def test_identical_sequences(self):
-        assert StaticToolEvaluator.longest_common_subsequence(
-            ["a", "b", "c"], ["a", "b", "c"]
-        ) == 3
+        assert (
+            StaticToolEvaluator.longest_common_subsequence(
+                ["a", "b", "c"], ["a", "b", "c"]
+            )
+            == 3
+        )
 
     def test_reversed_sequences(self):
-        assert StaticToolEvaluator.longest_common_subsequence(
-            ["a", "b", "c"], ["c", "b", "a"]
-        ) == 1
+        assert (
+            StaticToolEvaluator.longest_common_subsequence(
+                ["a", "b", "c"], ["c", "b", "a"]
+            )
+            == 1
+        )
 
     def test_empty_sequences(self):
         assert StaticToolEvaluator.longest_common_subsequence([], []) == 0
 
     def test_partial_overlap(self):
-        assert StaticToolEvaluator.longest_common_subsequence(
-            ["a", "b", "c"], ["a", "c"]
-        ) == 2
+        assert (
+            StaticToolEvaluator.longest_common_subsequence(["a", "b", "c"], ["a", "c"])
+            == 2
+        )
 
 
 class TestEvaluateFromJson:
@@ -161,13 +176,19 @@ class TestEvaluateFromJson:
         gt = {
             "task_id": "test1",
             "tool_calls": [
-                {"tool_name": "fetch", "tool_parameters": {"url": "https://example.com"}}
+                {
+                    "tool_name": "fetch",
+                    "tool_parameters": {"url": "https://example.com"},
+                }
             ],
         }
         pred = {
             "task_id": "test1",
             "tool_calls": [
-                {"tool_name": "fetch", "tool_parameters": {"url": "https://example.com"}}
+                {
+                    "tool_name": "fetch",
+                    "tool_parameters": {"url": "https://example.com"},
+                }
             ],
         }
         result = StaticToolEvaluator.evaluate_from_json(gt, pred, match_type="strict")

@@ -1,6 +1,7 @@
 """
 HTTP-based MCP client for connecting to HTTP MCP servers.
 """
+
 import asyncio
 import logging
 from contextlib import AsyncExitStack
@@ -41,14 +42,16 @@ class MCPClientHTTP(BaseClient):
             tuple: session, http_transport, write objects for the connected server
         """
         logger.info(f"Connecting to HTTP MCP server at {server_url}")
-        
+
         # Validate URL
         parsed_url = urlparse(server_url)
         if not parsed_url.scheme or not parsed_url.netloc:
             raise ValueError(f"Invalid server URL: {server_url}")
-        
-        if parsed_url.scheme not in ['http', 'https']:
-            raise ValueError(f"Unsupported scheme: {parsed_url.scheme}. Only http and https are supported.")
+
+        if parsed_url.scheme not in ["http", "https"]:
+            raise ValueError(
+                f"Unsupported scheme: {parsed_url.scheme}. Only http and https are supported."
+            )
 
         try:
             # Create streamable HTTP client for HTTP transport
@@ -56,19 +59,21 @@ class MCPClientHTTP(BaseClient):
                 streamablehttp_client(server_url)
             )
             read, write, get_session_id = http_transport
-            
+
             # Create client session
             session = await self.exit_stack.enter_async_context(
                 ClientSession(read, write)
             )
-            
+
             # Initialize the session
             await session.initialize()
-            
+
             # Get available tools
             response = await session.list_tools()
             tools = response.tools
-            logger.info(f"Connected to HTTP server with tools: {[tool.name for tool in tools]}")
+            logger.info(
+                f"Connected to HTTP server with tools: {[tool.name for tool in tools]}"
+            )
 
             # Map tools to session
             for tool in tools:
@@ -83,7 +88,7 @@ class MCPClientHTTP(BaseClient):
             }
 
             # Set default session if this is the first server
-            if not hasattr(self, 'session') or self.session is None:
+            if not hasattr(self, "session") or self.session is None:
                 self.session = session
                 self.stdio = read  # For compatibility
                 self.write = write

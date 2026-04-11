@@ -30,8 +30,8 @@ def tmp_db(tmp_path):
 def app(tmp_db):
     """Create a Flask test app with v1 routes registered."""
     from flask import Flask
-    from routes.v1.runs import create_runs_routes
     from routes.v1.leaderboard import create_leaderboard_routes
+    from routes.v1.runs import create_runs_routes
 
     app = Flask(__name__)
     app.config["TESTING"] = True
@@ -47,11 +47,14 @@ def client(app):
 
 class TestRunsCRUD:
     def test_create_run(self, client):
-        resp = client.post("/api/v1/runs", json={
-            "model_name": "gpt-4o",
-            "servers": ["server_a.py"],
-            "num_tasks": 10,
-        })
+        resp = client.post(
+            "/api/v1/runs",
+            json={
+                "model_name": "gpt-4o",
+                "servers": ["server_a.py"],
+                "num_tasks": 10,
+            },
+        )
         assert resp.status_code == 201
         data = resp.get_json()
         assert data["model_name"] == "gpt-4o"
@@ -99,12 +102,22 @@ class TestResults:
         run_id = run["id"]
 
         # Add results
-        client.post(f"/api/v1/runs/{run_id}/results", json={
-            "task_id": "t1", "success": True, "final_response": "Done",
-        })
-        client.post(f"/api/v1/runs/{run_id}/results", json={
-            "task_id": "t2", "success": False, "error": "timeout",
-        })
+        client.post(
+            f"/api/v1/runs/{run_id}/results",
+            json={
+                "task_id": "t1",
+                "success": True,
+                "final_response": "Done",
+            },
+        )
+        client.post(
+            f"/api/v1/runs/{run_id}/results",
+            json={
+                "task_id": "t2",
+                "success": False,
+                "error": "timeout",
+            },
+        )
 
         resp = client.get(f"/api/v1/runs/{run_id}/results")
         assert resp.status_code == 200
@@ -115,8 +128,12 @@ class TestResults:
         run = client.post("/api/v1/runs", json={"model_name": "m"}).get_json()
         run_id = run["id"]
 
-        client.post(f"/api/v1/runs/{run_id}/results", json={"task_id": "t1", "success": True})
-        client.post(f"/api/v1/runs/{run_id}/results", json={"task_id": "t2", "success": False})
+        client.post(
+            f"/api/v1/runs/{run_id}/results", json={"task_id": "t1", "success": True}
+        )
+        client.post(
+            f"/api/v1/runs/{run_id}/results", json={"task_id": "t2", "success": False}
+        )
 
         passed = client.get(f"/api/v1/runs/{run_id}/results?success=true").get_json()
         assert len(passed) == 1
@@ -128,9 +145,14 @@ class TestScores:
         run = client.post("/api/v1/runs", json={"model_name": "m"}).get_json()
         run_id = run["id"]
 
-        client.post(f"/api/v1/runs/{run_id}/scores", json={
-            "task_id": "t1", "match_type": "strict", "overall_score": 0.85,
-        })
+        client.post(
+            f"/api/v1/runs/{run_id}/scores",
+            json={
+                "task_id": "t1",
+                "match_type": "strict",
+                "overall_score": 0.85,
+            },
+        )
 
         resp = client.get(f"/api/v1/runs/{run_id}/scores")
         data = resp.get_json()
@@ -150,8 +172,12 @@ class TestComplete:
         run = client.post("/api/v1/runs", json={"model_name": "m"}).get_json()
         run_id = run["id"]
 
-        client.post(f"/api/v1/runs/{run_id}/results", json={"task_id": "t1", "success": True})
-        client.post(f"/api/v1/runs/{run_id}/results", json={"task_id": "t2", "success": False})
+        client.post(
+            f"/api/v1/runs/{run_id}/results", json={"task_id": "t1", "success": True}
+        )
+        client.post(
+            f"/api/v1/runs/{run_id}/results", json={"task_id": "t2", "success": False}
+        )
 
         resp = client.post(f"/api/v1/runs/{run_id}/complete", json={})
         data = resp.get_json()
@@ -171,9 +197,13 @@ class TestLeaderboard:
         for model, success_rate in [("gpt-4o", True), ("gpt-3.5", False)]:
             run = client.post("/api/v1/runs", json={"model_name": model}).get_json()
             run_id = run["id"]
-            client.post(f"/api/v1/runs/{run_id}/results", json={
-                "task_id": "t1", "success": success_rate,
-            })
+            client.post(
+                f"/api/v1/runs/{run_id}/results",
+                json={
+                    "task_id": "t1",
+                    "success": success_rate,
+                },
+            )
             client.post(f"/api/v1/runs/{run_id}/complete", json={})
 
         resp = client.get("/api/v1/leaderboard")

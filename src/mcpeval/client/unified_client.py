@@ -1,12 +1,13 @@
 """
 Unified MCP client that supports both stdio and HTTP transports.
 """
+
 import logging
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
-from .mcp_clients import MCPClientStdio
 from .http_client import MCPClientHTTP
+from .mcp_clients import MCPClientStdio
 from .utils import is_http_server
 
 logger = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ class UnifiedMCPClient:
             # Use HTTP client
             if self.http_client is None:
                 self.http_client = MCPClientHTTP()
-            
+
             client = self.http_client
             session, transport, write, tools = await client.connect_to_server(
                 server_path, server_args, env
@@ -50,7 +51,7 @@ class UnifiedMCPClient:
             # Use stdio client
             if self.stdio_client is None:
                 self.stdio_client = MCPClientStdio()
-            
+
             client = self.stdio_client
             session, transport, write, tools = await client.connect_to_server(
                 server_path, server_args, env
@@ -58,7 +59,7 @@ class UnifiedMCPClient:
 
         # Track which client is handling this server
         self.active_clients[server_path] = client
-        
+
         return session, transport, write, tools
 
     async def connect_to_multiple_servers(
@@ -88,7 +89,7 @@ class UnifiedMCPClient:
             session, transport, write, tools = await self.connect_to_server(
                 server_path, args, env
             )
-            
+
             all_connections[server_path] = {
                 "session": session,
                 "transport": transport,
@@ -101,15 +102,15 @@ class UnifiedMCPClient:
     async def get_all_tools(self):
         """Get all tools from all connected servers."""
         all_tools = []
-        
+
         if self.stdio_client:
             stdio_tools = await self.stdio_client.get_all_tools()
             all_tools.extend(stdio_tools)
-        
+
         if self.http_client:
             http_tools = await self.http_client.get_all_tools()
             all_tools.extend(http_tools)
-        
+
         return all_tools
 
     async def call_tool(self, tool_name: str, arguments: Dict[str, Any]):
@@ -117,44 +118,44 @@ class UnifiedMCPClient:
         # Try stdio client first
         if self.stdio_client and tool_name in self.stdio_client.tool_mapping:
             return await self.stdio_client.call_tool(tool_name, arguments)
-        
+
         # Try HTTP client
         if self.http_client and tool_name in self.http_client.tool_mapping:
             return await self.http_client.call_tool(tool_name, arguments)
-        
+
         raise ValueError(f"Tool '{tool_name}' not found in any connected server")
 
     async def close(self):
         """Close all connections."""
         if self.stdio_client:
             await self.stdio_client.exit_stack.aclose()
-        
+
         if self.http_client:
             await self.http_client.close()
 
     @property
     def session(self):
         """Get the primary session (for backward compatibility)."""
-        if self.stdio_client and hasattr(self.stdio_client, 'session'):
+        if self.stdio_client and hasattr(self.stdio_client, "session"):
             return self.stdio_client.session
-        if self.http_client and hasattr(self.http_client, 'session'):
+        if self.http_client and hasattr(self.http_client, "session"):
             return self.http_client.session
         return None
 
     @property
     def stdio(self):
         """Get the primary stdio/transport (for backward compatibility)."""
-        if self.stdio_client and hasattr(self.stdio_client, 'stdio'):
+        if self.stdio_client and hasattr(self.stdio_client, "stdio"):
             return self.stdio_client.stdio
-        if self.http_client and hasattr(self.http_client, 'stdio'):
+        if self.http_client and hasattr(self.http_client, "stdio"):
             return self.http_client.stdio
         return None
 
     @property
     def write(self):
         """Get the primary write interface (for backward compatibility)."""
-        if self.stdio_client and hasattr(self.stdio_client, 'write'):
+        if self.stdio_client and hasattr(self.stdio_client, "write"):
             return self.stdio_client.write
-        if self.http_client and hasattr(self.http_client, 'write'):
+        if self.http_client and hasattr(self.http_client, "write"):
             return self.http_client.write
         return None

@@ -5,22 +5,23 @@ Scenario Generation CLI Module
 Generates multi-turn scenarios (from scratch or by converting existing tasks)
 and saves them as JSONL without running the actual simulation.
 """
+import asyncio
+import json
+import logging
 import os
 import sys
-import json
-import asyncio
-import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from mcpeval.models.llms import OpenAIWrapper
-from mcpeval.commons.types import Task, MultiTurnScenario
-from mcpeval.synthesis.utils import load_tasks_from_jsonl
-from mcpeval.client.openai_client import OpenAIMCPClient
-from mcpeval.simulation.scenario_generator import MultiTurnScenarioGenerator
-from mcpeval.simulation.personas import DEFAULT_PERSONAS, load_personas_from_file
-from mcpeval.utils.cli import setup_colored_logging
 from dotenv import load_dotenv
+
+from mcpeval.client.openai_client import OpenAIMCPClient
+from mcpeval.commons.types import MultiTurnScenario, Task
+from mcpeval.models.llms import OpenAIWrapper
+from mcpeval.simulation.personas import DEFAULT_PERSONAS, load_personas_from_file
+from mcpeval.simulation.scenario_generator import MultiTurnScenarioGenerator
+from mcpeval.synthesis.utils import load_tasks_from_jsonl
+from mcpeval.utils.cli import setup_colored_logging
 
 load_dotenv()
 setup_colored_logging(level=logging.INFO)
@@ -156,9 +157,7 @@ async def run_scenario_generation(args):
         for scenario in scenarios:
             _save_scenario_to_jsonl(scenario, args.output)
 
-        logger.info(
-            f"Generated {len(scenarios)} scenarios, saved to {args.output}"
-        )
+        logger.info(f"Generated {len(scenarios)} scenarios, saved to {args.output}")
         return True
 
     except Exception as e:

@@ -5,16 +5,16 @@ Generates realistic user messages based on a persona, scenario, and conversation
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from mcpeval.models.llms import OpenAIWrapper
-from mcpeval.commons.types import Persona, MultiTurnScenario, ToolDefinition
 from mcpeval.commons.prompts import (
     SCENARIO_TYPE_INSTRUCTIONS,
-    user_simulator_system_prompt,
-    user_simulator_followup_prompt,
     user_simulator_end_check_prompt,
+    user_simulator_followup_prompt,
+    user_simulator_system_prompt,
 )
+from mcpeval.commons.types import MultiTurnScenario, Persona, ToolDefinition
+from mcpeval.models.llms import OpenAIWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,7 @@ class UserSimulator:
         if self.persona:
             parts = [self.persona.description]
             if self.persona.communication_style:
-                parts.append(
-                    f"Communication style: {self.persona.communication_style}"
-                )
+                parts.append(f"Communication style: {self.persona.communication_style}")
             if self.persona.expertise_level:
                 parts.append(f"Expertise level: {self.persona.expertise_level}")
             return " | ".join(parts)

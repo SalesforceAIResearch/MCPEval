@@ -5,29 +5,30 @@ User Simulation CLI Module
 Runs multi-turn conversations between a user simulator LLM and an agent LLM
 using MCP servers for tool execution. Outputs conversation data as JSONL.
 """
+import asyncio
+import json
+import logging
 import os
 import sys
-import json
-import asyncio
-import logging
 import time
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from mcpeval.models.llms import OpenAIWrapper
-from mcpeval.commons.types import Task, MultiTurnScenario, Persona
-from mcpeval.synthesis.utils import load_tasks_from_jsonl
+from dotenv import load_dotenv
+
 from mcpeval.client.openai_client import OpenAIMCPClient
-from mcpeval.simulation.user_simulator import UserSimulator
+from mcpeval.commons.types import MultiTurnScenario, Persona, Task
+from mcpeval.models.llms import OpenAIWrapper
 from mcpeval.simulation.conversation_orchestrator import ConversationOrchestrator
-from mcpeval.simulation.scenario_generator import MultiTurnScenarioGenerator
 from mcpeval.simulation.personas import (
     DEFAULT_PERSONAS,
-    load_personas_from_file,
     get_random_persona,
+    load_personas_from_file,
 )
+from mcpeval.simulation.scenario_generator import MultiTurnScenarioGenerator
+from mcpeval.simulation.user_simulator import UserSimulator
+from mcpeval.synthesis.utils import load_tasks_from_jsonl
 from mcpeval.utils.cli import setup_colored_logging
-from dotenv import load_dotenv
 
 load_dotenv()
 setup_colored_logging(level=logging.INFO)

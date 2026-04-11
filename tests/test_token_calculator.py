@@ -3,11 +3,11 @@
 import pytest
 
 from mcpeval.eval.token_calculator import (
-    count_tokens,
-    extract_assistant_outputs,
+    MODEL_PRICING,
     calculate_conversation_tokens,
     calculate_cost,
-    MODEL_PRICING,
+    count_tokens,
+    extract_assistant_outputs,
 )
 
 
@@ -127,7 +127,9 @@ class TestCalculateConversationTokens:
         result = calculate_conversation_tokens(conv)
         assert result["input_tokens"] > 0
         assert result["output_tokens"] > 0
-        assert result["total_tokens"] == result["input_tokens"] + result["output_tokens"]
+        assert (
+            result["total_tokens"] == result["input_tokens"] + result["output_tokens"]
+        )
         assert result["output_text_tokens"] > 0
         assert result["output_tool_tokens"] == 0
 

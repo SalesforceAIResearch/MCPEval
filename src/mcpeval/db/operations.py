@@ -8,12 +8,13 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-from mcpeval.db.models import EvaluationRun, TaskResult, Score, LLMJudgeScore, Job
+from mcpeval.db.models import EvaluationRun, Job, LLMJudgeScore, Score, TaskResult
 
 logger = logging.getLogger(__name__)
 
 
 # --- Evaluation Runs ---
+
 
 def create_run(
     session: Session,
@@ -48,7 +49,9 @@ def complete_run(session: Session, run_id: str, status: str = "completed"):
     results = session.query(TaskResult).filter_by(run_id=run_id).all()
     run.success_count = sum(1 for r in results if r.success)
     run.fail_count = len(results) - run.success_count
-    run.total_tokens = sum((r.input_tokens or 0) + (r.output_tokens or 0) for r in results)
+    run.total_tokens = sum(
+        (r.input_tokens or 0) + (r.output_tokens or 0) for r in results
+    )
     session.flush()
 
 
@@ -72,6 +75,7 @@ def list_runs(
 
 
 # --- Task Results ---
+
 
 def add_task_result(
     session: Session,
@@ -127,6 +131,7 @@ def get_task_results(
 
 # --- Scores ---
 
+
 def add_score(
     session: Session,
     run_id: str,
@@ -164,6 +169,7 @@ def get_scores(
 
 # --- LLM Judge Scores ---
 
+
 def add_llm_judge_score(
     session: Session,
     run_id: str,
@@ -200,6 +206,7 @@ def get_llm_judge_scores(
 
 
 # --- Jobs ---
+
 
 def create_job(
     session: Session,
@@ -245,15 +252,11 @@ def get_job(session: Session, job_id: str) -> Optional[Job]:
 
 
 def get_recent_jobs(session: Session, limit: int = 10) -> List[Job]:
-    return (
-        session.query(Job)
-        .order_by(Job.created_at.desc())
-        .limit(limit)
-        .all()
-    )
+    return session.query(Job).order_by(Job.created_at.desc()).limit(limit).all()
 
 
 # --- JSONL Import ---
+
 
 def import_eval_results_jsonl(
     session: Session,

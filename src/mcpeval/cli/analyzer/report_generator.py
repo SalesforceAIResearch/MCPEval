@@ -6,9 +6,9 @@ This module contains all the report generation and visualization logic.
 
 import json
 import os
-from pathlib import Path
-from typing import Dict, List, Any
 import sys
+from pathlib import Path
+from typing import Any, Dict, List
 
 # Add the src directory to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))

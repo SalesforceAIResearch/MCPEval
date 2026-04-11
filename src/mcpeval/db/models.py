@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     Float,
@@ -11,7 +12,6 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    Boolean,
 )
 from sqlalchemy.orm import DeclarativeBase, relationship
 
@@ -44,9 +44,7 @@ class EvaluationRun(Base):
     task_results = relationship(
         "TaskResult", back_populates="run", cascade="all, delete-orphan"
     )
-    scores = relationship(
-        "Score", back_populates="run", cascade="all, delete-orphan"
-    )
+    scores = relationship("Score", back_populates="run", cascade="all, delete-orphan")
     llm_judge_scores = relationship(
         "LLMJudgeScore", back_populates="run", cascade="all, delete-orphan"
     )
@@ -85,7 +83,9 @@ class TaskResult(Base):
     __tablename__ = "task_results"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    run_id = Column(String, ForeignKey("evaluation_runs.id"), nullable=False, index=True)
+    run_id = Column(
+        String, ForeignKey("evaluation_runs.id"), nullable=False, index=True
+    )
     task_id = Column(String, nullable=False, index=True)
     success = Column(Boolean, default=False)
     tool_calls = Column(Text, default="[]")  # JSON list
@@ -140,7 +140,9 @@ class Score(Base):
     __tablename__ = "scores"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    run_id = Column(String, ForeignKey("evaluation_runs.id"), nullable=False, index=True)
+    run_id = Column(
+        String, ForeignKey("evaluation_runs.id"), nullable=False, index=True
+    )
     task_id = Column(String, nullable=False, index=True)
     match_type = Column(String, nullable=False)  # "strict" or "flexible"
     tool_name_score = Column(Float, default=0.0)
@@ -169,7 +171,9 @@ class LLMJudgeScore(Base):
     __tablename__ = "llm_judge_scores"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    run_id = Column(String, ForeignKey("evaluation_runs.id"), nullable=False, index=True)
+    run_id = Column(
+        String, ForeignKey("evaluation_runs.id"), nullable=False, index=True
+    )
     task_id = Column(String, nullable=False, index=True)
     judge_model = Column(String, nullable=False)
     dimension = Column(String, nullable=False)  # e.g. "trajectory", "completion"
@@ -201,14 +205,19 @@ class Job(Base):
     type = Column(String, nullable=False)
     title = Column(String, nullable=False)
     endpoint = Column(String, nullable=True)
-    status = Column(String, default="pending")  # pending, running, completed, failed, cancelled
+    status = Column(
+        String, default="pending"
+    )  # pending, running, completed, failed, cancelled
     progress = Column(Integer, default=0)
     command = Column(Text, nullable=True)
     logs = Column(Text, default="[]")  # JSON list of log lines
     metadata_json = Column(Text, default="{}")  # extra metadata
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc),
-                        onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     def append_log(self, line: str):
         logs = json.loads(self.logs) if self.logs else []

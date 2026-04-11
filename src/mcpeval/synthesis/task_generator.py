@@ -1,20 +1,21 @@
-from pydantic import BaseModel, Field, ConfigDict
+import json
 import logging
 import random
-import json
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-from ..commons.types import Task
-from .tools import ToolDefinition, ToolLibrary, format_tools_for_prompt
-from ..models.llms import OpenAIWrapper
+from pydantic import BaseModel, ConfigDict, Field
+
 from ..commons.prompts import (
     task_generation_system_prompt,
     task_generation_with_tools_user_prompt,
     task_revision_system_prompt,
     task_revision_user_prompt,
 )
+from ..commons.types import Task
+from ..models.llms import OpenAIWrapper
+from ..utils.structured_output import LLMJsonParseError, parse_llm_json
+from .tools import ToolDefinition, ToolLibrary, format_tools_for_prompt
 from .utils import append_task_to_jsonl, load_tasks_from_jsonl
-from ..utils.structured_output import parse_llm_json, LLMJsonParseError
 
 logger = logging.getLogger(__name__)
 
@@ -51,21 +52,18 @@ class TaskGenerator:
             existing_tasks: Optional list of existing tasks
         """
         self.tool_library = tool_library
-        
+
         # Use default model config if none provided
         if model_config is None:
             model_config = {
                 "model": "gpt-4o-2024-11-20",
                 "temperature": 0.01,
-                "max_tokens": 16384
+                "max_tokens": 16384,
             }
-        
+
         # Initialize the OpenAI wrapper with the model config
         self.llm = OpenAIWrapper(
-            api_key=api_key,
-            base_url=base_url,
-            model_config=model_config,
-            **kwargs
+            api_key=api_key, base_url=base_url, model_config=model_config, **kwargs
         )
 
         self.system_message = system_message or task_generation_system_prompt
@@ -111,11 +109,15 @@ class TaskGenerator:
                         f"Return ONLY the JSON object, no additional text."
                     )
                     retry_messages = messages.copy()
-                    retry_messages.append({"role": "assistant", "content": current_response})
+                    retry_messages.append(
+                        {"role": "assistant", "content": current_response}
+                    )
                     retry_messages.append({"role": "user", "content": retry_prompt})
                     try:
                         response = self.llm.chat_completion(messages=retry_messages)
-                        current_response = response["choices"][0]["message"]["content"].strip()
+                        current_response = response["choices"][0]["message"][
+                            "content"
+                        ].strip()
                     except Exception as llm_err:
                         logger.error(f"Error during LLM retry: {llm_err}")
                         break

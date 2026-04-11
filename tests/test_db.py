@@ -6,9 +6,15 @@ import tempfile
 
 import pytest
 
-from mcpeval.db.models import Base, EvaluationRun, TaskResult, Score, LLMJudgeScore, Job
-from mcpeval.db.session import get_engine, get_session, init_db, reset_engine, session_scope
 from mcpeval.db import operations as ops
+from mcpeval.db.models import Base, EvaluationRun, Job, LLMJudgeScore, Score, TaskResult
+from mcpeval.db.session import (
+    get_engine,
+    get_session,
+    init_db,
+    reset_engine,
+    session_scope,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -26,9 +32,7 @@ def tmp_db(tmp_path):
 class TestModels:
     def test_evaluation_run_json_fields(self, tmp_db):
         with session_scope(tmp_db) as s:
-            run = EvaluationRun(
-                id="run-1", model_name="gpt-4o", status="running"
-            )
+            run = EvaluationRun(id="run-1", model_name="gpt-4o", status="running")
             run.set_model_config({"temperature": 0.1})
             run.set_servers(["server_a.py", "server_b.py"])
             s.add(run)
@@ -104,7 +108,9 @@ class TestOperations:
         with session_scope(tmp_db) as s:
             ops.create_run(s, model_name="m", run_id="r1")
             ops.add_task_result(s, run_id="r1", task_id="t1", success=True)
-            ops.add_task_result(s, run_id="r1", task_id="t2", success=False, error="timeout")
+            ops.add_task_result(
+                s, run_id="r1", task_id="t2", success=False, error="timeout"
+            )
 
         with session_scope(tmp_db) as s:
             all_results = ops.get_task_results(s, "r1")
@@ -121,8 +127,22 @@ class TestOperations:
     def test_complete_run_aggregates(self, tmp_db):
         with session_scope(tmp_db) as s:
             ops.create_run(s, model_name="m", run_id="r1")
-            ops.add_task_result(s, run_id="r1", task_id="t1", success=True, input_tokens=100, output_tokens=50)
-            ops.add_task_result(s, run_id="r1", task_id="t2", success=False, input_tokens=200, output_tokens=100)
+            ops.add_task_result(
+                s,
+                run_id="r1",
+                task_id="t1",
+                success=True,
+                input_tokens=100,
+                output_tokens=50,
+            )
+            ops.add_task_result(
+                s,
+                run_id="r1",
+                task_id="t2",
+                success=False,
+                input_tokens=200,
+                output_tokens=100,
+            )
             ops.complete_run(s, "r1")
 
         with session_scope(tmp_db) as s:
@@ -135,8 +155,12 @@ class TestOperations:
     def test_scores(self, tmp_db):
         with session_scope(tmp_db) as s:
             ops.create_run(s, model_name="m", run_id="r1")
-            ops.add_score(s, run_id="r1", task_id="t1", match_type="strict", overall_score=0.85)
-            ops.add_score(s, run_id="r1", task_id="t1", match_type="flexible", overall_score=0.95)
+            ops.add_score(
+                s, run_id="r1", task_id="t1", match_type="strict", overall_score=0.85
+            )
+            ops.add_score(
+                s, run_id="r1", task_id="t1", match_type="flexible", overall_score=0.95
+            )
 
         with session_scope(tmp_db) as s:
             strict = ops.get_scores(s, "r1", match_type="strict")
@@ -150,9 +174,13 @@ class TestOperations:
         with session_scope(tmp_db) as s:
             ops.create_run(s, model_name="m", run_id="r1")
             ops.add_llm_judge_score(
-                s, run_id="r1", task_id="t1",
-                judge_model="gpt-4o", dimension="trajectory",
-                score=8.5, comments="Good",
+                s,
+                run_id="r1",
+                task_id="t1",
+                judge_model="gpt-4o",
+                dimension="trajectory",
+                score=8.5,
+                comments="Good",
             )
 
         with session_scope(tmp_db) as s:
@@ -163,7 +191,9 @@ class TestOperations:
 
     def test_job_crud(self, tmp_db):
         with session_scope(tmp_db) as s:
-            job = ops.create_job(s, job_type="eval", title="Run eval", endpoint="/api/eval")
+            job = ops.create_job(
+                s, job_type="eval", title="Run eval", endpoint="/api/eval"
+            )
             job_id = job.id
 
         with session_scope(tmp_db) as s:
@@ -195,7 +225,11 @@ class TestOperations:
                     "tool_calls": [{"tool_name": "search", "tool_parameters": {}}],
                     "final_response": f"Response {i}",
                     "conversation": [{"role": "user", "content": f"Q{i}"}],
-                    "task": {"name": f"Task {i}", "description": f"Desc {i}", "goal": f"Goal {i}"},
+                    "task": {
+                        "name": f"Task {i}",
+                        "description": f"Desc {i}",
+                        "goal": f"Goal {i}",
+                    },
                 }
                 f.write(json.dumps(record) + "\n")
 

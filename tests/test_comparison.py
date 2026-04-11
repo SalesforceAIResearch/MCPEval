@@ -48,12 +48,14 @@ class TestCompareResults:
     @pytest.fixture
     def create_jsonl(self, tmp_path):
         """Helper to create JSONL files with task results."""
+
         def _create(name, tasks):
             path = str(tmp_path / f"{name}.jsonl")
             with open(path, "w") as f:
                 for t in tasks:
                     f.write(json.dumps(t) + "\n")
             return path
+
         return _create
 
     def test_identical_runs(self, create_jsonl):

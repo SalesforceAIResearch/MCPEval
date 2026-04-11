@@ -5,7 +5,7 @@ Report enhancer for integrating charts with AI-generated reports.
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from .chart_generator import ChartGenerator
 

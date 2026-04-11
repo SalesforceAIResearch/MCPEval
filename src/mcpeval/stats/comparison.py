@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # Bootstrap confidence intervals
 # ---------------------------------------------------------------------------
 
+
 def bootstrap_ci(
     values: np.ndarray,
     stat_fn=np.mean,
@@ -53,9 +54,8 @@ def bootstrap_ci(
 # Paired significance tests
 # ---------------------------------------------------------------------------
 
-def mcnemar_test(
-    successes_a: np.ndarray, successes_b: np.ndarray
-) -> Dict[str, Any]:
+
+def mcnemar_test(successes_a: np.ndarray, successes_b: np.ndarray) -> Dict[str, Any]:
     """McNemar's test for paired binary outcomes (pass/fail).
 
     successes_a, successes_b: boolean arrays of same length.
@@ -80,6 +80,7 @@ def mcnemar_test(
         # Fallback chi-squared approximation
         stat = (abs(b - c) - 1) ** 2 / (b + c) if b + c > 0 else 0
         from scipy.stats import chi2  # type: ignore
+
         p_value = float(1 - chi2.cdf(stat, df=1))
 
     return {
@@ -91,9 +92,7 @@ def mcnemar_test(
     }
 
 
-def wilcoxon_test(
-    scores_a: np.ndarray, scores_b: np.ndarray
-) -> Dict[str, Any]:
+def wilcoxon_test(scores_a: np.ndarray, scores_b: np.ndarray) -> Dict[str, Any]:
     """Wilcoxon signed-rank test for paired continuous scores.
 
     Returns dict with statistic, p_value, effect_size (r = Z/sqrt(N)).
@@ -102,7 +101,12 @@ def wilcoxon_test(
     nonzero = diffs[diffs != 0]
 
     if len(nonzero) < 2:
-        return {"statistic": 0.0, "p_value": 1.0, "significant": False, "effect_size": 0.0}
+        return {
+            "statistic": 0.0,
+            "p_value": 1.0,
+            "significant": False,
+            "effect_size": 0.0,
+        }
 
     from scipy.stats import wilcoxon as _wilcoxon  # type: ignore
 
@@ -123,6 +127,7 @@ def wilcoxon_test(
 # ---------------------------------------------------------------------------
 # Load and align evaluation results
 # ---------------------------------------------------------------------------
+
 
 def _load_jsonl(path: str) -> List[Dict]:
     results = []
@@ -159,8 +164,7 @@ def _align_by_task_id(
 
     task_ids = sorted(common_ids)
     success_arrays = [
-        np.array([rm[tid] for tid in task_ids], dtype=bool)
-        for rm in run_maps
+        np.array([rm[tid] for tid in task_ids], dtype=bool) for rm in run_maps
     ]
     return task_ids, success_arrays
 
@@ -168,6 +172,7 @@ def _align_by_task_id(
 # ---------------------------------------------------------------------------
 # Main comparison logic
 # ---------------------------------------------------------------------------
+
 
 def compare_results(
     run_paths: List[str],
@@ -202,15 +207,17 @@ def compare_results(
     for i, (label, succ) in enumerate(zip(labels, success_arrays)):
         rate = float(np.mean(succ))
         _, lower, upper = bootstrap_ci(succ.astype(float), confidence=confidence)
-        report["runs"].append({
-            "label": label,
-            "success_rate": round(rate, 4),
-            "ci_lower": round(lower, 4),
-            "ci_upper": round(upper, 4),
-            "n_tasks": len(succ),
-            "n_pass": int(np.sum(succ)),
-            "n_fail": int(np.sum(~succ)),
-        })
+        report["runs"].append(
+            {
+                "label": label,
+                "success_rate": round(rate, 4),
+                "ci_lower": round(lower, 4),
+                "ci_upper": round(upper, 4),
+                "n_tasks": len(succ),
+                "n_pass": int(np.sum(succ)),
+                "n_fail": int(np.sum(~succ)),
+            }
+        )
 
     # Pairwise comparisons
     has_scipy = True
@@ -239,6 +246,7 @@ def compare_results(
 # ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
+
 
 def run_comparison(args):
     """Run comparison from CLI args and print results."""
@@ -284,7 +292,9 @@ def _print_report(report: Dict[str, Any]):
     print("-" * 80)
     for r in report["runs"]:
         ci_str = f"[{r['ci_lower']:.3f}, {r['ci_upper']:.3f}]"
-        print(f"{r['label']:<35} {r['success_rate']:>7.3f}  {ci_str:>20} {r['n_pass']:>6} {r['n_fail']:>6}")
+        print(
+            f"{r['label']:<35} {r['success_rate']:>7.3f}  {ci_str:>20} {r['n_pass']:>6} {r['n_fail']:>6}"
+        )
 
     # Pairwise
     if report["pairwise"]:

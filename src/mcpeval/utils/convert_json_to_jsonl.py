@@ -7,8 +7,8 @@ where each object is written as a separate line.
 Enhanced version also supports separating trajectory and completion scores from judge results files.
 """
 
-import json
 import argparse
+import json
 import os
 import re
 from pathlib import Path

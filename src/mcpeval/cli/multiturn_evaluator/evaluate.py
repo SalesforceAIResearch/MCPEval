@@ -5,17 +5,18 @@ Multi-Turn Evaluator CLI Module
 Evaluates multi-turn conversation results using an LLM judge,
 scoring conversations across multiple quality dimensions.
 """
-import os
-import sys
 import json
 import logging
+import os
+import sys
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from mcpeval.models.llms import OpenAIWrapper
-from mcpeval.eval.multiturn_evaluator import MultiTurnEvaluator
-from mcpeval.utils.cli import setup_colored_logging
 from dotenv import load_dotenv
+
+from mcpeval.eval.multiturn_evaluator import MultiTurnEvaluator
+from mcpeval.models.llms import OpenAIWrapper
+from mcpeval.utils.cli import setup_colored_logging
 
 load_dotenv()
 setup_colored_logging(level=logging.INFO)
@@ -115,12 +116,24 @@ def main(args):
 
         if summary.get("successful_evaluations", 0) > 0:
             print(f"\nAverage Scores:")
-            print(f"  Clarification Handling: {summary.get('avg_clarification_handling', 'N/A')}")
-            print(f"  Context Maintenance:    {summary.get('avg_context_maintenance', 'N/A')}")
-            print(f"  Tool Usage Efficiency:  {summary.get('avg_tool_usage_efficiency', 'N/A')}")
-            print(f"  Goal Achievement:       {summary.get('avg_goal_achievement', 'N/A')}")
-            print(f"  Response Quality:       {summary.get('avg_response_quality', 'N/A')}")
-            print(f"  Overall Score:          {summary.get('avg_overall_score', 'N/A')}")
+            print(
+                f"  Clarification Handling: {summary.get('avg_clarification_handling', 'N/A')}"
+            )
+            print(
+                f"  Context Maintenance:    {summary.get('avg_context_maintenance', 'N/A')}"
+            )
+            print(
+                f"  Tool Usage Efficiency:  {summary.get('avg_tool_usage_efficiency', 'N/A')}"
+            )
+            print(
+                f"  Goal Achievement:       {summary.get('avg_goal_achievement', 'N/A')}"
+            )
+            print(
+                f"  Response Quality:       {summary.get('avg_response_quality', 'N/A')}"
+            )
+            print(
+                f"  Overall Score:          {summary.get('avg_overall_score', 'N/A')}"
+            )
 
         print(f"\nResults saved to: {args.output}")
         print(f"Summary saved to: {summary_path}")

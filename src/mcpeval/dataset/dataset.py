@@ -2,11 +2,10 @@
 Dataset module for loading and processing data for LLM evaluation.
 """
 
+import json
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Any, Iterator
-
-import json
+from typing import Any, Dict, Iterator, List, Optional, Union
 
 
 class DatasetFormat(Enum):

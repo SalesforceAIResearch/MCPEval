@@ -5,22 +5,23 @@ Model Evaluator Module
 This module provides functionality for evaluating LLM models on MCP tasks.
 It enables connecting to an MCP server, executing tasks, and reporting results.
 """
+import asyncio
+import json
+import logging
 import os
 import sys
-import json
-import asyncio
-import logging
-from pathlib import Path
-from typing import List, Dict, Any, Optional
 import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from mcpeval.eval.task_executor import LLMTaskExecutor
-from mcpeval.commons.types import Task
-from mcpeval.synthesis.utils import load_tasks_from_jsonl
-from mcpeval.client.openai_client import OpenAIMCPClient
-from mcpeval.utils.cli import load_prompt_from_file, load_jsonl, setup_colored_logging
-from mcpeval.models.llms import OpenAIWrapper
 from dotenv import load_dotenv
+
+from mcpeval.client.openai_client import OpenAIMCPClient
+from mcpeval.commons.types import Task
+from mcpeval.eval.task_executor import LLMTaskExecutor
+from mcpeval.models.llms import OpenAIWrapper
+from mcpeval.synthesis.utils import load_tasks_from_jsonl
+from mcpeval.utils.cli import load_jsonl, load_prompt_from_file, setup_colored_logging
 
 # Load environment variables
 load_dotenv()
@@ -155,7 +156,8 @@ async def evaluate_performance(
 
         # Filter tasks to only those that need evaluation
         pending_tasks = [
-            (i, task) for i, task in enumerate(tasks)
+            (i, task)
+            for i, task in enumerate(tasks)
             if task.id not in already_tested_task_ids
         ]
         skipped = len(tasks) - len(pending_tasks)
@@ -269,7 +271,9 @@ async def evaluate_performance(
                     "client_type": "openai",
                 }
 
-        async def _run_and_save(task_index: int, task: Task, semaphore: asyncio.Semaphore):
+        async def _run_and_save(
+            task_index: int, task: Task, semaphore: asyncio.Semaphore
+        ):
             """Run a task with semaphore and save result."""
             async with semaphore:
                 evaluation_result = await _evaluate_single_task(task_index, task)
