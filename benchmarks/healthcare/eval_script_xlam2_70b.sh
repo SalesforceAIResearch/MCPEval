@@ -6,8 +6,7 @@ MODEL="xlam_2_70b"
 MAX_TURNS=30
 REPORT_MODEL="gpt-4.1-2025-04-14"
 JUDGE_MODEL="gpt-4o"
-SERVER="@openbnb/mcp-server-airbnb"
-SERVER_ARGS="--ignore-robots-txt"
+SERVER="mcp_servers/${DOMAIN}/server.py"
 MODEL_CONFIG="benchmarks/${DOMAIN}/eval_models/${MODEL}.json"
 TASKS_FILE="data/${DOMAIN}/evaluation_tasks_verified.jsonl"
 OUTPUT="benchmarks/${DOMAIN}/results/${MODEL}_task_evaluation.json"
@@ -22,7 +21,6 @@ REPORT_DIR="benchmarks/${DOMAIN}/report"
 
 mcp-eval evaluate \
     --server $SERVER \
-    --server-args="$SERVER_ARGS" \
     --model-config $MODEL_CONFIG \
     --tasks-file $TASKS_FILE \
     --output $OUTPUT \
