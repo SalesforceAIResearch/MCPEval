@@ -227,6 +227,7 @@ These servers are fully deterministic with embedded data or pure computation —
 | [airbnb](mcp_servers/airbnb/) | 2 | Travel | Airbnb listing search and details. npm: `@openbnb/mcp-server-airbnb` |
 | [yfinance](mcp_servers/yfinance/) | 10 | Finance | Stock prices, financials, options, analyst recommendations via Yahoo Finance. |
 | [national_park](mcp_servers/national_park/) | 6 | Parks | U.S. National Parks info, alerts, campgrounds, events. Requires `NPS_API_KEY` (free). |
+| [lumify](mcp_servers/lumify/) | 7 | Sports | Multi-sport schedules, scores, odds, and explainable bet intelligence via lumify.ai. Requires `LUMIFY_API_KEY` (free instant key at https://lumify.ai/docs/ai). |
 | [crm_bench](mcp_servers/crm_bench/) | 11 | CRM | Salesforce CRM operations (stub implementation for benchmarking). |
 
 ### Multi-Turn Simulation
