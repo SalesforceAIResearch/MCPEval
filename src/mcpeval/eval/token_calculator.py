@@ -13,9 +13,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import tiktoken
 
+try:
+    import llm_prices
+except ImportError:  # pragma: no cover - llm-prices is a declared dependency
+    llm_prices = None
+
 logger = logging.getLogger(__name__)
 
-# Model pricing per 1K tokens (input, output)
+# Fallback model pricing per 1K tokens (input, output), used for models that
+# llm-prices does not list (retired models such as gpt-4 or claude-3-*)
 MODEL_PRICING = {
     "gpt-4o": (0.0025, 0.01),
     "gpt-4o-mini": (0.00015, 0.0006),
@@ -158,12 +164,21 @@ def calculate_cost(input_tokens: int, output_tokens: int, model_name: str) -> fl
     Returns:
         Total cost in USD
     """
-    # Find the best matching model in pricing
-    model_key = None
-    for key in MODEL_PRICING.keys():
-        if key in model_name.lower():
-            model_key = key
-            break
+    # Current published prices (USD per 1M tokens) from llm-prices. It resolves
+    # dated snapshots and provider prefixes, and never matches gpt-4o-mini to gpt-4o.
+    if llm_prices is not None:
+        price = llm_prices.lookup(model_name)
+        if price is not None:
+            cost = price.cost(input_tokens, output_tokens)
+            if cost is not None:
+                return cost
+
+    # Fall back to the local table, preferring the longest matching key so that
+    # e.g. "gpt-4o-mini" is not billed as "gpt-4o"
+    matches = [
+        key for key in MODEL_PRICING if key != "default" and key in model_name.lower()
+    ]
+    model_key = max(matches, key=len) if matches else None
 
     if not model_key:
         model_key = "default"

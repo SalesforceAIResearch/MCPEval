@@ -894,6 +894,15 @@ wheels = [
 ]
 
 [[package]]
+name = "llm-prices"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/52/054d17ca60249694a8faa5fd586fd4ddbd959d44430b6077983fd4ad9bb5/llm_prices-1.2.0.tar.gz", hash = "sha256:a86aafe2bcfbdcf653e7e4b9fb63bfc4de3630fbd3f827b6adfa22c6023ef931", size = 24991 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/8b/a8e0bb805bc8b01af71db39a00418965bf5b90c463a5eff0798468b0faff/llm_prices-1.2.0-py3-none-any.whl", hash = "sha256:06d9f067dd07ce6925582381c65e16849787a2365e57fb86053afe5cc48f992c", size = 19180 },
+]
+
+[[package]]
 name = "logistro"
 version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1021,6 +1030,7 @@ dependencies = [
     { name = "gunicorn" },
     { name = "jsonschema" },
     { name = "kaleido" },
+    { name = "llm-prices" },
     { name = "matplotlib" },
     { name = "mcp" },
     { name = "numpy" },
@@ -1067,6 +1077,7 @@ requires-dist = [
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.12.0" },
     { name = "jsonschema", specifier = ">=4.17.0" },
     { name = "kaleido", specifier = ">=1.0.0" },
+    { name = "llm-prices", specifier = ">=1.2.0" },
     { name = "matplotlib", specifier = ">=3.7.0" },
     { name = "mcp", specifier = ">=1.6.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.3.0" },

@@ -162,12 +162,34 @@ class TestCalculateCost:
         assert cost == pytest.approx(expected)
 
     def test_partial_model_name_match(self):
-        # calculate_cost uses substring matching in dict insertion order,
-        # so "gpt-4o-mini" matches "gpt-4o" first (it appears earlier in MODEL_PRICING)
+        # "gpt-4o-mini" must be billed as gpt-4o-mini ($0.15/$0.60 per 1M),
+        # not as "gpt-4o" ($2.50/$10 per 1M), which it used to hit first
         cost = calculate_cost(2000, 500, "gpt-4o-mini")
-        input_price, output_price = MODEL_PRICING["gpt-4o"]
-        expected = (2000 / 1000) * input_price + (500 / 1000) * output_price
+        expected = 2000 * 0.15 / 1e6 + 500 * 0.60 / 1e6
         assert cost == pytest.approx(expected)
+
+    @pytest.mark.parametrize(
+        "model_name, input_per_m, output_per_m",
+        [
+            ("gpt-4.1", 2.0, 8.0),  # used to hit "gpt-4" at $30/$60
+            ("gpt-5", 1.25, 10.0),  # used to fall to the $1/$2 default
+            ("claude-sonnet-4-5", 3.0, 15.0),
+            ("gemini-2.5-pro", 1.25, 10.0),
+            ("gpt-4o-2024-08-06", 2.5, 10.0),
+        ],
+    )
+    def test_current_models_use_published_prices(
+        self, model_name, input_per_m, output_per_m
+    ):
+        cost = calculate_cost(1000, 1000, model_name)
+        expected = 1000 * input_per_m / 1e6 + 1000 * output_per_m / 1e6
+        assert cost == pytest.approx(expected)
+
+    def test_unlisted_model_falls_back_to_local_table(self):
+        # gpt-4 is retired upstream; the local table still prices it
+        cost = calculate_cost(1000, 1000, "gpt-4")
+        input_price, output_price = MODEL_PRICING["gpt-4"]
+        assert cost == pytest.approx(input_price + output_price)
 
     def test_model_name_case_insensitive(self):
         cost_lower = calculate_cost(1000, 1000, "gpt-4o")
